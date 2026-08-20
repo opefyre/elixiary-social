@@ -335,3 +335,24 @@ The token also means dry-run cleanup can only ever remove its own uploads.
 `sweep_orphans.py` protects `drafted`, `scheduled` and `published`. `scheduled`
 was missing from that list, which would have deleted the images out from under
 posts a human had already approved.
+
+
+## Image check
+
+`scripts/verify_images.py` confirms every queued post's slides are still
+reachable. `daily_run` calls it after each batch and reports `broken_images`
+in the summary; the n8n workflow treats a non-empty list as a **failed run**,
+even when all the posts were created.
+
+That is deliberate. Buffer fetches media when a post publishes, not when it is
+created, so a slide that disappears in between fails silently at the worst
+moment — which is exactly what a prefix collision did to two posts due out the
+next morning.
+
+It checks every post not yet published, not just the ones made in that run,
+because damage usually happens to something queued earlier.
+
+```bash
+python3 scripts/verify_images.py          # human readable, exit 1 if broken
+python3 scripts/verify_images.py --quiet  # JSON
+```

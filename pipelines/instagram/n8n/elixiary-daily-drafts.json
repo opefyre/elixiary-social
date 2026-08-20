@@ -61,7 +61,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// The service returns {ok, exitCode, summary:{...}}\nconst r = $input.first().json;\nconst s = r.summary || {};\nreturn [{ json: {\n  ok: (s.succeeded || 0) > 0,\n  requested: s.requested ?? 0,\n  succeeded: s.succeeded ?? 0,\n  failed: s.failed ?? 0,\n  drafts: s.drafts || [],\n  results: s.results || [],\n  exitCode: r.exitCode,\n  stderr: (r.stderr || '').slice(-800),\n}}];"
+        "jsCode": "// The service returns {ok, exitCode, summary:{...}}\nconst r = $input.first().json;\nconst s = r.summary || {};\nconst broken = s.broken_images || [];\nreturn [{ json: {\n  // a run that made its posts but left images unreachable is NOT ok:\n  // Buffer fetches media at publish time, so it would fail silently later\n  ok: (s.succeeded || 0) > 0 && broken.length === 0,\n  requested: s.requested ?? 0,\n  succeeded: s.succeeded ?? 0,\n  failed: s.failed ?? 0,\n  drafts: s.drafts || [],\n  brokenImages: broken,\n  brokenCount: broken.length,\n  results: s.results || [],\n  exitCode: r.exitCode,\n  stderr: (r.stderr || '').slice(-800),\n}}];"
       },
       "id": "parse-1",
       "name": "Parse summary",
@@ -122,10 +122,10 @@
     },
     {
       "parameters": {
-        "errorMessage": "={{ 'Elixiary daily run produced no drafts: ' + JSON.stringify($json.results || $json.reason) }}"
+        "errorMessage": "={{ ($json.brokenCount ? $json.brokenCount + ' queued post(s) have unreachable slides: ' + JSON.stringify($json.brokenImages) : 'Elixiary daily run produced no drafts: ' + JSON.stringify($json.results || $json.reason)) }}"
       },
       "id": "err-1",
-      "name": "Nothing was created",
+      "name": "Problem \u2014 check images or run",
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
@@ -179,7 +179,7 @@
         ],
         [
           {
-            "node": "Nothing was created",
+            "node": "Problem \u2014 check images or run",
             "type": "main",
             "index": 0
           }

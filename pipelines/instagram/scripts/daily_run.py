@@ -111,6 +111,24 @@ def main():
     for _ in range(a.homebar):
         results.append(run_one("homebar", a.dry_run))
 
+    # Buffer fetches media at publish time, so a slide that vanishes between
+    # now and then fails silently. Check every queued post, not just today's.
+    broken = []
+    try:
+        import verify_images
+        checked, broken = verify_images.verify(conn, quiet=True)
+        if broken:
+            print(f"  [images] {len(broken)} of {checked} queued posts have "
+                  f"missing slides:")
+            for b in broken:
+                print(f"           post {b.get('id')} ({b.get('type')}, "
+                      f"{b.get('status')}) {b.get('missing')}/{b.get('of')} "
+                      f"gone — {b.get('buffer_post_id')}")
+        else:
+            print(f"  [images] {checked} queued posts, all slides reachable")
+    except Exception as ex:
+        print(f"  [images] check failed: {str(ex)[:140]}")
+
     ok = sum(1 for r in results if r["ok"])
     summary = {
         "requested": a.recipes + a.articles + a.homebar + a.marlow,
@@ -118,6 +136,7 @@ def main():
         "failed": len(results) - ok,
         "dry_run": a.dry_run,
         "drafts": [r["buffer_post_id"] for r in results if r["buffer_post_id"]],
+        "broken_images": broken,
         "results": results,
     }
 
@@ -129,7 +148,8 @@ def main():
 
     db.finish_run(conn, run_id, ok > 0,
                   json.dumps({k: summary[k] for k in
-                              ("requested", "succeeded", "failed", "drafts")}))
+                              ("requested", "succeeded", "failed", "drafts",
+                               "broken_images")}))
 
     print(json.dumps(summary))
     # non-zero only if nothing at all worked, so a single miss doesn't page anyone
