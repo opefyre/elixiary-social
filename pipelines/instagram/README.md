@@ -118,3 +118,21 @@ Expect ~90s per daily batch (3 carousels).
 The spare Mac's SQLite DB is the **authoritative** record of what has been
 posted. A development copy on a laptop will drift; do not let both create real
 drafts.
+
+### Why HTTP and not Execute Command
+
+n8n on this host does not ship `n8n-nodes-base.executeCommand` (801 node types
+are available; that one is excluded, as it commonly is for security). The
+pipeline is therefore exposed over loopback HTTP by `scripts/serve.py`, run
+under launchd as `com.elixiary.social.service`, and driven by an HTTP Request
+node.
+
+The service binds to `127.0.0.1` only — that binding is the security boundary,
+and it additionally refuses any non-loopback client. A bearer token is
+supported but intentionally unset: n8n runs as the same user on the same box
+and could read the token file anyway, so embedding the value in a workflow
+would spread a secret for no real gain. Create
+`~/.config/elixiary/servicetoken.txt` and it becomes mandatory.
+
+Note n8n 2.x replaced "Activate" with **Publish** (a named version). The
+`active` flag cannot be flipped by PATCHing the REST API alone.

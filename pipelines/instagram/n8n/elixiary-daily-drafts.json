@@ -6,8 +6,8 @@
         "rule": {
           "interval": [
             {
-              "triggerAtHour": 9,
-              "triggerAtMinute": 0
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
             }
           ]
         }
@@ -34,12 +34,24 @@
     },
     {
       "parameters": {
-        "command": "cd $HOME/.local/elixiary-social && /usr/bin/python3 scripts/daily_run.py --recipes 2 --articles 1"
+        "method": "POST",
+        "url": "http://127.0.0.1:8787/run",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ recipes: 2, articles: 1, dry_run: false }) }}",
+        "options": {
+          "timeout": 900000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
       },
       "id": "exec-1",
       "name": "Build 2 recipes + 1 article",
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
         -20,
         100
@@ -49,7 +61,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// daily_run.py prints a JSON summary on its last stdout line.\nconst raw = $input.first().json;\nconst stdout = (raw.stdout || '').trim();\nconst stderr = (raw.stderr || '').trim();\nconst exitCode = raw.exitCode ?? 0;\n\nlet summary = null;\nconst lines = stdout.split('\\n').filter(l => l.trim().startsWith('{'));\nif (lines.length) {\n  try { summary = JSON.parse(lines[lines.length - 1]); } catch (e) { summary = null; }\n}\n\nif (!summary) {\n  return [{ json: {\n    ok: false, requested: 0, succeeded: 0, failed: 0, drafts: [],\n    reason: 'could not parse a summary from the run',\n    exitCode, stdout: stdout.slice(-1500), stderr: stderr.slice(-1500),\n  }}];\n}\n\nreturn [{ json: {\n  ok: summary.succeeded > 0,\n  requested: summary.requested,\n  succeeded: summary.succeeded,\n  failed: summary.failed,\n  drafts: summary.drafts,\n  results: summary.results,\n  exitCode,\n}}];"
+        "jsCode": "// The service returns {ok, exitCode, summary:{...}}\nconst r = $input.first().json;\nconst s = r.summary || {};\nreturn [{ json: {\n  ok: (s.succeeded || 0) > 0,\n  requested: s.requested ?? 0,\n  succeeded: s.succeeded ?? 0,\n  failed: s.failed ?? 0,\n  drafts: s.drafts || [],\n  results: s.results || [],\n  exitCode: r.exitCode,\n  stderr: (r.stderr || '').slice(-800),\n}}];"
       },
       "id": "parse-1",
       "name": "Parse summary",
