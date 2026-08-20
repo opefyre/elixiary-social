@@ -73,3 +73,8 @@ pipelines/instagram/state/*.db
 pipelines/instagram/state/*.db-wal
 pipelines/instagram/state/*.db-shm
 pipelines/instagram/scripts/mirror-failures.json
+
+# contained Chromium fetched by puppeteer
+pipelines/instagram/render/.chromium/
+pipelines/instagram/render/.puppeteer/
+pipelines/instagram/node_modules/

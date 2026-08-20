@@ -1,0 +1,10 @@
+{
+  "name": "elixiary-instagram-pipeline",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Renders Elixiary carousels and queues them to Buffer as drafts",
+  "scripts": {
+    "setup": "bash scripts/install_chromium.sh",
+    "which-chrome": "python3 -c \"import sys;sys.path.insert(0,'render');import render;print(render.find_chrome())\""
+  }
+}

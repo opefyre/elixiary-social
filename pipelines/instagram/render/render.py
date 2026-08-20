@@ -31,7 +31,30 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 W, H = 1080, 1350
 
+def _puppeteer_chromes():
+    """Contained Chromium, kept inside render/.chromium so nothing is
+    installed system-wide. Populated by `scripts/install_chromium.sh`."""
+    roots = [os.environ.get("PUPPETEER_CACHE_DIR"),
+             os.path.join(HERE, ".chromium"),
+             os.path.join(HERE, ".puppeteer"),
+             os.path.expanduser("~/.cache/puppeteer")]
+    found = []
+    for root in roots:
+        if not root or not os.path.isdir(root):
+            continue
+        for dirpath, dirnames, filenames in os.walk(root):
+            for fn in filenames:
+                if fn in ("Google Chrome for Testing", "chrome", "chrome-headless-shell"):
+                    p = os.path.join(dirpath, fn)
+                    if os.access(p, os.X_OK):
+                        found.append(p)
+            if dirpath.count(os.sep) - root.count(os.sep) > 8:
+                dirnames[:] = []
+    return sorted(found)
+
+
 CHROME_CANDIDATES = [
+    os.environ.get("ELIXIARY_CHROME") or "",
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "/Applications/Chromium.app/Contents/MacOS/Chromium",
     "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
@@ -77,7 +100,11 @@ def find_chrome():
     for c in CHROME_CANDIDATES:
         if c and os.path.exists(c):
             return c
-    sys.exit("Could not find Chrome/Chromium. Install Google Chrome.")
+    pup = _puppeteer_chromes()
+    if pup:
+        return pup[0]
+    sys.exit("No Chromium found. Set ELIXIARY_CHROME, or run "
+             "`npm run setup` in this directory to fetch a contained one.")
 
 
 def data_uri(path):
@@ -366,7 +393,9 @@ def render(spec, outdir, chrome=None):
     tpl_dir = os.path.join(HERE, "templates")
     font_dir = os.path.join(HERE, "fonts")
 
-    marlow = os.path.join(HERE, "..", "..", "..", "marlow", "mascot-1024.png")
+    marlow = os.path.join(HERE, "assets", "marlow-mascot.png")
+    if not os.path.exists(marlow):
+        marlow = os.path.join(HERE, "..", "..", "..", "marlow", "mascot-1024.png")
     assets = {
         "bg": data_uri(os.path.join(tpl_dir, t["bg"])),
         "pjs": data_uri(os.path.join(font_dir, "PlusJakartaSans-latin.woff2")),
