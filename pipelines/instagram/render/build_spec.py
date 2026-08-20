@@ -201,14 +201,25 @@ def recipe_spec(r):
             "note": "Estimates — actual values vary with pour and brand.",
         })
 
-    # 7 — cta
+    # 7 — cta: performable actions only, no fake button
     slides.append({
         "kind": "cta",
         "eyebrow": "Free to start",
         "title": "Mix it tonight.",
-        "subtitle": "Full recipe, ratios and 1,000+ more in the Elixiary app.",
-        "button": "Get the recipe",
+        "subtitle": "1,000+ recipes, free in the Elixiary app.",
+        "actions": [
+            {"icon": "save", "text": "Save it for your next round"},
+            {"icon": "send", "text": "Send it to your drinking partner"},
+            {"icon": "follow", "text": "Follow @elixiary.ai for a drink a day"},
+        ],
+        "link": "Full recipe — link in bio",
     })
+
+    # Nudge saves at peak interest rather than only on the final slide, which
+    # most viewers never reach. Slide 2 also doubles as an entry point when
+    # Instagram re-serves the carousel from a later position.
+    if len(slides) > 2:
+        slides[1]["save_hint"] = "Save this"
 
     return {
         "theme": "recipe",

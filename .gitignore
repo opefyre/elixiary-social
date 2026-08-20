@@ -2,6 +2,8 @@
 # Supabase credentials (Postgres connection string + sbp_ PAT)
 supabase.txt
 supabaseapi.txt
+# Buffer GraphQL API key
+bufferapi.txt
 
 # Generic secret patterns — belt and braces
 .env

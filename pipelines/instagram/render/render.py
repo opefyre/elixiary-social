@@ -188,15 +188,34 @@ def build_stats(s):
     </div>"""
 
 
+def _glyph(name, sz=30):
+    d = {
+        "save": '<path d="M6 3h12a1 1 0 011 1v17l-7-4-7 4V4a1 1 0 011-1z"/>',
+        "send": '<path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>',
+        "follow": '<path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 7a4 4 0 100 8 4 4 0 000-8'
+                  'M19 8v6M22 11h-6"/>',
+    }[name]
+    return (f'<svg class="g" width="{sz}" height="{sz}" viewBox="0 0 24 24" fill="none" '
+            f'stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+            f'stroke-linejoin="round">{d}</svg>')
+
+
 def build_cta(s, marlow_uri):
+    """No fake buttons. Nothing on an Instagram image is tappable, so the last
+    slide asks for actions the viewer can actually perform: save, send, follow,
+    and the bio link."""
+    acts = "".join(
+        f'<li>{_glyph(a.get("icon", "save"))}<span>{e(a.get("text"))}</span></li>'
+        for a in s.get("actions", [])
+    )
+    link = s.get("link")
     return f"""
     <div class="pad cta">
       {_eyebrow(s.get('eyebrow'))}
       <h1 class="display cta-h">{e(s.get('title'))}</h1>
       {f'<p class="lede">{e(s.get("subtitle"))}</p>' if s.get("subtitle") else ""}
-      <div class="cta-row">
-        <span class="btn">{e(s.get('button', 'Get the recipe'))} <span>&rarr;</span></span>
-      </div>
+      {f'<ul class="acts">{acts}</ul>' if acts else ""}
+      {f'<p class="linkline"><span class="arr">&rarr;</span> {e(link)}</p>' if link else ""}
       {f'<img class="marlow" src="{marlow_uri}" alt="">' if marlow_uri else ""}
     </div>"""
 
@@ -220,6 +239,12 @@ def page_html(slide, theme_key, idx, total, assets):
 
     # Bottom-left lockup, inset past the template's sparkle badge (~100px wide)
     # and clear of the embossed glass watermark in the top-right corner.
+    nudge = (
+        f'<div class="nudge">{_glyph("save", 26)}'
+        f'<span>{e(slide["save_hint"])}</span></div>'
+        if slide.get("save_hint") else ""
+    )
+
     counter = (
         f'<span class="sep">&middot;</span><span class="counter">{idx}'
         f'<span class="of">/{total}</span></span>' if total > 1 else ""
@@ -303,12 +328,21 @@ body{{
 .note{{font-size:23px;line-height:1.4;color:{t['muted']};margin-top:30px;
   padding-top:22px;border-top:1px solid {t['rule']}}}
 
-.cta-row{{margin-top:38px}}
-.btn{{display:inline-flex;align-items:center;gap:14px;font-family:'PJS';
-  font-weight:700;font-size:31px;color:#241405;padding:22px 40px;
-  border-radius:999px;
-  background:linear-gradient(95deg,#F5C451,#F59E0B 70%,#f97316);
-  box-shadow:0 12px 34px rgba(245,158,11,.34),inset 0 1px 0 rgba(255,255,255,.4)}}
+.acts{{list-style:none;margin-top:40px;display:flex;flex-direction:column;
+  gap:22px}}
+.acts li{{display:flex;align-items:center;gap:17px;font-size:29px;
+  line-height:1.25}}
+.acts .g{{flex:0 0 auto;color:{t['accent']}}}
+.linkline{{margin-top:38px;font-family:'PJS';font-weight:700;font-size:31px;
+  color:{t['accent']};display:flex;align-items:center;gap:13px}}
+.linkline .arr{{font-size:34px;line-height:1}}
+
+/* mid-carousel save nudge — most viewers never reach the last slide */
+.nudge{{position:absolute;right:56px;bottom:64px;display:flex;align-items:center;
+  gap:12px;font-family:'PJS';font-weight:700;font-size:23px;
+  color:{t['accent']};background:{t['card']};
+  border:1px solid {t['card_line']};border-radius:999px;padding:14px 24px 14px 20px;
+  box-shadow:{t['shadow']}}}
 .marlow{{position:absolute;right:44px;bottom:104px;width:290px;height:auto;
   filter:drop-shadow(0 22px 34px rgba(0,0,0,.42))}}
 
@@ -320,6 +354,7 @@ body{{
 .counter .of{{color:{t['muted']}}}
 </style></head><body>
 {body}
+{nudge}
 <div class="foot"><span>elixiary.com</span>{counter}</div>
 </body></html>"""
 
