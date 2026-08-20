@@ -29,6 +29,7 @@ sys.path.insert(0, os.path.join(PIPE, "llm"))
 sys.path.insert(0, HERE)
 import credentials         # noqa: E402
 import bottle_math         # noqa: E402
+import marlow              # noqa: E402
 import r2                  # noqa: E402
 import slots               # noqa: E402
 
@@ -230,9 +231,43 @@ def prepare_homebar(conn, hook_override):
     return post_id, spec, text, tags
 
 
+def prepare_marlow(conn, hook_override):
+    """AI-generated drinks from the configured account. Refuses to run without
+    ELIXIARY_MARLOW_USER_ID — these rows are somebody's private generations."""
+    rows = marlow.fetch()
+    used = {sid for sid, _ in db.used_keys(conn, "marlow")}
+    candidates = [g for g in rows if g["id"] not in used]
+    if not candidates:
+        raise RuntimeError(f"no unposted Marlow recipes left ({len(rows)} total)")
+
+    spec = None
+    for g in candidates:
+        spec = marlow.carousel(g)
+        if spec:
+            break
+    if spec is None:
+        raise RuntimeError("no candidate had usable ingredients and method")
+
+    spec["source"]["prompt"] = g.get("user_prompt")
+    print(f"picked  {g['recipe_name']}  (pool {len(candidates)})")
+
+    post_id = db.reserve(conn, "marlow", g["id"], "",
+                         {"name": g.get("recipe_name"),
+                          "glass": g.get("glassware")})
+    if post_id is None:
+        raise RuntimeError("lost a race for that generated recipe")
+
+    if hook_override:
+        spec["slides"][0]["kicker"] = hook_override
+    text = caption_mod.marlow_caption(spec["source"], hook=hook_override)
+    tags = caption_mod.marlow_hashtags(spec["source"])
+    return post_id, spec, text, tags
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--type", choices=["recipe", "article", "homebar"],
+    ap.add_argument("--type",
+                    choices=["recipe", "article", "homebar", "marlow"],
                     default="recipe")
     ap.add_argument("--dry-run", action="store_true",
                     help="render and upload, but do not touch Buffer")
@@ -244,7 +279,7 @@ def main():
     post_id = None
     try:
         prep = {"recipe": prepare_recipe, "article": prepare_article,
-                "homebar": prepare_homebar}[a.type]
+                "homebar": prepare_homebar, "marlow": prepare_marlow}[a.type]
         post_id, spec, text, tags = prep(conn, a.hook)
 
         if not FIRST_COMMENT_SUPPORTED:

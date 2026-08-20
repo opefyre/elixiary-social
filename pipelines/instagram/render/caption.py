@@ -244,3 +244,36 @@ def homebar_caption(source, hook=None):
 
     cap = "\n".join(parts).strip()
     return cap[:MAX_LEN]
+
+
+# ── Marlow-generated ───────────────────────────────────────────────────────
+
+def marlow_hashtags(source):
+    mid = ["aicocktails", "mixology", "cocktailrecipe"]
+    tags, seen = [], set()
+    for t in [BROAD_TAG] + mid[:3] + [BRAND_TAG]:
+        if t and t not in seen:
+            seen.add(t)
+            tags.append("#" + t)
+    return tags[:MAX_TAGS]
+
+
+def marlow_caption(source, hook=None):
+    name = source.get("name") or "This one"
+    prompt = " ".join((source.get("prompt") or "").split())
+    if len(prompt) > 220:
+        prompt = prompt[:220].rsplit(" ", 1)[0] + "…"
+
+    parts = [hook or f"Nobody has made a {name} before. Marlow invented it."]
+    parts.append("")
+    if prompt:
+        parts.append(f"The ask: \u201c{prompt}\u201d")
+        parts.append("")
+    parts.append("Marlow wrote the recipe and generated the photograph. "
+                 "Swipe for the full build.")
+    parts.append("")
+    parts.append("Save it if you want to try it, and send it to whoever thinks "
+                 "AI can't make a decent drink.")
+    parts.append("")
+    parts.append(f"Make your own → {SITE}")
+    return "\n".join(parts).strip()[:MAX_LEN]

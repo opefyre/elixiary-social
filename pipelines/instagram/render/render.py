@@ -19,6 +19,7 @@ Slide kinds: hook | list | steps | prose | stats | cta
 
 import argparse
 import base64
+import hashlib
 import html
 import json
 import mimetypes
@@ -27,6 +28,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 W, H = 1080, 1350
@@ -83,6 +85,27 @@ THEMES = {
         "cta_mascot": True,
         "card_right": 76,
         "hook_pad": "150px 250px 146px 76px",
+    },
+    # Create backplate — Marlow the glass mascot, used for AI-generated drinks
+    "create": {
+        "bg": "create-bg.png",
+        "fg": "#FCFEFD",
+        "muted": "rgba(232,236,242,.70)",
+        "accent": "#F5C451",
+        "rule": "rgba(245,196,81,.24)",
+        "card": "rgba(7,20,15,.94)",
+        "card_line": "rgba(245,196,81,.20)",
+        "chip_bg": "rgba(255,255,255,.06)",
+        "chip_line": "rgba(255,255,255,.14)",
+        "shadow": "0 24px 60px rgba(0,0,0,.45)",
+        "grad": "linear-gradient(102deg,#FBE2A0 0%,#F5C451 30%,#F59E0B 68%,#f97316 100%)",
+        "foot_left": 134,
+        "nudge_right": 56,
+        "cta_right": "330px",
+        "cta_mascot": True,
+        "card_right": 300,
+        "hook_align": "flex-end",
+        "hook_pad": "150px 300px 146px 76px",
     },
     # HomeBar backplate — Sal with the app open. Clear zone is the upper
     # band only, so hook copy is top-anchored rather than bottom-anchored.
@@ -146,6 +169,31 @@ def find_chrome():
 def data_uri(path):
     mime = mimetypes.guess_type(path)[0] or "application/octet-stream"
     with open(path, "rb") as f:
+        return f"data:{mime};base64," + base64.b64encode(f.read()).decode()
+
+
+def remote_data_uri(url, cache_dir=None):
+    """Fetch an image and inline it. Slides are rendered from file:// so a
+    remote <img> would not load, and inlining also means the render does not
+    depend on the host being up at that moment."""
+    cache_dir = cache_dir or os.path.join(HERE, ".imgcache")
+    os.makedirs(cache_dir, exist_ok=True)
+    key = hashlib.sha256(url.encode()).hexdigest()[:24]
+    hit = os.path.join(cache_dir, key)
+    if not os.path.exists(hit):
+        req = urllib.request.Request(url, headers={"User-Agent": "elixiary-render/1.0"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            data = r.read()
+        if len(data) < 512:
+            raise ValueError(f"image too small ({len(data)} bytes): {url}")
+        with open(hit, "wb") as f:
+            f.write(data)
+    with open(hit, "rb") as f:
+        head = f.read(12)
+    mime = ("image/png" if head.startswith(b"\x89PNG") else
+            "image/jpeg" if head.startswith(b"\xff\xd8") else
+            "image/webp" if head[8:12] == b"WEBP" else "image/png")
+    with open(hit, "rb") as f:
         return f"data:{mime};base64," + base64.b64encode(f.read()).decode()
 
 
@@ -283,6 +331,30 @@ def build_cta(s, marlow_uri):
     </div>"""
 
 
+def build_photo(s, img_uri, logo_uri=None, pill="CREATE"):
+    """Full-bleed image with a scrim, for the generated artwork itself."""
+    meta = "".join(f'<span class="chip">{e(m)}</span>' for m in s.get("meta", []))
+    title = str(s.get("title") or "")
+    words = title.split()
+    head = (f'{e(" ".join(words[:-1]))} <span class="grad">{e(words[-1])}</span>'
+            if len(words) > 1 else f'<span class="grad">{e(title)}</span>')
+    lock = (f'<div class="lockup"><img src="{logo_uri}" alt="">'
+            f'<span class="bar"></span><span class="pill">{e(pill)}</span></div>'
+            if logo_uri else "")
+    return f"""
+    <div class="photo-bg" style="background-image:url({img_uri})"></div>
+    <div class="photo-scrim"></div>
+    {lock}
+    <div class="pad photo">
+      <div class="rule"></div>
+      {_eyebrow(s.get('eyebrow'))}
+      {f'<p class="kicker">{e(s["kicker"])}</p>' if s.get("kicker") else ""}
+      <h1 class="display" style="font-size:{s.get('title_size', 96)}px">{head}</h1>
+      {f'<p class="lede">{e(s.get("subtitle"))}</p>' if s.get("subtitle") else ""}
+      {f'<div class="chips">{meta}</div>' if meta else ""}
+    </div>"""
+
+
 BUILDERS = {
     "hook": build_hook,
     "list": build_list,
@@ -298,6 +370,9 @@ def page_html(slide, theme_key, idx, total, assets):
     if kind == "cta":
         body = build_cta(slide,
                          assets.get("marlow") if t.get("cta_mascot", True) else None)
+    elif kind == "photo":
+        body = build_photo(slide, assets["images"][slide["image"]],
+                           assets.get("logo"), slide.get("pill", "CREATE"))
     else:
         body = BUILDERS.get(kind, build_prose)(slide)
 
@@ -332,6 +407,24 @@ body{{
 
 /* hook + cta sit directly on the artwork, lower-left, clear of the photo */
 .hook{{justify-content:{t['hook_align']};padding:{t['hook_pad']}}}
+.photo-bg{{position:absolute;inset:0;background-size:cover;
+  background-position:center;z-index:0}}
+.photo-scrim{{position:absolute;inset:0;z-index:1;background:
+  linear-gradient(180deg,rgba(6,17,13,.72) 0%,rgba(6,17,13,.12) 34%,
+  rgba(6,17,13,.58) 66%,rgba(6,17,13,.96) 100%)}}
+.photo{{justify-content:flex-end;padding:150px 110px 150px 76px;z-index:2}}
+.photo .kicker{{max-width:24ch}}
+.photo .lede{{max-width:26ch}}
+/* the backplates carry the lockup; a full-bleed photo has to draw its own */
+.lockup{{position:absolute;left:76px;top:62px;z-index:3;display:flex;
+  align-items:center;gap:22px}}
+.lockup img{{width:96px;height:96px;display:block;border-radius:50%;
+  filter:drop-shadow(0 6px 18px rgba(0,0,0,.55))}}
+.lockup .bar{{width:1px;height:52px;background:rgba(252,254,253,.42)}}
+.lockup .pill{{font-family:'PJS';font-weight:700;font-size:25px;
+  letter-spacing:.22em;color:#FCFEFD;border:1px solid rgba(252,254,253,.55);
+  border-radius:999px;padding:13px 30px;
+  text-shadow:0 1px 8px rgba(0,0,0,.6)}}
 .rule{{width:74px;height:4px;border-radius:2px;background:{t['accent']};
   margin-bottom:26px;opacity:.95}}
 .kicker{{font-family:'PJS';font-weight:700;font-size:33px;line-height:1.16;
@@ -440,7 +533,15 @@ def render(spec, outdir, chrome=None):
         "pjs": data_uri(os.path.join(font_dir, "PlusJakartaSans-latin.woff2")),
         "inter": data_uri(os.path.join(font_dir, "Inter-latin.woff2")),
         "marlow": data_uri(marlow) if os.path.exists(marlow) else None,
+        "logo": (data_uri(os.path.join(HERE, "assets", "logo.png"))
+                 if os.path.exists(os.path.join(HERE, "assets", "logo.png")) else None),
     }
+
+    assets["images"] = {}
+    for sl in spec["slides"]:
+        u = sl.get("image")
+        if u and u not in assets["images"]:
+            assets["images"][u] = remote_data_uri(u)
 
     os.makedirs(outdir, exist_ok=True)
     slides = spec["slides"]

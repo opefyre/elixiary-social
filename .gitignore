@@ -80,3 +80,6 @@ pipelines/instagram/scripts/mirror-failures.json
 pipelines/instagram/render/.chromium/
 pipelines/instagram/render/.puppeteer/
 pipelines/instagram/node_modules/
+
+# cached remote images used by photo slides
+pipelines/instagram/render/.imgcache/

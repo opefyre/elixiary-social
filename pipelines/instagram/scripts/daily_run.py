@@ -19,6 +19,7 @@ import os
 import subprocess
 import sys
 import time
+from datetime import date
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PIPE = os.path.abspath(os.path.join(HERE, ".."))
@@ -37,6 +38,13 @@ if os.path.abspath(db.__file__) != os.path.abspath(_expected):
 
 
 PUBLISH = os.path.join(HERE, "publish.py")
+
+# The home-bar format has only ~52 variants, so daily would exhaust it in
+# seven weeks. Twice a week gives it half a year, and it works better as a
+# recurring anchor than as filler. Mon=0 .. Sun=6.
+HOMEBAR_WEEKDAYS = {int(x) for x in
+                    os.environ.get("ELIXIARY_HOMEBAR_DAYS", "1,5").split(",")}
+SLOTS_PER_DAY = int(os.environ.get("ELIXIARY_SLOTS_PER_DAY", "5"))
 
 
 def run_one(kind, dry):
@@ -68,9 +76,16 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--recipes", type=int, default=3)
     ap.add_argument("--articles", type=int, default=1)
-    ap.add_argument("--homebar", type=int, default=1)
+    ap.add_argument("--homebar", type=int, default=-1,
+                    help="-1 = decide from the weekday schedule")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
+
+    # Home bar runs on its scheduled weekdays; on other days the slot goes
+    # back to recipes so the day still fills all five.
+    if a.homebar < 0:
+        a.homebar = 1 if date.today().weekday() in HOMEBAR_WEEKDAYS else 0
+        a.recipes = max(0, SLOTS_PER_DAY - a.articles - a.homebar)
 
     conn = db.connect()
     run_id = db.start_run(conn, "daily")
