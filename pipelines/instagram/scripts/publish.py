@@ -198,15 +198,28 @@ def prepare_homebar(conn, hook_override):
     bottles, pantry = bottle_math.classify(recipes, master)
 
     used = {sid for sid, _ in db.used_keys(conn, "homebar")}
-    recent = [m.get("seed") for m in db.recent_meta(conn, "homebar", 4)]
+    recent = db.recent_meta(conn, "homebar", 4)
+    recent_seeds = [m.get("seed") for m in recent]
+    recent_totals = [m.get("total") for m in recent]
 
+    # Biggest headline first, but never the same figure twice in a row: past a
+    # dozen bottles the greedy converges, so many variants share a total and
+    # sorting on size alone would run "218 cocktails" eight posts running.
+    ordered = bottle_math.variants_by_impact(recipes, bottles, pantry)
     choice = None
-    for seed, steps in bottle_math.variants():
-        vid = bottle_math.variant_id(seed, steps)
-        if vid in used or seed in recent:
-            continue
-        choice = (seed, steps, vid)
-        break
+    for relax in (False, True):
+        for seed, steps, total in ordered:
+            vid = bottle_math.variant_id(seed, steps)
+            if vid in used:
+                continue
+            if seed in recent_seeds:
+                continue
+            if not relax and total in recent_totals:
+                continue
+            choice = (seed, steps, vid)
+            break
+        if choice:
+            break
     if choice is None:
         raise RuntimeError("no unused home-bar variants left")
 

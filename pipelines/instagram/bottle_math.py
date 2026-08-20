@@ -428,5 +428,24 @@ def variants():
     return out
 
 
+def variants_by_impact(recipes, bottles, pantry):
+    """Variants ordered so the biggest headline number goes out first.
+
+    Beyond about a dozen bottles the greedy converges on the same set, so many
+    variants share a total. Ties are broken toward the smaller bar, because
+    "10 bottles, 178 cocktails" is a better claim than reaching the same number
+    with more — and it keeps consecutive posts from repeating a figure.
+    """
+    scored = []
+    for seed, steps in variants():
+        order = build_order(recipes, steps, bottles=bottles, pantry=pantry,
+                            seed=seed)
+        if len(order) < steps:
+            continue
+        scored.append((order[-1]["total"], steps, seed))
+    scored.sort(key=lambda x: (-x[0], x[1], x[2] or ""))
+    return [(seed, steps, total) for total, steps, seed in scored]
+
+
 def variant_id(seed, steps):
     return f"order:{seed or 'cold'}:{steps}"
