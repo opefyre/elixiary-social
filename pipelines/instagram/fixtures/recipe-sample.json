@@ -1,0 +1,118 @@
+{
+    "id": "i1uACpVh2vsCBxuLsoga",
+    "name": "Winter Paloma",
+    "slug": "winter-paloma",
+    "tags": [
+        "style_contemporary_classic",
+        "flavor_citrus",
+        "strength_moderate",
+        "season_winter",
+        "occ_brunch",
+        "base_spirit_tequila"
+    ],
+    "moods": [
+        "season_winter",
+        "energy_cozy_warming"
+    ],
+    "garnish": "Edible glitter (optional garnish)",
+    "sugar_g": 22.7,
+    "category": "Highball Long",
+    "is_vegan": true,
+    "equipment": [
+        "shaker"
+    ],
+    "glassware": "Highball",
+    "image_url": "https://drive.google.com/file/d/1QiENvVBXyZ8J3bKm66km06zIh9A7kXbO/view?usp=drivesdk",
+    "occasions": [
+        "holiday",
+        "party"
+    ],
+    "prep_time": "3 minutes",
+    "difficulty": "Medium",
+    "abv_percent": 12.0,
+    "ingredients": [
+        {
+            "name": "Don Julio Reposado tequila",
+            "unit": "oz",
+            "amount": 1.5,
+            "measure": "1.5 oz",
+            "ingredient": ""
+        },
+        {
+            "name": "Cranberry juice",
+            "unit": "oz",
+            "amount": 2,
+            "measure": "2 oz",
+            "ingredient": ""
+        },
+        {
+            "name": "Pomegranate juice",
+            "unit": "oz",
+            "amount": 1,
+            "measure": "1 oz",
+            "ingredient": ""
+        },
+        {
+            "name": "Agave syrup",
+            "unit": "oz",
+            "amount": 0.5,
+            "measure": "0.5 oz",
+            "ingredient": ""
+        },
+        {
+            "name": "Soda water",
+            "unit": "fill",
+            "amount": 0,
+            "measure": "Top",
+            "ingredient": ""
+        },
+        {
+            "name": "Lime wedge (garnish)",
+            "unit": "count",
+            "amount": 1,
+            "measure": "1",
+            "ingredient": ""
+        },
+        {
+            "name": "Whole cranberries (garnish)",
+            "unit": "to_taste",
+            "amount": 0,
+            "measure": "Optional",
+            "ingredient": ""
+        }
+    ],
+    "is_mocktail": false,
+    "health_flags": [
+        "contains_alcohol",
+        "high_sugar"
+    ],
+    "instructions": {
+        "notes": [
+            "Edible glitter optional."
+        ],
+        "steps": [
+            "Add tequila, cranberry juice, pomegranate juice, and agave syrup to a cocktail shaker with ice.",
+            "Shake well.",
+            "Strain into a glass filled with fresh ice.",
+            "Top with soda water.",
+            "Stir gently.",
+            "Garnish with a lime wedge and/or cranberries."
+        ]
+    },
+    "origin_story": "The Paloma cocktail is widely considered to have originated in Mexico, likely in the mid-20th century. Its exact creator is often debated, with some attributing it to Don Javier Delgado Corona, owner of La Capilla in Tequila, Jalisco. The drink gained popularity alongside the rise of bottled grapefruit sodas in Mexico. This \"Winter Paloma\" is a modern seasonal adaptation of the traditional grapefruit-based cocktail, designed to feature cranberry and pomegranate flavors.",
+    "calories_kcal": 189,
+    "pairing_foods": [
+        "spicy tacos",
+        "grilled chicken",
+        "shrimp cocktail"
+    ],
+    "serving_notes": "Serve this refreshing highball in a tall glass, filled generously with ice, to maintain its chill and effervescence. A fresh lime wedge is crucial for an aromatic squeeze, and whole cranberries enhance its festive, winter-themed presentation.",
+    "flavor_profile": "This Winter Paloma offers a vibrant and balanced profile, blending the earthy notes of reposado tequila with the tart sweetness of cranberry and pomegranate. It is moderately sweet with a refreshing effervescence from the soda water, finishing bright and fruity with a subtle citrus zest.",
+    "pairing_flavors": [
+        "citrus",
+        "fruity",
+        "sweet"
+    ],
+    "variations_tips": "To adjust sweetness, slightly reduce or increase the agave syrup according to your preference, as the fruit juices already contribute sweetness. For a spicier kick, a tiny pinch of chili powder can be added to the rim or directly into the drink. When preparing multiple servings, scale all liquid ingredients proportionally, topping with soda water to taste.",
+    "serving_temperature": "chilled"
+}
