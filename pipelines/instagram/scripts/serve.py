@@ -14,7 +14,7 @@ it becomes mandatory. It is deliberately not used by default — the caller
 anyway, and embedding the value in a workflow would spread the secret for no
 real gain. Create the token if the service is ever bound beyond loopback.
 
-    POST /run     {"recipes": 3, "articles": 1, "homebar": 1, "dry_run": false}
+    POST /run     {"recipes": 3, "articles": 1, "marlow": 1, "dry_run": false}
     GET  /health
 
     python3 scripts/serve.py            # port 8787
@@ -53,10 +53,10 @@ def token():
         return None
 
 
-def run_daily(recipes, articles, dry, homebar=1):
+def run_daily(recipes, articles, dry, homebar=-1, marlow=1):
     cmd = [sys.executable, os.path.join(HERE, "daily_run.py"),
            "--recipes", str(recipes), "--articles", str(articles),
-           "--homebar", str(homebar)]
+           "--homebar", str(homebar), "--marlow", str(marlow)]
     if dry:
         cmd.append("--dry-run")
     p = subprocess.run(cmd, capture_output=True, text=True, timeout=MAX_SECONDS)
@@ -129,9 +129,11 @@ class Handler(BaseHTTPRequestHandler):
 
         recipes = int(body.get("recipes", 3))
         articles = int(body.get("articles", 1))
-        homebar = int(body.get("homebar", 1))
+        homebar = int(body.get("homebar", -1))
+        marlow = int(body.get("marlow", 1))
         dry = bool(body.get("dry_run", False))
-        if not all(0 <= n <= 8 for n in (recipes, articles, homebar)):
+        if not all(0 <= n <= 8 for n in (recipes, articles, marlow)) \
+                or not (-1 <= homebar <= 8):
             return self._send(400, {"error": "counts must be 0-8"})
 
         if not _lock.acquire(blocking=False):
@@ -139,7 +141,7 @@ class Handler(BaseHTTPRequestHandler):
                                     "last": _last})
         try:
             _last["started"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
-            result = run_daily(recipes, articles, dry, homebar)
+            result = run_daily(recipes, articles, dry, homebar, marlow)
             _last["finished"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
             _last["summary"] = result.get("summary")
             self._send(200 if result["ok"] else 500, result)

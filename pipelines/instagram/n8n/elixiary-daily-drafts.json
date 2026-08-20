@@ -38,7 +38,7 @@
         "url": "http://127.0.0.1:8787/run",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ recipes: 3, articles: 1, homebar: 1, dry_run: false }) }}",
+        "jsonBody": "={{ JSON.stringify({ articles: 1, marlow: 1, homebar: -1, dry_run: false }) }}",
         "options": {
           "timeout": 1500000,
           "response": {
@@ -49,7 +49,7 @@
         }
       },
       "id": "exec-1",
-      "name": "Build 3 recipes + 1 article + 1 home bar",
+      "name": "Build the day\u2019s five posts",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
@@ -139,7 +139,7 @@
       "main": [
         [
           {
-            "node": "Build 3 recipes + 1 article + 1 home bar",
+            "node": "Build the day\u2019s five posts",
             "type": "main",
             "index": 0
           }
@@ -150,7 +150,7 @@
       "main": [
         [
           {
-            "node": "Build 3 recipes + 1 article + 1 home bar",
+            "node": "Build the day\u2019s five posts",
             "type": "main",
             "index": 0
           }
@@ -186,7 +186,7 @@
         ]
       ]
     },
-    "Build 3 recipes + 1 article + 1 home bar": {
+    "Build the day\u2019s five posts": {
       "main": [
         [
           {

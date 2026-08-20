@@ -281,3 +281,33 @@ more" would contradict the figures printed beside it.
 
 Marlow is omitted from this theme's CTA — Sal already carries the plate, and
 two mascots in one corner read as a collision.
+
+## Weekly mix
+
+Five posts a day, one per slot:
+
+| | Recipes | Article | Marlow | Home bar |
+|---|---|---|---|---|
+| Tue, Sat | 2 | 1 | 1 | 1 |
+| Other days | 3 | 1 | 1 | — |
+
+`homebar: -1` in the workflow body means "decide from the weekday"
+(`ELIXIARY_HOMEBAR_DAYS`, default Tue+Sat). Recipes absorb whatever is left,
+so a day always fills five slots.
+
+Home bar is twice weekly because it has ~52 variants — daily exhausted it in
+seven weeks.
+
+## Ask Marlow
+
+Carousels from `generated_recipes`: the generated image full-bleed, then the
+prompt that produced it, then the build. It demonstrates the Pro feature
+rather than describing it.
+
+**Privacy.** That table holds 517 generations from 128 different users. The
+format reads only `ELIXIARY_MARLOW_USER_ID` and raises if it is unset — it
+must never guess an account. The id is set in the launchd plist on the spare
+Mac, not in this repo.
+
+Only generations that already have an image qualify (101 of 272 for the
+configured account), since the picture is the point.
