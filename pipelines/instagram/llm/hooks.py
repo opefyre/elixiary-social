@@ -13,6 +13,7 @@ output fails the length checks, so a post is never blocked on the LLM.
 
 import os
 import sys
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -25,6 +26,11 @@ import client as llm  # noqa: E402
 # The hook is the most visible line of the post and this runs unattended, so
 # the slower model is worth it. Two recipes a day costs about 40s.
 HOOK_MODEL = os.environ.get("ELIXIARY_HOOK_MODEL", "@cf/zai-org/glm-5.2")
+
+# Total wall-clock allowed per hook across retries. Three attempts at the
+# observed median comfortably fit; a pathological tail gets cut off instead of
+# stretching the daily batch.
+HOOK_BUDGET_SECONDS = float(os.environ.get("ELIXIARY_HOOK_BUDGET", "150"))
 
 SCHEMA = {
     "name": "recipe_hook",
@@ -158,8 +164,16 @@ def recipe_hook(row, angle="classic", backend="cf"):
         focus=ANGLE_FOCUS.get(angle, ANGLE_FOCUS["classic"]),
     )
 
+    # Observed failures were transient Workers AI latency, not bad output:
+    # both combinations that fell back re-ran clean in 7s and 19s. So retry
+    # rather than relaxing the quality bar — but bound the total, because a
+    # slow tail on four recipes would otherwise dominate the daily run.
     why = "no attempt made"
-    for attempt in range(2):
+    deadline = time.time() + HOOK_BUDGET_SECONDS
+    for attempt in range(3):
+        if attempt and time.time() > deadline:
+            why = f"budget of {HOOK_BUDGET_SECONDS}s exhausted after {attempt} attempts"
+            break
         try:
             h = llm.complete_json(SYSTEM, user, schema=SCHEMA, backend=backend,
                                   max_tokens=700, temperature=0.85 + 0.1 * attempt,

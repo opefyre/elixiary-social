@@ -235,3 +235,18 @@ well as categories and spirits, and spreads across the catalogue rather than
 exhausting one recipe's seven angles first.
 
 Rows created before angles existed carry `angle=''` and are read as `classic`.
+
+
+## Hook reliability
+
+Measured across nine recipe/angle combinations: **2 fell back (22%)**, both
+after ~60s. Re-running those exact two succeeded in 7s and 19s, so the cause
+was transient Workers AI latency, not bad output or an over-strict validator.
+
+The response is three attempts inside a 150s per-hook budget, rather than
+relaxing the quality bar. A fallback is logged with its reason — silent
+fallbacks look like working hooks until every post of one angle opens the
+same way.
+
+Hook latency is 7-69s (median ~38s), which is most of a daily batch's 6-9
+minutes. `ELIXIARY_HOOK_BUDGET` caps the per-hook spend.
