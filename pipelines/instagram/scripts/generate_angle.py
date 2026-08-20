@@ -30,6 +30,7 @@ import client as llm  # noqa: E402
 sys.path.insert(0, PIPE)
 import db  # noqa: E402
 import credentials  # noqa: E402
+import pg  # noqa: E402
 
 ANGLE_KINDS = [
     ("primer", "a practical primer: what it is and why it matters"),
@@ -167,18 +168,11 @@ from the article above:
 
 
 def fetch_article(where):
-    conn = credentials.get("supabase")
     sql = (f"SELECT to_jsonb(a) FROM (SELECT id,slug,title,excerpt,category,"
            f"difficulty,read_time,content FROM education_articles "
            f"WHERE {where} AND status='published' LIMIT 1) a;")
-    out = subprocess.run(["psql", conn, "-At",
-                          "-c", "SET default_transaction_read_only=on;",
-                          "-c", sql],
-                         capture_output=True, text=True, check=True).stdout
-    for line in out.splitlines():
-        if line.startswith("{"):
-            return json.loads(line)
-    return None
+    rows = pg.rows(sql)
+    return rows[0] if rows else None
 
 
 def strip_markdown(md, limit=9000):

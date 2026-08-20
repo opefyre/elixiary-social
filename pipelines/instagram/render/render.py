@@ -418,7 +418,8 @@ def render(spec, outdir, chrome=None):
             png = os.path.abspath(os.path.join(outdir, f"slide-{i:02d}.png"))
             subprocess.run(
                 [chrome, "--headless", "--disable-gpu", "--hide-scrollbars",
-                 "--force-device-scale-factor=1", "--default-background-color=00000000",
+                 "--force-device-scale-factor=1",
+                 "--default-background-color=00000000",
                  f"--screenshot={png}", f"--window-size={W},{H}",
                  "--virtual-time-budget=4000", f"file://{hp}"],
                 check=True, capture_output=True,

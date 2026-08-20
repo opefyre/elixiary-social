@@ -79,3 +79,42 @@ a 7-slide carousel) because `chrome-headless-shell` starts faster than Chrome.
 - Chromium is fetched from Chrome-for-Testing directly rather than via
   `puppeteer browsers install`, which silently produces a broken tree on
   macOS 26 (launcher without framework — the binary exists and fails at dlopen).
+
+## Orchestration (n8n)
+
+`n8n/elixiary-daily-drafts.json` — import into n8n on the spare Mac.
+
+```
+Every day 09:00 (Europe/Lisbon) ─┐
+Run manually ────────────────────┴→ Execute Command
+                                      cd $HOME/.local/elixiary-social &&
+                                      /usr/bin/python3 scripts/daily_run.py
+                                        --recipes 2 --articles 1
+                                    → Parse summary (Code)
+                                    → Any drafts created? (IF)
+                                        ├─ yes → Drafts ready to review
+                                        └─ no  → Stop and Error
+```
+
+The heavy lifting stays in Python so it is version-controlled and testable;
+n8n only schedules, reports and gives you a manual trigger.
+
+`daily_run.py` treats each item independently — one failure does not stop the
+rest, and it exits non-zero only if *nothing* succeeded, so a single miss does
+not raise an alarm.
+
+Expect ~90s per daily batch (3 carousels).
+
+## Deployment layout on the spare Mac (`my-server`)
+
+```
+~/.local/elixiary-social/      the pipeline (rsync target)
+  render/.chromium/            contained headless Chromium
+  vendor/                      contained psycopg2
+  state/elixiary-social.db     authoritative post-tracking DB
+~/.config/elixiary/            credentials, chmod 600
+```
+
+The spare Mac's SQLite DB is the **authoritative** record of what has been
+posted. A development copy on a laptop will drift; do not let both create real
+drafts.

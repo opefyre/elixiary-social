@@ -28,6 +28,7 @@ sys.path.insert(0, PIPE)
 sys.path.insert(0, os.path.join(PIPE, "llm"))
 sys.path.insert(0, HERE)
 import credentials         # noqa: E402
+import r2                  # noqa: E402
 import build_spec          # noqa: E402
 import caption as caption_mod  # noqa: E402
 import db                  # noqa: E402
@@ -35,9 +36,7 @@ import generate_angle      # noqa: E402
 import pick_next           # noqa: E402
 import render as renderer  # noqa: E402
 
-BUCKET = "elixiary-images"
 SLIDE_PREFIX = "social"
-PUBLIC_BASE = "https://pub-dfe281321d524908ae12d89d86e1a8f6.r2.dev"
 BUFFER_API = "https://api.buffer.com"
 
 # Buffer's `metadata.instagram.firstComment` is paid-plan only. On Free the
@@ -47,14 +46,6 @@ FIRST_COMMENT_SUPPORTED = False
 CHANNEL_ELIXIARY = "6a855825ccaf649a67d4db86"
 # finkavo is a separate business on the same Buffer account. Never post to it.
 CHANNEL_BLOCKLIST = {"6a7b98a8b2d9d577435cbebe": "finkavo"}
-
-
-def wrangler_bin():
-    for p in (os.path.join(REPO, ".tools", "node_modules", ".bin", "wrangler"),
-              os.path.join(PIPE, "node_modules", ".bin", "wrangler")):
-        if os.path.exists(p):
-            return [p]
-    return ["npx", "--yes", "wrangler@4"]
 
 
 def buffer_key():
@@ -79,35 +70,18 @@ def gql(query, variables=None):
 
 
 def upload_slide(local, key):
-    if not key.startswith(SLIDE_PREFIX + "/"):
-        raise RuntimeError(f"refusing to write outside {SLIDE_PREFIX}/: {key}")
-    r = subprocess.run(
-        wrangler_bin() + ["r2", "object", "put", f"{BUCKET}/{key}",
-                          "--file", local, "--content-type", "image/png",
-                          "--remote"],
-        capture_output=True, text=True,
-    )
-    if r.returncode != 0:
-        raise RuntimeError((r.stderr or r.stdout).strip()[:300])
-    return f"{PUBLIC_BASE}/{key}"
+    return r2.put(local, key, "image/png")
 
 
 def delete_slide(key):
     """Only ever used to undo our own upload in a dry run."""
-    if not key.startswith(SLIDE_PREFIX + "/"):
-        raise RuntimeError(f"refusing to delete outside {SLIDE_PREFIX}/: {key}")
-    subprocess.run(
-        wrangler_bin() + ["r2", "object", "delete", f"{BUCKET}/{key}", "--remote"],
-        capture_output=True, text=True)
+    r2.delete(key)
 
 
 def verify_public(url):
     """Buffer fetches media at publish time, which may be days later. If a
     slide isn't publicly reachable now, the post fails silently then."""
-    req = urllib.request.Request(url, method="HEAD",
-                                 headers={"User-Agent": "elixiary-publish/1.0"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return r.status == 200
+    return r2.exists(url.rsplit(r2.PUBLIC_BASE + "/", 1)[-1])
 
 
 def create_draft(channel_id, text, image_urls, first_comment=None):
@@ -221,7 +195,7 @@ def main():
                 key = f"{SLIDE_PREFIX}/{post_id}/slide-{i:02d}.png"
                 urls.append(upload_slide(f, key))
             print(f"uploaded {len(urls)} slides to "
-                  f"r2://{BUCKET}/{SLIDE_PREFIX}/{post_id}/")
+                  f"r2://{r2.BUCKET}/{SLIDE_PREFIX}/{post_id}/")
 
         for u in urls:
             if not verify_public(u):

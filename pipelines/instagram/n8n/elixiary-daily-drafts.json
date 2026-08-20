@@ -1,0 +1,197 @@
+{
+  "name": "Elixiary \u2014 Instagram daily drafts",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "sched-1",
+      "name": "Every day 09:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -260,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "manual-1",
+      "name": "Run manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd $HOME/.local/elixiary-social && /usr/bin/python3 scripts/daily_run.py --recipes 2 --articles 1"
+      },
+      "id": "exec-1",
+      "name": "Build 2 recipes + 1 article",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        100
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// daily_run.py prints a JSON summary on its last stdout line.\nconst raw = $input.first().json;\nconst stdout = (raw.stdout || '').trim();\nconst stderr = (raw.stderr || '').trim();\nconst exitCode = raw.exitCode ?? 0;\n\nlet summary = null;\nconst lines = stdout.split('\\n').filter(l => l.trim().startsWith('{'));\nif (lines.length) {\n  try { summary = JSON.parse(lines[lines.length - 1]); } catch (e) { summary = null; }\n}\n\nif (!summary) {\n  return [{ json: {\n    ok: false, requested: 0, succeeded: 0, failed: 0, drafts: [],\n    reason: 'could not parse a summary from the run',\n    exitCode, stdout: stdout.slice(-1500), stderr: stderr.slice(-1500),\n  }}];\n}\n\nreturn [{ json: {\n  ok: summary.succeeded > 0,\n  requested: summary.requested,\n  succeeded: summary.succeeded,\n  failed: summary.failed,\n  drafts: summary.drafts,\n  results: summary.results,\n  exitCode,\n}}];"
+      },
+      "id": "parse-1",
+      "name": "Parse summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "if-1",
+      "name": "Any drafts created?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        420,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const s = $input.first().json;\nconst when = new Date().toISOString();\nconst lines = (s.results || []).map(r =>\n  `${r.ok ? 'ok' : 'FAILED'}  ${r.type}  ${r.detail || ''}`);\nreturn [{ json: {\n  headline: `${s.succeeded}/${s.requested} drafts created`,\n  drafts: s.drafts,\n  detail: lines,\n  reviewUrl: 'https://publish.buffer.com/drafts',\n  ranAt: when,\n}}];"
+      },
+      "id": "ok-1",
+      "name": "Drafts ready to review",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ 'Elixiary daily run produced no drafts: ' + JSON.stringify($json.results || $json.reason) }}"
+      },
+      "id": "err-1",
+      "name": "Nothing was created",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        660,
+        220
+      ]
+    }
+  ],
+  "connections": {
+    "Every day 09:00": {
+      "main": [
+        [
+          {
+            "node": "Build 2 recipes + 1 article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run manually": {
+      "main": [
+        [
+          {
+            "node": "Build 2 recipes + 1 article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build 2 recipes + 1 article": {
+      "main": [
+        [
+          {
+            "node": "Parse summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse summary": {
+      "main": [
+        [
+          {
+            "node": "Any drafts created?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any drafts created?": {
+      "main": [
+        [
+          {
+            "node": "Drafts ready to review",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Nothing was created",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Lisbon",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "executionTimeout": 1800
+  },
+  "pinData": {}
+}

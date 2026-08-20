@@ -24,6 +24,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import db  # noqa: E402
 import credentials  # noqa: E402
+import pg  # noqa: E402
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "render"))
 from build_spec import clean_category  # noqa: E402
 
@@ -48,21 +49,7 @@ SPIRIT_WINDOW = 4
 
 
 def query(sql):
-    conn = credentials.get("supabase")
-    out = subprocess.run(
-        ["psql", conn, "-At", "-c", "SET default_transaction_read_only=on;",
-         "-c", sql],
-        capture_output=True, text=True, check=True,
-    ).stdout
-    rows = []
-    for line in out.splitlines():
-        line = line.strip()
-        if line and line != "SET":
-            try:
-                rows.append(json.loads(line))
-            except json.JSONDecodeError:
-                pass
-    return rows
+    return pg.rows(sql)
 
 
 def tag_of(row, prefix):
