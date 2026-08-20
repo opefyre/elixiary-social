@@ -89,7 +89,7 @@ Every day 09:00 (Europe/Lisbon) ─┐
 Run manually ────────────────────┴→ Execute Command
                                       cd $HOME/.local/elixiary-social &&
                                       /usr/bin/python3 scripts/daily_run.py
-                                        --recipes 2 --articles 1
+                                        --recipes 4 --articles 1
                                     → Parse summary (Code)
                                     → Any drafts created? (IF)
                                         ├─ yes → Drafts ready to review
@@ -103,7 +103,13 @@ n8n only schedules, reports and gives you a manual trigger.
 rest, and it exits non-zero only if *nothing* succeeded, so a single miss does
 not raise an alarm.
 
-Expect ~90s per daily batch (3 carousels).
+Expect ~4-8 min per daily batch (5 carousels), against a 1500s service
+timeout. The variance is Workers AI queue time on the hook step.
+
+**Cadence: 5 posts a day (4 recipes + 1 article), one per slot.** At that rate
+the 1047 recipes last ~8.5 months and the ~430 article angles ~14 months.
+Change it in one place — the `jsonBody` of the workflow's HTTP node — and
+`daily_run.py` defaults match.
 
 ## Deployment layout on the spare Mac (`my-server`)
 

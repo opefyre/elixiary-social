@@ -14,7 +14,7 @@ it becomes mandatory. It is deliberately not used by default — the caller
 anyway, and embedding the value in a workflow would spread the secret for no
 real gain. Create the token if the service is ever bound beyond loopback.
 
-    POST /run     {"recipes": 2, "articles": 1, "dry_run": false}
+    POST /run     {"recipes": 4, "articles": 1, "dry_run": false}
     GET  /health
 
     python3 scripts/serve.py            # port 8787
@@ -38,7 +38,8 @@ PORT = int(os.environ.get("ELIXIARY_PORT", "8787"))
 TOKEN_FILE = os.path.expanduser(
     os.environ.get("ELIXIARY_SERVICE_TOKEN_FILE",
                    "~/.config/elixiary/servicetoken.txt"))
-MAX_SECONDS = 900
+# Five carousels at 45-95s each, with headroom for the LLM's slow tail.
+MAX_SECONDS = 1500
 
 _lock = threading.Lock()          # one run at a time
 _last = {"started": None, "finished": None, "summary": None}
@@ -125,11 +126,11 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, json.JSONDecodeError):
             return self._send(400, {"error": "invalid JSON body"})
 
-        recipes = int(body.get("recipes", 2))
+        recipes = int(body.get("recipes", 4))
         articles = int(body.get("articles", 1))
         dry = bool(body.get("dry_run", False))
-        if not (0 <= recipes <= 5 and 0 <= articles <= 5):
-            return self._send(400, {"error": "recipes/articles must be 0-5"})
+        if not (0 <= recipes <= 8 and 0 <= articles <= 8):
+            return self._send(400, {"error": "recipes/articles must be 0-8"})
 
         if not _lock.acquire(blocking=False):
             return self._send(409, {"error": "a run is already in progress",
