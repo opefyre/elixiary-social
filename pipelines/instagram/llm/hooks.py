@@ -90,7 +90,24 @@ Good kickers, for other drinks, to show register — do not reuse them:
   "Autumn, without the pumpkin."
 """
 
-FALLBACK_KICKER = "{name}, start to finish."
+# The fallback has to suit the angle too — a pairing post opening
+# "start to finish" describes the wrong thing entirely.
+FALLBACKS = {
+    "classic": ("{name}, start to finish.",
+                "{name}, start to finish — ingredients, method and how to serve it."),
+    "story":   ("Where the {name} comes from.",
+                "The {name} has a history worth knowing before you pour one."),
+    "swaps":   ("Make the {name} your own.",
+                "Swaps, substitutions and variations for the {name}, all tested."),
+    "faq":     ("The {name}, answered.",
+                "The questions people actually ask about making a {name}."),
+    "pairing": ("What to serve with a {name}.",
+                "What to eat alongside a {name}, and when to pour one."),
+    "numbers": ("The {name}, by the numbers.",
+                "Alcohol, calories and dietary detail for the {name}, in one place."),
+    "kit":     ("What the {name} needs.",
+                "The kit, the glass and the garnish a {name} actually calls for."),
+}
 
 
 def _tag(row, prefix):
@@ -120,8 +137,8 @@ def _valid(h):
 def recipe_hook(row, angle="classic", backend="cf"):
     """Returns (kicker, caption_hook). Never raises — falls back instead."""
     name = row.get("name") or "This drink"
-    fallback = (FALLBACK_KICKER.format(name=name),
-                f"{name}, start to finish — ingredients, method and how to serve it.")
+    k_tpl, c_tpl = FALLBACKS.get(angle, FALLBACKS["classic"])
+    fallback = (k_tpl.format(name=name), c_tpl.format(name=name))
 
     flavour = (row.get("flavor_profile") or "").strip()
     if len(flavour) > 320:
@@ -141,6 +158,7 @@ def recipe_hook(row, angle="classic", backend="cf"):
         focus=ANGLE_FOCUS.get(angle, ANGLE_FOCUS["classic"]),
     )
 
+    why = "no attempt made"
     for attempt in range(2):
         try:
             h = llm.complete_json(SYSTEM, user, schema=SCHEMA, backend=backend,
@@ -148,8 +166,12 @@ def recipe_hook(row, angle="classic", backend="cf"):
                                   model=HOOK_MODEL)
             if _valid(h):
                 return h["kicker"].strip(), h["caption_hook"].strip()
-        except Exception:
-            pass
+            why = f"rejected: kicker={h.get('kicker')!r}"
+        except Exception as ex:
+            why = f"{type(ex).__name__}: {str(ex)[:100]}"
+    # Say so — a silent fallback looks like a working hook until you notice
+    # every post of this angle opens the same way.
+    print(f"hook fell back for {name} [{angle}] — {why}", file=sys.stderr)
     return fallback
 
 
