@@ -67,3 +67,9 @@ tmp/
 
 # local tool installs (wrangler)
 .tools/
+
+# local pipeline state (SQLite) — not shared, machine-specific
+pipelines/instagram/state/*.db
+pipelines/instagram/state/*.db-wal
+pipelines/instagram/state/*.db-shm
+pipelines/instagram/scripts/mirror-failures.json
