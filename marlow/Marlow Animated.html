@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marlow — Animated</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#0D3929; --cream:#FCFEFD; --amber:#F5C451; --amber-lo:#D9892A; --navy:#0a1020;
+    --ink:#e8ecf2; --muted:#8b94a7; --line:rgba(255,255,255,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--ink);
+    background:
+      radial-gradient(1100px 640px at 82% -8%, rgba(47,125,92,.16), transparent 60%),
+      radial-gradient(820px 560px at -5% 108%, rgba(245,196,81,.06), transparent 55%),
+      linear-gradient(180deg,#0a1020,#0c1322);
+    background-attachment:fixed;min-height:100vh;-webkit-font-smoothing:antialiased;padding-bottom:120px}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px}
+  h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-.01em}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+
+  header{padding:56px 0 34px;border-bottom:1px solid var(--line)}
+  header h1{font-size:46px;font-weight:800;color:#fff;line-height:1;margin:12px 0 14px}
+  header h1 em{font-style:normal;color:var(--amber)}
+  header p{color:var(--muted);font-size:15px;line-height:1.6;max-width:60ch}
+  header p b{color:var(--ink);font-weight:600}
+
+  section{margin-top:54px}
+  .sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:24px}
+  .sec-head h2{font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink)}
+  .sec-head .hint{font-size:13px;color:var(--muted)}
+  .sec-head .rule{height:1px;background:var(--line);flex:1}
+
+  /* idle pair */
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .stage{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
+    border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
+  .stage .view{position:relative;height:320px;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(360px 280px at 50% 40%, rgba(47,125,92,.20), transparent 70%),
+      linear-gradient(180deg,#0c1626,#0a1322)}
+  .stage .view::after{content:"";position:absolute;left:50%;bottom:46px;transform:translateX(-50%);
+    width:170px;height:24px;border-radius:50%;background:radial-gradient(closest-side,rgba(245,196,81,.22),transparent);filter:blur(2px)}
+  .stage .view img{position:relative;z-index:1;height:268px;filter:drop-shadow(0 22px 26px rgba(0,0,0,.5))}
+  .stage .lab{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line)}
+  .stage .lab .n{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:15px;color:#fff}
+  .stage .lab .d{font-size:12px;color:var(--muted);margin-top:2px}
+  .stage .lab a{font-size:11px;font-weight:600;color:#dbe2ee;text-decoration:none;background:rgba(255,255,255,.05);
+    border:1px solid var(--line);padding:6px 11px;border-radius:8px;white-space:nowrap;transition:.15s}
+  .stage .lab a:hover{border-color:rgba(245,196,81,.5);color:var(--amber)}
+
+  /* loop */
+  .loopwrap{display:grid;grid-template-columns:1.15fr .85fr;gap:22px;align-items:stretch}
+  .loopstage{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
+    border:1px solid var(--line);border-radius:18px;overflow:hidden;position:relative;
+    display:flex;align-items:center;justify-content:center;min-height:380px;
+    background-image:radial-gradient(420px 320px at 50% 42%, rgba(47,125,92,.20), transparent 70%),
+      linear-gradient(180deg,#0c1626,#0a1322)}
+  .loopstage::after{content:"";position:absolute;left:50%;bottom:60px;transform:translateX(-50%);
+    width:190px;height:26px;border-radius:50%;background:radial-gradient(closest-side,rgba(245,196,81,.22),transparent);filter:blur(2px)}
+  #loopSvg{position:relative;z-index:1;height:300px;filter:drop-shadow(0 22px 26px rgba(0,0,0,.5))}
+  .moodtag{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:2;
+    font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);
+    background:rgba(10,16,32,.55);border:1px solid rgba(245,196,81,.25);padding:6px 14px;border-radius:999px;backdrop-filter:blur(4px)}
+
+  .panel{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:18px}
+  .panel h3{font-size:16px;color:#fff}
+  .panel p{font-size:13px;line-height:1.55;color:var(--muted)}
+  .moods{display:flex;flex-direction:column;gap:7px}
+  .moodrow{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;border:1px solid transparent;cursor:pointer;transition:.15s}
+  .moodrow:hover{background:rgba(255,255,255,.04)}
+  .moodrow.on{background:rgba(245,196,81,.08);border-color:rgba(245,196,81,.28)}
+  .moodrow .dot{width:8px;height:8px;border-radius:50%;background:#2a3346;flex:none;transition:.15s}
+  .moodrow.on .dot{background:var(--amber);box-shadow:0 0 0 4px rgba(245,196,81,.15)}
+  .moodrow .mn{font-size:13.5px;font-weight:600;color:var(--ink)}
+  .moodrow .md{font-size:11.5px;color:var(--muted);margin-left:auto}
+  .controls{display:flex;align-items:center;gap:10px;margin-top:2px}
+  .btn{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:13px;border-radius:10px;
+    padding:9px 15px;cursor:pointer;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);transition:.15s}
+  .btn:hover{border-color:rgba(245,196,81,.45)}
+  .btn.primary{background:var(--amber);color:#241a05;border-color:transparent}
+  .speed{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+  .speed input{accent-color:var(--amber)}
+
+  .note{margin-top:46px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;padding:20px 24px;
+    font-size:13px;line-height:1.6;color:var(--muted)}
+  .note b{color:var(--ink);font-weight:600}
+  .note a{color:var(--amber);text-decoration:none}
+
+  @media(max-width:880px){.pair,.loopwrap{grid-template-columns:1fr}header h1{font-size:34px}.wrap{padding:0 18px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <p class="eyebrow">Motion · v1</p>
+    <h1>Marlow, <em>in motion</em>.</h1>
+    <p>Subtle by design — a slow <b>idle float</b>, a soft <b>blink</b>, a gentle <b>shimmer</b> on the pour and a swaying olive. The two you asked for are real <b>self-contained animated SVG files</b> (drop them in as <code>&lt;img&gt;</code> and they just play). Below them, a slow loop through his whole range of moods.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- IDLE PAIR -->
+  <section>
+    <div class="sec-head"><h2>Idle loops</h2><span class="hint">Animated SVG · ~3–4s, seamless</span><span class="rule"></span></div>
+    <div class="pair">
+      <div class="stage">
+        <div class="view"><img src="assets/svg/marlow-neutral-animated.svg" alt="Marlow neutral, animated"></div>
+        <div class="lab"><div><div class="n">Neutral · composed</div><div class="d">Float · blink · shimmer · olive sway</div></div>
+          <a href="assets/svg/marlow-neutral-animated.svg" download>↓ SVG</a></div>
+      </div>
+      <div class="stage">
+        <div class="view"><img src="assets/svg/marlow-happy-animated.svg" alt="Marlow happy, animated"></div>
+        <div class="lab"><div><div class="n">Happy · delighted</div><div class="d">Bouncier float · squint · twinkle</div></div>
+          <a href="assets/svg/marlow-happy-animated.svg" download>↓ SVG</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EMOTION LOOP -->
+  <section>
+    <div class="sec-head"><h2>The full range</h2><span class="hint">A slow cycle through every mood — click any to jump</span><span class="rule"></span></div>
+    <div class="loopwrap">
+      <div class="loopstage">
+        <span class="moodtag" id="moodTag">Composed</span>
+        <svg id="loopSvg" viewBox="0 -12 200 254" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="panel">
+        <div>
+          <h3>Mood reel</h3>
+          <p>One character, his whole emotional vocabulary. Each holds for a beat, then dissolves to the next — built from the same expression set in the kit.</p>
+        </div>
+        <div class="moods" id="moodList"></div>
+        <div class="controls">
+          <button class="btn primary" id="playBtn">❚❚ Pause</button>
+          <button class="btn" id="stepBtn">↦ Next</button>
+          <span class="speed">Speed <input type="range" id="speed" min="0.5" max="2" step="0.25" value="1"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note"><b>Usage:</b> the animated SVGs play automatically wherever they're embedded — <code>&lt;img src="marlow-neutral-animated.svg"&gt;</code>, CSS backgrounds, even the FAB. They respect <b>prefers-reduced-motion</b> (motion off → they show the resting pose). The mood reel above is driven on-page; if you want it as a single looping file too (animated SVG, GIF, or Lottie), say the word. &nbsp;·&nbsp; <a href="Marlow Asset Kit.html">← back to the kit</a></p>
+</div>
+
+<script>
+/* inlined marlow-moodreel — no external resource to cache */
+// Marlow — mood reel driver. One glass; a single data-mood attribute drives
+// face + tilt (via CSS), so there are no cached node arrays to go stale.
+(function(){
+  if(window.__marlowLoopInit){ return; }
+  window.__marlowLoopInit = true;
+  const cream='#FCFEFD', ink='#0a1020', lidc='#13402d';
+  const DEFS = `
+    <linearGradient id="lg_glass" x1="0" y1="0" x2="0.85" y2="1"><stop offset="0" stop-color="#43946d"/><stop offset="0.4" stop-color="#15462f"/><stop offset="1" stop-color="#06231a"/></linearGradient>
+    <linearGradient id="lg_rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fb78c"/><stop offset="1" stop-color="#1d5840"/></linearGradient>
+    <linearGradient id="lg_amber" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBE2A0"/><stop offset="0.5" stop-color="#F5C451"/><stop offset="1" stop-color="#D9892A"/></linearGradient>
+    <radialGradient id="lg_sheen" cx="0.35" cy="0.25" r="0.8"><stop offset="0" stop-color="#fff6dd" stop-opacity="0.9"/><stop offset="0.4" stop-color="#F5C451" stop-opacity="0"/></radialGradient>
+    <linearGradient id="lg_stem" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0c2f22"/><stop offset="0.45" stop-color="#3a8763"/><stop offset="0.6" stop-color="#1d5840"/><stop offset="1" stop-color="#0a2719"/></linearGradient>`;
+  const GLASS_BACK = `
+    <rect x="96.5" y="176" width="7" height="40" rx="2.5" fill="url(#lg_stem)"/>
+    <ellipse cx="100" cy="220" rx="34" ry="8" fill="#0a2719"/>
+    <ellipse cx="100" cy="218" rx="34" ry="7.5" fill="url(#lg_rim)"/>
+    <ellipse cx="100" cy="216.5" rx="28" ry="4.6" fill="#0a2c1f" opacity="0.55"/>
+    <path d="M30 70 L100 180 L170 70 Z" fill="url(#lg_glass)"/>
+    <path d="M61 110 L100 178 L139 110 Z" fill="url(#lg_amber)"/>
+    <ellipse cx="100" cy="110" rx="39" ry="6.6" fill="#FBE2A0"/>
+    <path class="lsheen" d="M61 110 L100 178 L139 110 Z" fill="url(#lg_sheen)"/>`;
+  const GLASS_FRONT = `
+    <ellipse cx="100" cy="70" rx="70" ry="12.5" fill="#0c3324" opacity="0.9"/>
+    <ellipse cx="100" cy="70" rx="70" ry="12.5" fill="none" stroke="url(#lg_rim)" stroke-width="3.4"/>
+    <ellipse cx="100" cy="69" rx="62" ry="9" fill="#0a2719" opacity="0.5"/>
+    <path d="M44 74 L92 150 L84 150 L40 76 Z" fill="#ffffff" opacity="0.13"/>`;
+  const OLIVE = `
+    <line x1="120" y1="60" x2="168" y2="40" stroke="${cream}" stroke-width="2.6" stroke-linecap="round"/>
+    <circle cx="150" cy="48" r="7.2" fill="#7aa53c"/><circle cx="164" cy="42" r="7.2" fill="#7aa53c"/>
+    <circle cx="150" cy="48" r="2.6" fill="#c0392b"/><circle cx="164" cy="42" r="2.6" fill="#c0392b"/>
+    <circle cx="147" cy="45.5" r="1.6" fill="#fff" opacity=".5"/>`;
+
+  const eyeOpen=(cx,dx,dy)=>`<ellipse cx="${cx}" cy="99" rx="6.2" ry="6.6" fill="${cream}"/><circle cx="${cx+dx}" cy="${99+dy}" r="3.1" fill="${ink}"/><circle cx="${cx-1}" cy="97" r="1.1" fill="#fff"/>`;
+  const lid=(cx)=>`<path d="M${cx-6.5} 96.5 q6.5 -3.5 13 0" fill="none" stroke="${lidc}" stroke-width="2.4" stroke-linecap="round" opacity=".9"/>`;
+
+  const FACES = {
+    neutral:{ tag:'Composed', desc:'the house pour',
+      svg:`<path d="M74 110 q9 -8 18 -1 q8 6 16 0 q9 -7 18 0" fill="none" stroke="${cream}" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M70 90 q9 -6 18 0" fill="none" stroke="${cream}" stroke-width="3" stroke-linecap="round" opacity=".85"/><path d="M112 90 q9 -6 18 0" fill="none" stroke="${cream}" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+        ${eyeOpen(79,1.5,1.5)}${eyeOpen(121,1.5,1.5)}${lid(79)}${lid(121)}`},
+    happy:{ tag:'Delighted', desc:'good call',
+      svg:`<path d="M70 109 q9 11 18 5 q6 -3 11 0 q9 9 19 -3" fill="none" stroke="${cream}" stroke-width="5" stroke-linecap="round"/>
+        <path d="M70 85 q9 -5 18 0" fill="none" stroke="${cream}" stroke-width="3" stroke-linecap="round" opacity=".85"/><path d="M112 85 q9 -5 18 0" fill="none" stroke="${cream}" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+        <path d="M72 100 q7 -9 14 0" fill="none" stroke="${cream}" stroke-width="3.4" stroke-linecap="round"/><path d="M114 100 q7 -9 14 0" fill="none" stroke="${cream}" stroke-width="3.4" stroke-linecap="round"/>`},
+    thinking:{ tag:'Thinking', desc:'let me think',
+      svg:`<path d="M80 110 q10 -4 20 0" fill="none" stroke="${cream}" stroke-width="4.2" stroke-linecap="round"/>
+        <path d="M69 87 q10 -8 19 -1" fill="none" stroke="${cream}" stroke-width="3.1" stroke-linecap="round"/><path d="M112 91 q9 -4 18 0" fill="none" stroke="${cream}" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+        ${eyeOpen(79,-1.6,-2)}${eyeOpen(121,-1.6,-2)}${lid(79)}${lid(121)}
+        <circle cx="40" cy="54" r="2" fill="${cream}" opacity=".55"/><circle cx="31" cy="45" r="2.6" fill="${cream}" opacity=".7"/><circle cx="20" cy="34" r="3.4" fill="${cream}" opacity=".9"/>`},
+    skeptical:{ tag:'Not my rail', desc:'a hard no',
+      svg:`<path d="M76 111 q9 4 18 1 q8 -3 16 1" fill="none" stroke="${cream}" stroke-width="4.4" stroke-linecap="round"/>
+        <path d="M67 83 q11 -7 21 1" fill="none" stroke="${cream}" stroke-width="3.2" stroke-linecap="round"/><path d="M112 92 q9 -1 18 -1" fill="none" stroke="${cream}" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+        ${eyeOpen(79,1,2)}${eyeOpen(121,1,2)}
+        <path d="M71 97 q8 -2 16 0" fill="none" stroke="${lidc}" stroke-width="3.4" stroke-linecap="round"/><path d="M113 97 q8 -2 16 0" fill="none" stroke="${lidc}" stroke-width="3.4" stroke-linecap="round"/>`},
+    cheers:{ tag:'Cheers', desc:'to you', tilt:-9,
+      svg:`<path d="M70 109 q9 11 18 5 q6 -3 11 0 q9 9 19 -3" fill="none" stroke="${cream}" stroke-width="5" stroke-linecap="round"/>
+        <path d="M70 85 q9 -5 18 0" fill="none" stroke="${cream}" stroke-width="3" stroke-linecap="round" opacity=".85"/><path d="M112 86 q9 -4 18 0" fill="none" stroke="${cream}" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+        <path d="M72 100 q7 -9 14 0" fill="none" stroke="${cream}" stroke-width="3.4" stroke-linecap="round"/><path d="M114 99 q7 7 14 0" fill="none" stroke="${cream}" stroke-width="3.4" stroke-linecap="round"/>
+        <g fill="${cream}" opacity=".9"><path d="M176 40 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2 z"/></g>`},
+    mixing:{ tag:'Mixing', desc:'on it',
+      svg:`<path d="M72 110 q8 -10 16 -2 q8 8 16 -1 q8 -9 18 -1" fill="none" stroke="${cream}" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M70 89 q9 -5 18 0" fill="none" stroke="${cream}" stroke-width="3" stroke-linecap="round" opacity=".85"/><path d="M112 89 q9 -5 18 0" fill="none" stroke="${cream}" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+        ${eyeOpen(79,1,2.4)}${eyeOpen(121,1,2.4)}${lid(79)}${lid(121)}
+        <path d="M16 86 q-7 8 0 16" fill="none" stroke="${cream}" stroke-width="3" stroke-linecap="round" opacity=".5"/><path d="M26 92 q-5 6 0 12" fill="none" stroke="${cream}" stroke-width="3" stroke-linecap="round" opacity=".35"/>
+        <path d="M184 86 q7 8 0 16" fill="none" stroke="${cream}" stroke-width="3" stroke-linecap="round" opacity=".5"/><path d="M174 92 q5 6 0 12" fill="none" stroke="${cream}" stroke-width="3" stroke-linecap="round" opacity=".35"/>
+        <circle cx="150" cy="98" r="2.6" fill="#F5C451"/><circle cx="56" cy="104" r="2.2" fill="#F5C451"/>`}
+  };
+  const ORDER = ['neutral','happy','thinking','skeptical','cheers','mixing'];
+
+  // ---- build the figure: every face stacked, shown via CSS [data-mood] ----
+  const svg = document.getElementById('loopSvg');
+  if(!svg) return;
+  if(svg.querySelector('.ltilt')) return;   // idempotent — never build twice
+  const faceLayers = ORDER.map(k=> `<g class="lface" data-k="${k}">${FACES[k].svg}</g>`).join('');
+  const faceRules = ORDER.map(k=> `.ltilt[data-mood="${k}"] .lface[data-k="${k}"]{opacity:1}`).join('\n');
+  const tiltRules = ORDER.filter(k=>FACES[k].tilt).map(k=> `.ltilt[data-mood="${k}"]{transform:rotate(${FACES[k].tilt}deg)}`).join('\n');
+  svg.innerHTML = `<defs>${DEFS}</defs>
+    <style>
+      .lface{opacity:0;transition:opacity .5s ease}
+      .ltilt{transition:transform .55s ease;transform-box:fill-box;transform-origin:100px 130px}
+      .lfloat{animation:lFloat 3.8s ease-in-out infinite;transform-box:fill-box;transform-origin:100px 130px}
+      @keyframes lFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+      .lsheen{animation:lSheen 4.2s ease-in-out infinite}
+      @keyframes lSheen{0%,100%{opacity:.55}50%{opacity:1}}
+      @media (prefers-reduced-motion: reduce){.lfloat,.lsheen{animation:none}}
+    </style>
+    <g class="ltilt" data-mood="neutral">
+      <g class="lfloat">
+        ${GLASS_BACK}${GLASS_FRONT}
+        ${faceLayers}
+        ${OLIVE}
+      </g>
+    </g>`;
+  const tilt = svg.querySelector('.ltilt');
+
+  const tagEl  = document.getElementById('moodTag');
+  const listEl = document.getElementById('moodList');
+  const playBtn = document.getElementById('playBtn');
+  const stepBtn = document.getElementById('stepBtn');
+  const speedEl = document.getElementById('speed');
+
+  listEl.innerHTML = ORDER.map(k=>
+    `<div class="moodrow" data-k="${k}"><span class="dot"></span><span class="mn">${FACES[k].tag}</span><span class="md">${FACES[k].desc}</span></div>`).join('');
+
+  const LS='marlow_mood';
+  let idx = parseInt(localStorage.getItem(LS+'_i')||'0',10); if(!(idx>=0&&idx<ORDER.length)) idx=0;
+  let playing = localStorage.getItem(LS+'_p')!=='0';
+  let speed = parseFloat(localStorage.getItem(LS+'_s')||'1')||1;
+  speedEl.value = speed;
+  let timer=null;
+
+  function render(){
+    const key = ORDER[idx];
+    // Inline styles (always apply) instead of attribute-selector CSS, which
+    // doesn't reliably match inside an innerHTML-injected SVG <style>.
+    document.querySelectorAll('#loopSvg .lface').forEach(l=>
+      l.style.opacity = (l.getAttribute('data-k')===key) ? '1' : '0');
+    const tiltEl = document.querySelector('#loopSvg .ltilt');
+    if(tiltEl) tiltEl.style.transform = FACES[key].tilt ? ('rotate('+FACES[key].tilt+'deg)') : 'rotate(0deg)';
+    document.querySelectorAll('#moodList .moodrow').forEach(r=>
+      r.classList.toggle('on', r.getAttribute('data-k')===key));
+    const tg = document.getElementById('moodTag');
+    if(tg) tg.textContent = FACES[key].tag;
+    localStorage.setItem(LS+'_i', idx);
+  }
+  function next(){ idx=(idx+1)%ORDER.length; render(); }
+  function schedule(){ clearInterval(timer); if(playing) timer=setInterval(next, 2400/speed); }
+  function setPlaying(p){
+    playing=p; localStorage.setItem(LS+'_p', p?'1':'0');
+    if(playBtn) playBtn.innerHTML = p?'❚❚ Pause':'▶ Play';
+    schedule();
+  }
+
+  // event delegation — robust to re-render of rows
+  listEl.addEventListener('click', e=>{
+    const row = e.target.closest('.moodrow'); if(!row) return;
+    idx = ORDER.indexOf(row.dataset.k); render(); schedule();
+  });
+  if(playBtn) playBtn.addEventListener('click',()=> setPlaying(!playing));
+  if(stepBtn) stepBtn.addEventListener('click',()=>{ next(); schedule(); });
+  if(speedEl) speedEl.addEventListener('input',()=>{ speed=parseFloat(speedEl.value); localStorage.setItem(LS+'_s',speed); schedule(); });
+
+  render(); setPlaying(playing);
+})();
+
+</script>
+</body>
+</html>

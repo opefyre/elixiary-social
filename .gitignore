@@ -1,0 +1,61 @@
+# ─── SECRETS — never commit ────────────────────────────────────────────
+# Supabase credentials (Postgres connection string + sbp_ PAT)
+supabase.txt
+supabaseapi.txt
+
+# Generic secret patterns — belt and braces
+.env
+.env.*
+!.env.example
+*.env
+secrets/
+**/secrets.*
+*secret*
+*credential*
+*.pem
+*.key
+*.p8
+*.p12
+*.keystore
+*token*
+!**/tokenizer*
+service-account*.json
+gcp-*.json
+client_secret*.json
+.wrangler/
+.dev.vars
+.dev.vars.*
+
+# n8n exports may embed credentials — audit before un-ignoring
+n8n/**/credentials*.json
+*.credentials.json
+
+# ─── OS / editor ───────────────────────────────────────────────────────
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# ─── Node ──────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+build/
+.cache/
+
+# ─── Python ────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# ─── Scratch / local working files ─────────────────────────────────────
+scratch/
+tmp/
+*.local.*

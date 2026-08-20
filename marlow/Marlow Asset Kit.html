@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marlow — Asset Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#0D3929; --cream:#FCFEFD; --amber:#F5C451; --amber-lo:#D9892A; --navy:#0a1020;
+    --ink:#e8ecf2; --muted:#8b94a7; --line:rgba(255,255,255,.08);
+    --tile:#0d1626;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--ink);
+    background:
+      radial-gradient(1100px 640px at 82% -8%, rgba(47,125,92,.16), transparent 60%),
+      radial-gradient(820px 560px at -5% 108%, rgba(245,196,81,.06), transparent 55%),
+      linear-gradient(180deg,#0a1020,#0c1322);
+    background-attachment:fixed;min-height:100vh;-webkit-font-smoothing:antialiased;padding-bottom:120px}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 32px}
+  h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-.01em}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  a{color:inherit}
+
+  /* header */
+  header{padding:56px 0 36px;border-bottom:1px solid var(--line)}
+  .head{display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+  .head .mark{width:96px;height:96px;flex:none;filter:drop-shadow(0 10px 22px rgba(0,0,0,.5))}
+  header h1{font-size:46px;font-weight:800;color:#fff;line-height:1;margin:10px 0 0}
+  header h1 em{font-style:normal;color:var(--amber)}
+  .head .meta{flex:1;min-width:280px}
+  .head p{color:var(--muted);font-size:15px;line-height:1.6;max-width:54ch;margin-top:12px}
+  .dl-all{display:inline-flex;align-items:center;gap:9px;margin-top:18px;background:var(--amber);color:#241a05;
+    font-weight:700;font-size:13.5px;padding:11px 18px;border-radius:11px;text-decoration:none;
+    box-shadow:0 8px 20px rgba(245,196,81,.18);transition:transform .15s}
+  .dl-all:hover{transform:translateY(-1px)}
+
+  .palette{display:flex;gap:18px;flex-wrap:wrap;margin-top:26px}
+  .sw{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .sw i{width:26px;height:26px;border-radius:7px;border:1px solid rgba(255,255,255,.14);display:block}
+  .sw b{color:var(--ink);font-weight:600;font-family:'Plus Jakarta Sans',sans-serif}
+
+  /* section */
+  section{margin-top:58px}
+  .sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:22px}
+  .sec-head h2{font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink)}
+  .sec-head .hint{font-size:13px;color:var(--muted)}
+  .sec-head .rule{height:1px;background:var(--line);flex:1}
+
+  .grid{display:grid;gap:18px}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g6{grid-template-columns:repeat(6,1fr)}
+
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
+    border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+  .prev{position:relative;height:150px;display:flex;align-items:center;justify-content:center;
+    background:
+      linear-gradient(45deg,#0e1828 25%,transparent 25%),linear-gradient(-45deg,#0e1828 25%,transparent 25%),
+      linear-gradient(45deg,transparent 75%,#0e1828 75%),linear-gradient(-45deg,transparent 75%,#0e1828 75%),
+      #0a1322;
+    background-size:18px 18px;background-position:0 0,0 9px,9px -9px,-9px 0;border-bottom:1px solid var(--line)}
+  .prev.solid{background:radial-gradient(220px 150px at 50% 40%,rgba(47,125,92,.18),transparent 70%),#0b1422}
+  .prev img{max-width:78%;max-height:80%;object-fit:contain;filter:drop-shadow(0 10px 16px rgba(0,0,0,.45))}
+  .prev.tiny img{max-width:none}
+  .c-meta{padding:13px 15px;display:flex;flex-direction:column;gap:9px;flex:1}
+  .c-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;color:#fff}
+  .c-sub{font-size:11.5px;color:var(--muted);margin-top:-4px}
+  .dls{display:flex;gap:7px;margin-top:auto;flex-wrap:wrap}
+  .dls a{font-size:11px;font-weight:600;letter-spacing:.03em;color:#dbe2ee;text-decoration:none;
+    background:rgba(255,255,255,.05);border:1px solid var(--line);padding:5px 10px;border-radius:8px;
+    display:inline-flex;align-items:center;gap:6px;transition:.15s}
+  .dls a:hover{border-color:rgba(245,196,81,.5);color:var(--amber)}
+  .dls a i{width:5px;height:5px;border-radius:50%;background:var(--amber)}
+
+  /* fab demo */
+  .demo{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:18px}
+  .phone{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#0b1220}
+  .phone .scr{position:relative;height:200px;background:linear-gradient(180deg,#0d1424,#0a0f1c);padding:16px}
+  .phone .ln{height:9px;border-radius:5px;background:rgba(255,255,255,.06);margin-bottom:10px}
+  .phone .ffab{position:absolute;right:16px;bottom:16px;width:56px;height:56px;border-radius:50%;
+    overflow:hidden;box-shadow:0 12px 26px rgba(0,0,0,.5)}
+  .phone .ffab img{width:56px;height:56px;display:block}
+  .phone .cap{padding:11px 15px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line)}
+  .phone .cap b{color:var(--ink)}
+  .ring-hover{box-shadow:0 0 0 4px rgba(245,196,81,.18),0 12px 26px rgba(0,0,0,.5)!important}
+
+  /* usage */
+  .notes{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .note{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+  .note h3{font-size:15px;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:9px}
+  .note ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .note li{font-size:13px;line-height:1.5;color:var(--muted);padding-left:20px;position:relative}
+  .note li::before{content:"";position:absolute;left:0;top:7px;width:7px;height:7px;border-radius:2px}
+  .note.do li::before{background:#5fb78c}
+  .note.dont li::before{background:var(--amber-lo);border-radius:50%}
+  .note li b{color:var(--ink);font-weight:600}
+
+  .footer{margin-top:60px;text-align:center;color:var(--muted);font-size:12.5px}
+  .footer a{color:var(--amber);text-decoration:none}
+
+  @media(max-width:1080px){.g4,.g6{grid-template-columns:repeat(3,1fr)}.demo,.notes{grid-template-columns:1fr 1fr}}
+  @media(max-width:720px){.wrap{padding:0 18px}.g4,.g6,.g3{grid-template-columns:repeat(2,1fr)}.demo,.notes{grid-template-columns:1fr}header h1{font-size:34px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="head">
+      <img class="mark" src="assets/svg/marlow-badge.svg" alt="Marlow badge">
+      <div class="meta">
+        <p class="eyebrow">Asset Kit · v1</p>
+        <h1>Marlow <em>“The Classic”</em></h1>
+        <p>Elixiary's AI bartender, as a complete set. Vector <b>SVG</b> for anything that scales, plus <b>PNG</b> exports at every standard size — favicons, app icons, FAB, avatar, expressions and stickers. The icon lives in a green roundel so it sits beside your existing logo.</p>
+        <a class="dl-all" href="assets/png/icon-512.png" download>↓ Grab the app icon (512px)</a>
+      </div>
+    </div>
+    <div class="palette">
+      <span class="sw"><i style="background:#0D3929"></i><b>Bottle Green</b> #0D3929</span>
+      <span class="sw"><i style="background:#FCFEFD"></i><b>Cream</b> #FCFEFD</span>
+      <span class="sw"><i style="background:#F5C451"></i><b>Amber</b> #F5C451</span>
+      <span class="sw"><i style="background:#D9892A"></i><b>Amber Deep</b> #D9892A</span>
+      <span class="sw"><i style="background:#0a1020"></i><b>App Navy</b> #0a1020</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- CORE MARKS -->
+  <section>
+    <div class="sec-head"><h2>Core marks</h2><span class="hint">The source of truth — scalable vectors</span><span class="rule"></span></div>
+    <div class="grid g4" id="core"></div>
+  </section>
+
+  <!-- FAB -->
+  <section>
+    <div class="sec-head"><h2>Floating button</h2><span class="hint">Replaces the plain amber chat circle · 56px base</span><span class="rule"></span></div>
+    <div class="demo">
+      <div class="phone"><div class="scr">
+        <div class="ln" style="width:55%"></div><div class="ln" style="width:80%"></div><div class="ln" style="width:40%"></div>
+        <div class="ffab"><img src="assets/png/fab-112.png" alt="FAB idle"></div>
+      </div><p class="cap"><b>Idle</b> — the resting state</p></div>
+      <div class="phone"><div class="scr">
+        <div class="ln" style="width:55%"></div><div class="ln" style="width:80%"></div><div class="ln" style="width:40%"></div>
+        <div class="ffab ring-hover"><img src="assets/png/fab-112.png" alt="FAB hover"></div>
+      </div><p class="cap"><b>Hover</b> — amber focus ring</p></div>
+      <div class="phone"><div class="scr">
+        <div class="ln" style="width:55%"></div><div class="ln" style="width:80%"></div><div class="ln" style="width:40%"></div>
+        <div class="ffab"><img src="assets/png/fab-notification-56.png" alt="FAB notification"></div>
+      </div><p class="cap"><b>Notification</b> — unread badge</p></div>
+    </div>
+    <div class="grid g4" id="fab"></div>
+  </section>
+
+  <!-- ICONS -->
+  <section>
+    <div class="sec-head"><h2>Favicons &amp; app icons</h2><span class="hint">Drop-in replacements for /public</span><span class="rule"></span></div>
+    <div class="grid g6" id="icons"></div>
+  </section>
+
+  <!-- EXPRESSIONS -->
+  <section>
+    <div class="sec-head"><h2>Expressions</h2><span class="hint">For chat states &amp; personality moments — his smile is the drink</span><span class="rule"></span></div>
+    <div class="grid g6" id="expr"></div>
+  </section>
+
+  <!-- STICKERS -->
+  <section>
+    <div class="sec-head"><h2>Stickers</h2><span class="hint">Die-cut, white keyline — social &amp; in-app reactions</span><span class="rule"></span></div>
+    <div class="grid g3" id="stickers"></div>
+  </section>
+
+  <!-- USAGE -->
+  <section>
+    <div class="sec-head"><h2>Using Marlow</h2><span class="rule"></span></div>
+    <div class="notes">
+      <div class="note do">
+        <h3>Do</h3>
+        <ul>
+          <li>Use <b>SVG</b> wherever it scales — web, FAB, avatars. Reach for PNG only where raster is required (favicons, app stores, email).</li>
+          <li>Keep <b>clear space</b> around him equal to the olive — don't crowd the rim.</li>
+          <li>Place the mascot on <b>dark or photographic</b> grounds; use the green badge when you need a contained shape.</li>
+          <li>Minimum size: <b>24px</b> for the badge, <b>40px</b> for the bare mascot (the stem thins out below that).</li>
+        </ul>
+      </div>
+      <div class="note dont">
+        <h3>Don't</h3>
+        <ul>
+          <li>Don't <b>recolor</b> the glass or swap the amber pour — the green/cream/amber trio is the recognition.</li>
+          <li>Don't <b>stretch or rotate</b> (except the built-in “cheers” tilt) or add outer drop-shadows on top of the baked-in ones.</li>
+          <li>Don't place the bare mascot on a <b>busy light</b> background where the cream face disappears — use a badge or sticker instead.</li>
+          <li>Don't <b>redraw the face</b> by hand — use the expression set so every mood stays on-model.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <p class="footer">Marlow “The Classic” · Elixiary AI · 13 SVG + 23 PNG files in <a href="assets/">/marlow/assets</a> &nbsp;·&nbsp; <a href="Marlow Concepts.html">← back to concepts</a></p>
+</div>
+
+<script>
+  function card(p){
+    const dls = p.links.map(l=>`<a href="${l.href}" download><i></i>${l.label}</a>`).join('');
+    const tiny = p.tiny ? ' tiny':'';
+    const solid = p.solid ? ' solid':'';
+    const style = p.imgStyle ? ` style="${p.imgStyle}"`:'';
+    return `<div class="card"><div class="prev${solid}${tiny}"><img src="${p.src}" alt="${p.name}"${style}></div>
+      <div class="c-meta"><div class="c-name">${p.name}</div><div class="c-sub">${p.sub}</div>
+      <div class="dls">${dls}</div></div></div>`;
+  }
+  const S='assets/svg/', P='assets/png/';
+  const core=[
+    {name:'Mascot',sub:'Full character · transparent',src:S+'marlow-mascot.svg',
+      links:[{label:'SVG',href:S+'marlow-mascot.svg'},{label:'1024',href:P+'mascot-1024.png'},{label:'512',href:P+'mascot-512.png'}]},
+    {name:'Badge',sub:'Green roundel · the icon',src:S+'marlow-badge.svg',solid:true,
+      links:[{label:'SVG',href:S+'marlow-badge.svg'},{label:'512',href:P+'icon-512.png'}]},
+    {name:'Avatar',sub:'Chat bubble mark',src:S+'marlow-avatar.svg',solid:true,
+      links:[{label:'SVG',href:S+'marlow-avatar.svg'},{label:'192',href:P+'avatar-192.png'},{label:'96',href:P+'avatar-96.png'}]},
+    {name:'Badge · Alert',sub:'Notification variant',src:S+'marlow-badge-notification.svg',solid:true,
+      links:[{label:'SVG',href:S+'marlow-badge-notification.svg'},{label:'56',href:P+'fab-notification-56.png'}]},
+  ];
+  const fab=[
+    {name:'FAB @1×',sub:'56 × 56',src:P+'fab-56.png',solid:true,tiny:true,imgStyle:'width:56px;height:56px',
+      links:[{label:'PNG',href:P+'fab-56.png'},{label:'SVG',href:S+'marlow-badge.svg'}]},
+    {name:'FAB @2×',sub:'112 × 112',src:P+'fab-112.png',solid:true,tiny:true,imgStyle:'width:84px;height:84px',
+      links:[{label:'PNG',href:P+'fab-112.png'}]},
+    {name:'FAB @3×',sub:'168 × 168',src:P+'fab-168.png',solid:true,tiny:true,imgStyle:'width:96px;height:96px',
+      links:[{label:'PNG',href:P+'fab-168.png'}]},
+    {name:'FAB · Alert',sub:'56 × 56 · unread',src:P+'fab-notification-56.png',solid:true,tiny:true,imgStyle:'width:56px;height:56px',
+      links:[{label:'PNG',href:P+'fab-notification-56.png'}]},
+  ];
+  const icons=[
+    {name:'favicon 16',sub:'16 × 16',src:P+'favicon-16.png',solid:true,tiny:true,imgStyle:'width:32px;height:32px;image-rendering:pixelated',links:[{label:'PNG',href:P+'favicon-16.png'}]},
+    {name:'favicon 32',sub:'32 × 32',src:P+'favicon-32.png',solid:true,tiny:true,imgStyle:'width:48px;height:48px',links:[{label:'PNG',href:P+'favicon-32.png'}]},
+    {name:'favicon 48',sub:'48 × 48',src:P+'favicon-48.png',solid:true,tiny:true,imgStyle:'width:64px;height:64px',links:[{label:'PNG',href:P+'favicon-48.png'}]},
+    {name:'apple-touch',sub:'180 × 180',src:P+'icon-180.png',solid:true,links:[{label:'PNG',href:P+'icon-180.png'}]},
+    {name:'android 192',sub:'192 × 192',src:P+'icon-192.png',solid:true,links:[{label:'PNG',href:P+'icon-192.png'}]},
+    {name:'maskable 512',sub:'512 × 512',src:P+'icon-512.png',solid:true,links:[{label:'PNG',href:P+'icon-512.png'}]},
+  ];
+  const moods=[['neutral','Composed'],['happy','Happy'],['thinking','Thinking'],['skeptical','Not my rail'],['cheers','Cheers'],['mixing','Mixing']];
+  const expr=moods.map(([k,label])=>({name:label,sub:k+' · SVG + 256',src:S+'marlow-'+k+'.svg',
+    links:[{label:'SVG',href:S+'marlow-'+k+'.svg'},{label:'256',href:P+'expr-'+k+'-256.png'}]}));
+  const stickers=[['cheers','Cheers'],['happy','Happy'],['skeptical','Not my rail']].map(([k,label])=>({
+    name:label,sub:'die-cut · 512',src:S+'marlow-sticker-'+k+'.svg',solid:true,
+    links:[{label:'SVG',href:S+'marlow-sticker-'+k+'.svg'},{label:'512',href:P+'sticker-'+k+'-512.png'}]}));
+
+  document.getElementById('core').innerHTML = core.map(card).join('');
+  document.getElementById('fab').innerHTML = fab.map(card).join('');
+  document.getElementById('icons').innerHTML = icons.map(card).join('');
+  document.getElementById('expr').innerHTML = expr.map(card).join('');
+  document.getElementById('stickers').innerHTML = stickers.map(card).join('');
+</script>
+</body>
+</html>
