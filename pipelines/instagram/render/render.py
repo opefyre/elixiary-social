@@ -107,6 +107,28 @@ THEMES = {
         "hook_align": "flex-end",
         "hook_pad": "150px 300px 146px 76px",
     },
+    # Discover backplate — deep navy, shaker bottom-right. Clean through the
+    # middle, so the card runs nearly full width and stops short of the glass.
+    "discover": {
+        "bg": "discover-bg.png",
+        "fg": "#FCFEFD",
+        "muted": "rgba(232,236,242,.72)",
+        "accent": "#F5C451",
+        "rule": "rgba(245,196,81,.24)",
+        "card": "rgba(8,14,26,.93)",
+        "card_line": "rgba(245,196,81,.20)",
+        "chip_bg": "rgba(255,255,255,.06)",
+        "chip_line": "rgba(255,255,255,.14)",
+        "shadow": "0 24px 60px rgba(0,0,0,.5)",
+        "grad": "linear-gradient(102deg,#FBE2A0 0%,#F5C451 30%,#F59E0B 68%,#f97316 100%)",
+        "foot_left": 134,
+        "nudge_right": 56,
+        "cta_right": "360px",
+        "cta_mascot": True,
+        "card_right": 120,
+        "hook_align": "flex-end",
+        "hook_pad": "150px 300px 168px 76px",
+    },
     # HomeBar backplate — Sal with the app open. Clear zone is the upper
     # band only, so hook copy is top-anchored rather than bottom-anchored.
     "homebar": {

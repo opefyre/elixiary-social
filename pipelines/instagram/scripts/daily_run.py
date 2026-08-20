@@ -46,9 +46,23 @@ HOMEBAR_WEEKDAYS = {int(x) for x in
                     os.environ.get("ELIXIARY_HOMEBAR_DAYS", "1,5").split(",")}
 SLOTS_PER_DAY = int(os.environ.get("ELIXIARY_SLOTS_PER_DAY", "5"))
 
+# Each shortlist series runs twice a week, spread so no day carries more than
+# two. Mon=0 .. Sun=6.
+SHORTLIST_WEEKDAYS = {
+    "rule-of-three":    {0, 3},
+    "two-minutes-flat": {1, 4},
+    "light-work":       {2, 5},
+    "no-proof-needed":  {3, 6},
+    "full-proof":       {0, 4},
+}
 
-def run_one(kind, dry):
-    cmd = [sys.executable, PUBLISH, "--type", kind]
+
+def shortlists_for(weekday):
+    return [sid for sid, days in SHORTLIST_WEEKDAYS.items() if weekday in days]
+
+
+def run_one(kind, dry, extra=None):
+    cmd = [sys.executable, PUBLISH, "--type", kind] + list(extra or [])
     if dry:
         cmd.append("--dry-run")
     t0 = time.time()
@@ -79,14 +93,23 @@ def main():
     ap.add_argument("--homebar", type=int, default=-1,
                     help="-1 = decide from the weekday schedule")
     ap.add_argument("--marlow", type=int, default=1)
+    ap.add_argument("--shortlists", default=None,
+                    help="comma-separated series ids; omit to use the weekday map")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
 
     # Home bar runs on its scheduled weekdays; on other days the slot goes
     # back to recipes so the day still fills all five.
+    weekday = date.today().weekday()
+    if a.shortlists is None:
+        series = shortlists_for(weekday)
+    else:
+        series = [x for x in a.shortlists.split(",") if x.strip()]
+
     if a.homebar < 0:
-        a.homebar = 1 if date.today().weekday() in HOMEBAR_WEEKDAYS else 0
-        a.recipes = max(0, SLOTS_PER_DAY - a.articles - a.homebar - a.marlow)
+        a.homebar = 1 if weekday in HOMEBAR_WEEKDAYS else 0
+        a.recipes = max(0, SLOTS_PER_DAY - a.articles - a.homebar
+                        - a.marlow - len(series))
 
     conn = db.connect()
     run_id = db.start_run(conn, "daily")
@@ -108,6 +131,8 @@ def main():
         results.append(run_one("article", a.dry_run))
     for _ in range(a.marlow):
         results.append(run_one("marlow", a.dry_run))
+    for sid in series:
+        results.append(run_one("shortlist", a.dry_run, extra=["--series", sid]))
     for _ in range(a.homebar):
         results.append(run_one("homebar", a.dry_run))
 
@@ -131,7 +156,8 @@ def main():
 
     ok = sum(1 for r in results if r["ok"])
     summary = {
-        "requested": a.recipes + a.articles + a.homebar + a.marlow,
+        "requested": (a.recipes + a.articles + a.homebar + a.marlow
+                      + len(series)),
         "succeeded": ok,
         "failed": len(results) - ok,
         "dry_run": a.dry_run,

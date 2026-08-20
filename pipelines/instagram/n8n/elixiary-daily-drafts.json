@@ -38,7 +38,7 @@
         "url": "http://127.0.0.1:8787/run",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ articles: 1, marlow: 1, homebar: -1, dry_run: false }) }}",
+        "jsonBody": "={{ JSON.stringify({ articles: 1, marlow: 1, homebar: -1, recipes: -1, dry_run: false }) }}",
         "options": {
           "timeout": 1500000,
           "response": {

@@ -53,10 +53,14 @@ def token():
         return None
 
 
-def run_daily(recipes, articles, dry, homebar=-1, marlow=1):
+def run_daily(recipes, articles, dry, homebar=-1, marlow=1, shortlists=None):
     cmd = [sys.executable, os.path.join(HERE, "daily_run.py"),
-           "--recipes", str(recipes), "--articles", str(articles),
+           "--articles", str(articles),
            "--homebar", str(homebar), "--marlow", str(marlow)]
+    if recipes is not None and recipes >= 0:
+        cmd += ["--recipes", str(recipes)]
+    if shortlists is not None:
+        cmd += ["--shortlists", str(shortlists)]
     if dry:
         cmd.append("--dry-run")
     p = subprocess.run(cmd, capture_output=True, text=True, timeout=MAX_SECONDS)
@@ -127,13 +131,14 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, json.JSONDecodeError):
             return self._send(400, {"error": "invalid JSON body"})
 
-        recipes = int(body.get("recipes", 3))
+        recipes = int(body.get("recipes", -1))
+        shortlists = body.get("shortlists")
         articles = int(body.get("articles", 1))
         homebar = int(body.get("homebar", -1))
         marlow = int(body.get("marlow", 1))
         dry = bool(body.get("dry_run", False))
-        if not all(0 <= n <= 8 for n in (recipes, articles, marlow)) \
-                or not (-1 <= homebar <= 8):
+        if not all(0 <= n <= 8 for n in (articles, marlow)) \
+                or not (-1 <= homebar <= 8) or not (-1 <= recipes <= 8):
             return self._send(400, {"error": "counts must be 0-8"})
 
         if not _lock.acquire(blocking=False):
@@ -141,7 +146,8 @@ class Handler(BaseHTTPRequestHandler):
                                     "last": _last})
         try:
             _last["started"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
-            result = run_daily(recipes, articles, dry, homebar, marlow)
+            result = run_daily(recipes, articles, dry, homebar, marlow,
+                               shortlists)
             _last["finished"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
             _last["summary"] = result.get("summary")
             self._send(200 if result["ok"] else 500, result)

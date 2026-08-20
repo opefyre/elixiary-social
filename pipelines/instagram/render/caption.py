@@ -277,3 +277,41 @@ def marlow_caption(source, hook=None):
     parts.append("")
     parts.append(f"Make your own → {SITE}")
     return "\n".join(parts).strip()[:MAX_LEN]
+
+
+# ── shortlists ─────────────────────────────────────────────────────────────
+
+SERIES_TAGS = {
+    "rule-of-three": "easycocktails",
+    "two-minutes-flat": "quickcocktails",
+    "light-work": "lowcalcocktails",
+    "no-proof-needed": "mocktails",
+    "full-proof": "spiritforward",
+}
+
+
+def shortlist_hashtags(source):
+    mid = [SERIES_TAGS.get(source.get("series"), "cocktailrecipe"),
+           "mixology", "homebar"]
+    tags, seen = [], set()
+    for t in [BROAD_TAG] + mid[:3] + [BRAND_TAG]:
+        if t and t not in seen:
+            seen.add(t)
+            tags.append("#" + t)
+    return tags[:MAX_TAGS]
+
+
+def shortlist_caption(source, hook=None):
+    names = source.get("names") or []
+    parts = [hook or f"{source.get('name')}: five worth knowing."]
+    parts.append("")
+    if names:
+        parts.append("\n".join(f"· {n}" for n in names))
+        parts.append("")
+    parts.append("Swipe for the builds. Every one is in the app with "
+                 "measurements, method and what to serve it with.")
+    parts.append("")
+    parts.append("Save the list, and send it to whoever asks you what to make.")
+    parts.append("")
+    parts.append(f"Browse them all → {SITE}")
+    return "\n".join(parts).strip()[:MAX_LEN]

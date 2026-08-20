@@ -32,6 +32,7 @@ import credentials         # noqa: E402
 import bottle_math         # noqa: E402
 import marlow              # noqa: E402
 import r2                  # noqa: E402
+import shortlist           # noqa: E402
 import slots               # noqa: E402
 
 import build_spec          # noqa: E402
@@ -297,11 +298,60 @@ def prepare_marlow(conn, hook_override):
     return post_id, spec, text, tags
 
 
+def prepare_shortlist(conn, hook_override, series_id=None):
+    """Five drinks that share an attribute. Each series remembers which
+    recipes it has already featured, so a series never repeats a drink."""
+    used_rows = conn.execute(
+        "SELECT source_id, meta FROM posts WHERE source_type='shortlist'"
+    ).fetchall()
+    used_ids, per_series = set(), {}
+    for r in used_rows:
+        try:
+            m = json.loads(r["meta"] or "{}")
+        except Exception:
+            m = {}
+        sid = m.get("series")
+        per_series.setdefault(sid, set()).update(m.get("picks") or [])
+        used_ids.add(r["source_id"])
+
+    recent = [m.get("series") for m in db.recent_meta(conn, "shortlist", 3)]
+    order = [s for s in shortlist.SERIES if s["id"] == series_id] if series_id \
+        else [s for s in shortlist.SERIES if s["id"] not in recent] or shortlist.SERIES
+
+    for series in order:
+        seen = per_series.get(series["id"], set())
+        picks = shortlist.candidates(series, exclude_ids=seen)[:shortlist.PER_POST]
+        if len(picks) < shortlist.PER_POST:
+            continue
+        spec = shortlist.carousel(series, picks)
+        if not spec:
+            continue
+
+        n = len(seen) // shortlist.PER_POST + 1
+        vid = f"{series['id']}:{n}"
+        post_id = db.reserve(conn, "shortlist", vid, "",
+                             {"series": series["id"], "name": series["name"],
+                              "picks": spec["source"]["picks"]})
+        if post_id is None:
+            continue
+        print(f"picked  {vid}  ({series['name']}: "
+              f"{', '.join(spec['source']['names'])})")
+        if hook_override:
+            spec["slides"][0]["kicker"] = hook_override
+        text = caption_mod.shortlist_caption(spec["source"], hook=hook_override)
+        tags = caption_mod.shortlist_hashtags(spec["source"])
+        return post_id, spec, text, tags
+
+    raise RuntimeError("no shortlist series has five unused recipes left")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--type",
-                    choices=["recipe", "article", "homebar", "marlow"],
+                    choices=["recipe", "article", "homebar", "marlow",
+                             "shortlist"],
                     default="recipe")
+    ap.add_argument("--series", help="force a specific shortlist series")
     ap.add_argument("--dry-run", action="store_true",
                     help="render and upload, but do not touch Buffer")
     ap.add_argument("--hook", help="override the hook line")
@@ -311,9 +361,12 @@ def main():
     run_id = db.start_run(conn, f"publish:{a.type}")
     post_id = None
     try:
-        prep = {"recipe": prepare_recipe, "article": prepare_article,
-                "homebar": prepare_homebar, "marlow": prepare_marlow}[a.type]
-        post_id, spec, text, tags = prep(conn, a.hook)
+        if a.type == "shortlist":
+            post_id, spec, text, tags = prepare_shortlist(conn, a.hook, a.series)
+        else:
+            prep = {"recipe": prepare_recipe, "article": prepare_article,
+                    "homebar": prepare_homebar, "marlow": prepare_marlow}[a.type]
+            post_id, spec, text, tags = prep(conn, a.hook)
 
         if not FIRST_COMMENT_SUPPORTED:
             text = f"{text}\n\n{' '.join(tags)}"

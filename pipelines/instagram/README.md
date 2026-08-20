@@ -292,10 +292,15 @@ two mascots in one corner read as a collision.
 
 Five posts a day, one per slot:
 
-| | Recipes | Article | Marlow | Home bar |
-|---|---|---|---|---|
-| Tue, Sat | 2 | 1 | 1 | 1 |
-| Other days | 3 | 1 | 1 | — |
+| Day | Recipes | Article | Marlow | Home bar | Shortlists |
+|---|---|---|---|---|---|
+| Mon | 1 | 1 | 1 | — | Rule of Three, Full Proof |
+| Tue | 1 | 1 | 1 | 1 | Two Minutes Flat |
+| Wed | 2 | 1 | 1 | — | Light Work |
+| Thu | 1 | 1 | 1 | — | Rule of Three, No Proof Needed |
+| Fri | 1 | 1 | 1 | — | Two Minutes Flat, Full Proof |
+| Sat | 1 | 1 | 1 | 1 | Light Work |
+| Sun | 2 | 1 | 1 | — | No Proof Needed |
 
 `homebar: -1` in the workflow body means "decide from the weekday"
 (`ELIXIARY_HOMEBAR_DAYS`, default Tue+Sat). Recipes absorb whatever is left,
@@ -356,3 +361,34 @@ because damage usually happens to something queued earlier.
 python3 scripts/verify_images.py          # human readable, exit 1 if broken
 python3 scripts/verify_images.py --quiet  # JSON
 ```
+
+
+## Discover shortlists
+
+Five drinks that share an attribute. Every other format is a deep dive that
+assumes you already know what you want; this is the browse format, and one
+post surfaces five recipes instead of one.
+
+| Series | Filter | Pool | Posts |
+|---|---|---|---|
+| **Rule of Three** | three ingredients or fewer | 279 | ~55 |
+| **Two Minutes Flat** | one or two minutes | 350 | ~70 |
+| **Light Work** | under 150 kcal | 219 | ~43 |
+| **No Proof Needed** | alcohol-free | 287 | ~57 |
+| **Full Proof** | over 25% ABV | 248 | ~49 |
+
+Each runs twice a week and remembers which recipes it has already featured,
+so a series never repeats a drink.
+
+Two things decide whether the picks are any good:
+
+- **Ranked on `style_classic` / `style_contemporary_classic`, not `view_count`.**
+  View counts track alphabetical crawl order — the top entries are "252",
+  "3 Wise Men", "57 Chevy" — so ranking by them filled a best-of list with
+  drinks nobody has heard of. The style tags give Daiquiri, Dry Martini,
+  Hanky Panky.
+- **A spirit or liqueur is required**, except for No Proof Needed. Without it
+  "Rule of Three" offered KiBa, which is banana and cherry nectar.
+
+Ordering is seeded per series (`md5(id || series)`); unseeded, every series
+got the same order within a tier and Hanky Panky headlined three lists at once.
