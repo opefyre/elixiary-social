@@ -80,6 +80,67 @@ def sentences(text, limit):
     return [p.strip() for p in parts[:limit] if p.strip()]
 
 
+# Slides are fixed-size images with no scrolling, so anything past these
+# limits silently runs off the artboard. Checked before rendering rather than
+# discovered in a published post.
+LIMITS = {
+    "hook_title": 34, "kicker": 52, "subtitle": 76,
+    "section_title": 40, "eyebrow": 30,
+    "item_label": 38, "item_value": 20,
+    "paragraph": 260, "note": 110,
+}
+MAX_ITEMS = 9
+MAX_STEPS = 6
+MAX_PARAS = 3
+
+
+def validate_spec(spec):
+    """Length and shape checks against what the renderer can actually fit."""
+    p = []
+    slides = spec.get("slides") or []
+    if not 3 <= len(slides) <= MAX_SLIDES:
+        p.append(f"{len(slides)} slides, need 3-{MAX_SLIDES}")
+
+    def too_long(where, text, key):
+        if text and len(str(text)) > LIMITS[key]:
+            p.append(f"{where}: {key} is {len(str(text))} chars, "
+                     f"max {LIMITS[key]}")
+
+    for i, s in enumerate(slides, 1):
+        kind = s.get("kind")
+        w = f"slide {i} ({kind})"
+        too_long(w, s.get("eyebrow"), "eyebrow")
+        if kind == "hook":
+            too_long(w, s.get("title"), "hook_title")
+            too_long(w, s.get("kicker"), "kicker")
+            too_long(w, s.get("subtitle"), "subtitle")
+        elif kind in ("list", "steps", "stats", "prose"):
+            too_long(w, s.get("title"), "section_title")
+            too_long(w, s.get("note"), "note")
+            items = s.get("items") or []
+            if kind in ("list", "stats") and not items:
+                p.append(f"{w}: no items")
+            cap = MAX_STEPS if kind == "steps" else MAX_ITEMS
+            if len(items) > cap:
+                p.append(f"{w}: {len(items)} items, max {cap}")
+            for it in items:
+                if isinstance(it, dict):
+                    too_long(w, it.get("label"), "item_label")
+                    too_long(w, it.get("value"), "item_value")
+                else:
+                    too_long(w, it, "item_label")
+            paras = s.get("paragraphs") or []
+            if kind == "prose" and not paras:
+                p.append(f"{w}: no paragraphs")
+            if len(paras) > MAX_PARAS:
+                p.append(f"{w}: {len(paras)} paragraphs, max {MAX_PARAS}")
+            for para in paras:
+                too_long(w, para, "paragraph")
+    if slides and slides[-1].get("kind") != "cta":
+        p.append("last slide must be the cta")
+    return p
+
+
 def recipe_spec(r):
     slides = []
     name = r.get("name") or "Untitled"

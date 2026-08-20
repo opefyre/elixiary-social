@@ -153,6 +153,17 @@ def release(conn, post_id):
     conn.commit()
 
 
+def discard(conn, post_id):
+    """Drop a claim that got as far as rendering but was never drafted — a dry
+    run, or a failure we want to retry. Refuses to touch anything that reached
+    Buffer, since that row is the record of a real post."""
+    row = conn.execute("SELECT status FROM posts WHERE id=?", (post_id,)).fetchone()
+    if row and row["status"] in ("drafted", "published"):
+        raise ValueError(f"refusing to discard post {post_id}: {row['status']}")
+    conn.execute("DELETE FROM posts WHERE id=?", (post_id,))
+    conn.commit()
+
+
 def start_run(conn, kind):
     cur = conn.execute("INSERT INTO runs (kind, started_at) VALUES (?,?)",
                        (kind, now()))

@@ -112,3 +112,69 @@ if __name__ == "__main__":
     print(recipe_caption(row))
     print("\n--- first comment ---")
     print(first_comment(row))
+
+
+# ── articles ───────────────────────────────────────────────────────────────
+
+CATEGORY_TAGS = {
+    "mixology-techniques": "mixologytips",
+    "mixology-fundamentals": "bartending",
+    "classic-cocktails": "classiccocktails",
+    "comparisons": "cocktailtips",
+    "cocktail-pairing": "foodandcocktails",
+    "bar-equipment": "barware",
+    "cocktail-ingredients": "cocktailingredients",
+    "home-bar-setup": "homebar",
+    "cocktail-presentation": "cocktailstyling",
+    "cocktail-history": "cocktailhistory",
+    "seasonal": "seasonalcocktails",
+    "pillar-guides": "mixology",
+}
+
+
+def article_hashtags(article, angle=None):
+    """Same 5-tag budget as recipes: 1 broad + up to 3 niche + 1 branded."""
+    mid = []
+    cat = CATEGORY_TAGS.get(article.get("category"))
+    if cat:
+        mid.append(cat)
+    if (article.get("difficulty") or "").lower() == "beginner":
+        mid.append("cocktailsforbeginners")
+    mid.append("bartender")
+
+    tags, seen = [], set()
+    for t in [BROAD_TAG] + mid[:3] + [BRAND_TAG]:
+        if t and t not in seen:
+            seen.add(t)
+            tags.append("#" + t)
+    return tags[:MAX_TAGS]
+
+
+def article_caption(article, angle=None):
+    angle = angle or {}
+    parts = []
+    parts.append(angle.get("caption_hook")
+                 or (article.get("excerpt") or article.get("title") or "").strip())
+    parts.append("")
+
+    sub = (angle.get("subtitle") or "").strip()
+    if sub:
+        parts.append(sub)
+        parts.append("")
+
+    bits = [x for x in (article.get("difficulty"), article.get("read_time")) if x]
+    if bits:
+        parts.append(" · ".join(str(b).capitalize() for b in bits))
+        parts.append("")
+
+    parts.append("Swipe for the whole thing.")
+    parts.append("")
+    parts.append("Save it for the next time you are behind the bar, and send it "
+                 "to someone still getting this wrong.")
+    parts.append("")
+    parts.append("Full guide → link in bio")
+
+    cap = "\n".join(parts).strip()
+    if len(cap) > MAX_LEN:
+        cap = cap[:MAX_LEN].rsplit("\n", 1)[0]
+    return cap

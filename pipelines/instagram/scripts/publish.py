@@ -24,9 +24,13 @@ REPO = os.path.abspath(os.path.join(PIPE, "..", ".."))
 sys.path.insert(0, os.path.join(PIPE, "state"))
 sys.path.insert(0, os.path.join(PIPE, "render"))
 
+sys.path.insert(0, os.path.join(PIPE, "llm"))
+sys.path.insert(0, HERE)
 import build_spec          # noqa: E402
 import caption as caption_mod  # noqa: E402
 import db                  # noqa: E402
+import generate_angle      # noqa: E402
+import pick_next           # noqa: E402
 import render as renderer  # noqa: E402
 
 BUCKET = "elixiary-images"
@@ -87,6 +91,15 @@ def upload_slide(local, key):
     return f"{PUBLIC_BASE}/{key}"
 
 
+def delete_slide(key):
+    """Only ever used to undo our own upload in a dry run."""
+    if not key.startswith(SLIDE_PREFIX + "/"):
+        raise RuntimeError(f"refusing to delete outside {SLIDE_PREFIX}/: {key}")
+    subprocess.run(
+        wrangler_bin() + ["r2", "object", "delete", f"{BUCKET}/{key}", "--remote"],
+        capture_output=True, text=True)
+
+
 def verify_public(url):
     """Buffer fetches media at publish time, which may be days later. If a
     slide isn't publicly reachable now, the post fails silently then."""
@@ -133,9 +146,52 @@ def create_draft(channel_id, text, image_urls, first_comment=None):
     return res["post"]
 
 
+def prepare_recipe(conn, hook_override):
+    pick, err = pick_next.pick_recipe(conn, dry=False)
+    if err:
+        raise RuntimeError(err)
+    post_id, row = pick["post_id"], pick["row"]
+    print(f"picked  #{post_id}  {row['name']}  ({pick['meta']['category']}, "
+          f"pool {pick['pool']})")
+
+    spec = build_spec.recipe_spec(row)
+    hook = hook_override or f"{row['name']}, start to finish."
+    spec["slides"][0]["kicker"] = hook
+    text = caption_mod.recipe_caption(row, hook=hook)
+    tags = caption_mod.hashtags(row)
+    return post_id, spec, text, tags
+
+
+def prepare_article(conn, hook_override):
+    pick, err = pick_next.pick_article(conn, dry=False)
+    if err:
+        raise RuntimeError(err)
+    art, used = pick["row"], pick["used_angles"]
+    print(f"picked  {art['title'][:52]}  ({pick['meta']['category']}, "
+          f"{len(used)} angle(s) used, pool {pick['pool']})")
+
+    angle = generate_angle.generate(art, used)
+    print(f"angle   {angle['angle_id']}  ({angle['_kind']})")
+
+    # reserve only once the angle exists — it is part of the uniqueness key
+    post_id = db.reserve(conn, "article", art["id"], angle["angle_id"],
+                         {"category": art.get("category"),
+                          "title": art.get("title"), "slug": art.get("slug"),
+                          "angle_kind": angle["_kind"]})
+    if post_id is None:
+        raise RuntimeError(f"angle {angle['angle_id']} already used for this article")
+
+    spec = build_spec.article_spec(art, angle)
+    if hook_override:
+        spec["slides"][0]["kicker"] = hook_override
+    text = caption_mod.article_caption(art, angle)
+    tags = caption_mod.article_hashtags(art, angle)
+    return post_id, spec, text, tags
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--type", choices=["recipe"], default="recipe")
+    ap.add_argument("--type", choices=["recipe", "article"], default="recipe")
     ap.add_argument("--dry-run", action="store_true",
                     help="render and upload, but do not touch Buffer")
     ap.add_argument("--hook", help="override the hook line")
@@ -145,22 +201,16 @@ def main():
     run_id = db.start_run(conn, f"publish:{a.type}")
     post_id = None
     try:
-        sys.path.insert(0, HERE)
-        import pick_next
-        pick, err = pick_next.pick_recipe(conn, dry=False)
-        if err:
-            raise RuntimeError(err)
-        post_id, row = pick["post_id"], pick["row"]
-        print(f"picked  #{post_id}  {row['name']}  ({pick['meta']['category']}, "
-              f"pool {pick['pool']})")
+        prep = prepare_recipe if a.type == "recipe" else prepare_article
+        post_id, spec, text, tags = prep(conn, a.hook)
 
-        spec = build_spec.recipe_spec(row)
-        hook = a.hook or f"{row['name']}, start to finish."
-        spec["slides"][0]["kicker"] = hook
-        text = caption_mod.recipe_caption(row, hook=hook)
-        fcomment = caption_mod.first_comment(row)
         if not FIRST_COMMENT_SUPPORTED:
-            text = f"{text}\n\n{fcomment}"
+            text = f"{text}\n\n{' '.join(tags)}"
+        fcomment = " ".join(tags)
+
+        problems = build_spec.validate_spec(spec)
+        if problems:
+            raise RuntimeError("spec rejected: " + "; ".join(problems))
 
         with tempfile.TemporaryDirectory() as td:
             files = renderer.render(spec, td)
@@ -169,7 +219,8 @@ def main():
             for i, f in enumerate(files, 1):
                 key = f"{SLIDE_PREFIX}/{post_id}/slide-{i:02d}.png"
                 urls.append(upload_slide(f, key))
-            print(f"uploaded {len(urls)} slides to r2://{BUCKET}/{SLIDE_PREFIX}/{post_id}/")
+            print(f"uploaded {len(urls)} slides to "
+                  f"r2://{BUCKET}/{SLIDE_PREFIX}/{post_id}/")
 
         for u in urls:
             if not verify_public(u):
@@ -183,8 +234,12 @@ def main():
             print(f"channel: {CHANNEL_ELIXIARY} (elixiary.ai)")
             print(f"assets : {len(urls)}")
             print(f"caption:\n{text}")
-            print(f"\nfirst comment:\n{fcomment}")
-            db.release(conn, post_id)
+            # a dry run must leave no trace: drop the uploads and the claim,
+            # otherwise this item is consumed without ever being posted
+            for i in range(1, len(urls) + 1):
+                delete_slide(f"{SLIDE_PREFIX}/{post_id}/slide-{i:02d}.png")
+            db.discard(conn, post_id)
+            print(f"cleaned up {len(urls)} slides and released the claim")
             db.finish_run(conn, run_id, True, "dry run")
             return
 
@@ -192,7 +247,8 @@ def main():
         db.update(conn, post_id, status="drafted", buffer_post_id=post["id"],
                   channel_id=CHANNEL_ELIXIARY)
         db.finish_run(conn, run_id, True, f"buffer post {post['id']}")
-        print(f"\nDRAFT CREATED  buffer_post_id={post['id']}  status={post['status']}")
+        print(f"\nDRAFT CREATED  buffer_post_id={post['id']}  "
+              f"status={post['status']}")
         print("Review it in Buffer → Drafts. Nothing publishes until you approve.")
 
     except Exception as ex:
