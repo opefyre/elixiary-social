@@ -25,6 +25,17 @@ PIPE = os.path.abspath(os.path.join(HERE, ".."))
 sys.path.insert(0, os.path.join(PIPE, "state"))
 import db  # noqa: E402
 
+# A stray copy of db.py anywhere earlier on sys.path would silently resolve to
+# a different, empty tracking database — the pool would look untouched and
+# already-posted items would be served again. Fail loudly instead.
+_expected = os.path.join(PIPE, "state", "db.py")
+if os.path.abspath(db.__file__) != os.path.abspath(_expected):
+    raise SystemExit(
+        f"wrong db module: imported {db.__file__}, expected {_expected}. "
+        f"Remove the stray copy before running.")
+
+
+
 PUBLISH = os.path.join(HERE, "publish.py")
 
 
@@ -62,6 +73,16 @@ def main():
 
     conn = db.connect()
     run_id = db.start_run(conn, "daily")
+
+    # Reconcile with Buffer first: a post you approved, published or deleted
+    # since the last run should be reflected before anything new is picked.
+    try:
+        import sync_status
+        checked, changed = sync_status.sync(conn, quiet=True)
+        print(f"  [sync ] reconciled {checked} tracked posts, {changed} updated")
+    except Exception as ex:
+        print(f"  [sync ] skipped: {str(ex)[:120]}")
+
     results = []
 
     for _ in range(a.recipes):

@@ -29,6 +29,8 @@ sys.path.insert(0, os.path.join(PIPE, "llm"))
 sys.path.insert(0, HERE)
 import credentials         # noqa: E402
 import r2                  # noqa: E402
+import slots               # noqa: E402
+
 import build_spec          # noqa: E402
 import caption as caption_mod  # noqa: E402
 import db                  # noqa: E402
@@ -36,6 +38,16 @@ import generate_angle      # noqa: E402
 import hooks               # noqa: E402
 import pick_next           # noqa: E402
 import render as renderer  # noqa: E402
+
+# A stray copy of db.py anywhere earlier on sys.path would silently resolve to
+# a different, empty tracking database — the pool would look untouched and
+# already-posted items would be served again. Fail loudly instead.
+_expected = os.path.join(PIPE, "state", "db.py")
+if os.path.abspath(db.__file__) != os.path.abspath(_expected):
+    raise SystemExit(
+        f"wrong db module: imported {db.__file__}, expected {_expected}. "
+        f"Remove the stray copy before running.")
+
 
 SLIDE_PREFIX = "social"
 BUFFER_API = "https://api.buffer.com"
@@ -85,7 +97,7 @@ def verify_public(url):
     return r2.exists(url.rsplit(r2.PUBLIC_BASE + "/", 1)[-1])
 
 
-def create_draft(channel_id, text, image_urls, first_comment=None):
+def create_draft(channel_id, text, image_urls, first_comment=None, due_at=None):
     if channel_id in CHANNEL_BLOCKLIST:
         raise RuntimeError(
             f"refusing to post to {CHANNEL_BLOCKLIST[channel_id]} ({channel_id})")
@@ -99,11 +111,15 @@ def create_draft(channel_id, text, image_urls, first_comment=None):
         ... on MutationError { message }
       }
     }"""
+    # A draft can carry a time: saveToDraft keeps it in review while dueAt
+    # reserves the slot. customScheduled pins the exact time rather than
+    # letting Buffer snap it to the next queue opening.
     data = gql(q, {"input": {
         "text": text,
         "channelId": channel_id,
         "schedulingType": "automatic",
-        "mode": "addToQueue",
+        "mode": "customScheduled" if due_at else "addToQueue",
+        **({"dueAt": due_at} if due_at else {}),
         "saveToDraft": True,                      # never publishes on its own
         "assets": [{"image": {"url": u}} for u in image_urls],
         # Instagram requires an explicit type. Multiple assets on a `post`
@@ -223,12 +239,26 @@ def main():
             db.finish_run(conn, run_id, True, "dry run")
             return
 
-        post = create_draft(CHANNEL_ELIXIARY, text, urls, fcomment)
+        slot = None
+        try:
+            free = slots.next_free(1)
+            if free:
+                slot = slots.to_buffer(free[0])
+                print(f"slot    {slots.local_str(free[0])}")
+        except Exception as ex:
+            print(f"slot    unavailable ({str(ex)[:80]}) — Buffer will queue it")
+
+        post = create_draft(CHANNEL_ELIXIARY, text, urls, fcomment, due_at=slot)
         db.update(conn, post_id, status="drafted", buffer_post_id=post["id"],
                   channel_id=CHANNEL_ELIXIARY)
+        if slot:
+            meta = json.loads(db.get_post(conn, post_id).get("meta") or "{}")
+            meta["due_at"] = slot
+            db.update(conn, post_id, meta=meta)
         db.finish_run(conn, run_id, True, f"buffer post {post['id']}")
         print(f"\nDRAFT CREATED  buffer_post_id={post['id']}  "
-              f"status={post['status']}")
+              f"status={post['status']}"
+              + (f"  due={slot}" if slot else ""))
         print("Review it in Buffer → Drafts. Nothing publishes until you approve.")
 
     except Exception as ex:

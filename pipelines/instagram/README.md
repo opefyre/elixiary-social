@@ -160,3 +160,40 @@ typically ~2 min and worst case ~5 min, against a 900s service timeout.
 | Captions, hashtags, URLs | template + database |
 
 No measurement or factual claim is ever model-invented.
+
+## Posting slots
+
+Five fixed times a day, local to `Europe/Lisbon`:
+
+```
+11:00   13:00   15:00   17:00   19:00
+```
+
+Buffer stores times in UTC, and Lisbon is UTC+1 in summer, so an 11 AM slot
+reads as `10:00Z`. The offset is computed via `zoneinfo`, never hardcoded, so
+the October DST change is handled.
+
+A new post takes the earliest slot not already occupied by a scheduled or
+draft post on the channel, at least `ELIXIARY_MIN_LEAD_HOURS` (default 4) away
+— a draft awaiting review must not be scheduled for ten minutes' time.
+
+A draft can carry a time: `saveToDraft: true` keeps it in review while `dueAt`
+reserves the slot, and `customScheduled` pins the exact time instead of letting
+Buffer snap it to the next queue opening. Setting `dueAt` *without*
+`saveToDraft` promotes the post out of draft state.
+
+## Status sync
+
+`scripts/sync_status.py` reconciles the local DB with Buffer, and `daily_run`
+calls it before picking anything.
+
+| Buffer | local |
+|---|---|
+| `draft`, `needs_approval` | `drafted` — awaiting review |
+| `scheduled`, `sending` | `scheduled` — approved, queued |
+| `sent` | `published` |
+| `error` | `failed` |
+| missing | `rejected` — deleted by a human |
+
+A post deleted in Buffer is recorded as `rejected` rather than removed: a human
+declining it is a signal, so the item stays out of the pool.

@@ -20,7 +20,11 @@ DB_PATH = os.environ.get("ELIXIARY_STATE_DB", os.path.join(HERE, "elixiary-socia
 
 # Post lifecycle. `reserved` is claimed the moment an item is chosen, so two
 # concurrent runs can never pick the same recipe.
-STATUSES = ("reserved", "rendered", "drafted", "published", "rejected", "failed")
+# `drafted` means awaiting review in Buffer; `scheduled` means a human
+# approved it and it is queued. Keeping them apart is the point of the
+# status sync — otherwise the log cannot say what actually went out.
+STATUSES = ("reserved", "rendered", "drafted", "scheduled", "published",
+            "rejected", "failed")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS posts (
