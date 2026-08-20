@@ -64,3 +64,6 @@ tmp/
 
 # ─── Local-only Claude workspace (ops skill stays off GitHub) ──────────
 .claude/
+
+# local tool installs (wrangler)
+.tools/
