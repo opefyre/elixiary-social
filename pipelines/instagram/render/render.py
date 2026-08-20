@@ -77,6 +77,7 @@ THEMES = {
         "shadow": "0 24px 60px rgba(78,54,18,.13)",
         "grad": "linear-gradient(102deg,#C77C18 0%,#A85410 52%,#0D3929 100%)",
         "foot_left": 134,
+        "nudge_right": 56,
     },
     # Dark bottle-green — the Learn backplate
     "learn": {
@@ -92,6 +93,7 @@ THEMES = {
         "shadow": "0 24px 60px rgba(0,0,0,.45)",
         "grad": "linear-gradient(102deg,#FBE2A0 0%,#F5C451 30%,#F59E0B 68%,#f97316 100%)",
         "foot_left": 76,
+        "nudge_right": 140,
     },
 }
 
@@ -365,7 +367,7 @@ body{{
 .linkline .arr{{font-size:34px;line-height:1}}
 
 /* mid-carousel save nudge — most viewers never reach the last slide */
-.nudge{{position:absolute;right:56px;bottom:64px;display:flex;align-items:center;
+.nudge{{position:absolute;right:{t['nudge_right']}px;bottom:64px;display:flex;align-items:center;
   gap:12px;font-family:'PJS';font-weight:700;font-size:23px;
   color:{t['accent']};background:{t['card']};
   border:1px solid {t['card_line']};border-radius:999px;padding:14px 24px 14px 20px;

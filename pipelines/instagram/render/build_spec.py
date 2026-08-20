@@ -230,38 +230,51 @@ def recipe_spec(r):
 
 
 def article_spec(a, angle=None):
-    """`angle` is supplied by the LLM step; without one we fall back to a
-    straight summary of the article."""
+    """`angle` comes from scripts/generate_angle.py. Without one we fall back
+    to a plain summary of the article."""
+    angle = angle or {}
+    title = angle.get("title") or a.get("title") or "Untitled"
+
     slides = [{
         "kind": "hook",
         "eyebrow": humanize(a.get("category") or "Learn"),
-        "title": (angle or {}).get("title") or a.get("title"),
-        "subtitle": (angle or {}).get("hook") or (a.get("excerpt") or "")[:140],
+        "kicker": angle.get("kicker"),
+        "title": title,
+        "title_size": hook_size(title),
+        "subtitle": angle.get("subtitle") or (a.get("excerpt") or "")[:120],
         "meta": [x for x in (a.get("difficulty"), a.get("read_time")) if x],
     }]
 
-    for sec in (angle or {}).get("sections", []):
+    for sec in angle.get("sections", []):
         kind = sec.get("kind", "prose")
-        s = {"kind": kind, "eyebrow": sec.get("eyebrow"), "title": sec.get("title")}
+        s = {"kind": kind, "eyebrow": sec.get("eyebrow"),
+             "title": sec.get("title"), "note": sec.get("note")}
         if kind == "prose":
             s["paragraphs"] = sec.get("paragraphs", [])
         else:
             s["items"] = sec.get("items", [])
-            s["note"] = sec.get("note")
         slides.append(s)
 
     slides.append({
         "kind": "cta",
         "eyebrow": "Learn more",
         "title": "Go deeper.",
-        "subtitle": "Read the full guide and put it to work in the Elixiary app.",
-        "button": "Read the guide",
+        "subtitle": "The full guide, and 1,000+ recipes to use it on.",
+        "actions": [
+            {"icon": "save", "text": "Save this for your next pour"},
+            {"icon": "send", "text": "Send it to someone who needs it"},
+            {"icon": "follow", "text": "Follow @elixiary.ai for a drink a day"},
+        ],
+        "link": "Read the full guide — link in bio",
     })
+
+    if len(slides) > 2:
+        slides[1]["save_hint"] = "Save this"
 
     return {
         "theme": "learn",
         "source": {"type": "article", "id": a.get("id"), "slug": a.get("slug"),
-                   "name": a.get("title")},
+                   "name": a.get("title"), "angle": angle.get("angle_id")},
         "slides": slides[:MAX_SLIDES],
     }
 
