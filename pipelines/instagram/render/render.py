@@ -52,6 +52,8 @@ THEMES = {
         "chip_bg": "rgba(13,57,41,.06)",
         "chip_line": "rgba(13,57,41,.20)",
         "shadow": "0 24px 60px rgba(78,54,18,.13)",
+        "grad": "linear-gradient(102deg,#C77C18 0%,#A85410 52%,#0D3929 100%)",
+        "foot_left": 134,
     },
     # Dark bottle-green — the Learn backplate
     "learn": {
@@ -65,6 +67,8 @@ THEMES = {
         "chip_bg": "rgba(255,255,255,.06)",
         "chip_line": "rgba(255,255,255,.14)",
         "shadow": "0 24px 60px rgba(0,0,0,.45)",
+        "grad": "linear-gradient(102deg,#FBE2A0 0%,#F5C451 30%,#F59E0B 68%,#f97316 100%)",
+        "foot_left": 76,
     },
 }
 
@@ -94,10 +98,23 @@ def _eyebrow(s):
 
 def build_hook(s):
     meta = "".join(f'<span class="chip">{e(m)}</span>' for m in s.get("meta", []))
+    title = str(s.get("title") or "")
+    # Brand headline pattern: last word carries the amber gradient. Single-word
+    # titles take the gradient whole.
+    words = title.split()
+    if len(words) > 1:
+        head = f'{e(" ".join(words[:-1]))} <span class="grad">{e(words[-1])}</span>'
+    else:
+        head = f'<span class="grad">{e(title)}</span>'
+
+    size = s.get("title_size", 104)
+    kicker = s.get("kicker")
     return f"""
     <div class="pad hook">
+      <div class="rule"></div>
       {_eyebrow(s.get('eyebrow'))}
-      <h1 class="display">{e(s.get('title'))}</h1>
+      {f'<p class="kicker">{e(kicker)}</p>' if kicker else ""}
+      <h1 class="display" style="font-size:{size}px">{head}</h1>
       {f'<p class="lede">{e(s.get("subtitle"))}</p>' if s.get("subtitle") else ""}
       {f'<div class="chips">{meta}</div>' if meta else ""}
     </div>"""
@@ -225,20 +242,26 @@ body{{
   flex-direction:column}}
 
 /* hook + cta sit directly on the artwork, lower-left, clear of the photo */
-.hook{{justify-content:flex-end;padding-bottom:150px;padding-right:300px}}
+.hook{{justify-content:flex-end;padding-bottom:146px;padding-right:250px}}
+.rule{{width:74px;height:4px;border-radius:2px;background:{t['accent']};
+  margin-bottom:26px;opacity:.95}}
+.kicker{{font-family:'PJS';font-weight:700;font-size:33px;line-height:1.16;
+  letter-spacing:-.012em;color:{t['muted']};margin-bottom:14px;max-width:17ch}}
+.grad{{background:{t['grad']};-webkit-background-clip:text;background-clip:text;
+  color:transparent}}
 .cta{{justify-content:center;padding-right:330px}}
 
-.eyebrow{{font-family:'PJS';font-weight:700;font-size:21px;letter-spacing:.24em;
-  text-transform:uppercase;color:{t['accent']};margin-bottom:20px}}
+.eyebrow{{font-family:'PJS';font-weight:700;font-size:24px;letter-spacing:.26em;
+  text-transform:uppercase;color:{t['accent']};margin-bottom:22px}}
 
-.display{{font-family:'PJS';font-weight:800;font-size:82px;line-height:.98;
-  letter-spacing:-.022em;text-wrap:balance}}
-.cta-h{{font-size:76px}}
-.lede{{font-size:29px;line-height:1.42;color:{t['muted']};margin-top:24px;
-  max-width:22ch}}
+.display{{font-family:'PJS';font-weight:800;font-size:104px;line-height:.94;
+  letter-spacing:-.028em;text-wrap:balance}}
+.cta-h{{font-size:82px}}
+.lede{{font-size:32px;line-height:1.38;color:{t['muted']};margin-top:26px;
+  max-width:24ch}}
 
 .chips{{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}}
-.chip{{font-family:'PJS';font-weight:600;font-size:21px;padding:11px 20px;
+.chip{{font-family:'PJS';font-weight:600;font-size:23px;padding:13px 23px;
   border-radius:999px;background:{t['chip_bg']};border:1px solid {t['chip_line']};
   white-space:nowrap}}
 
@@ -289,7 +312,7 @@ body{{
 .marlow{{position:absolute;right:44px;bottom:104px;width:290px;height:auto;
   filter:drop-shadow(0 22px 34px rgba(0,0,0,.42))}}
 
-.foot{{position:absolute;left:134px;bottom:70px;display:flex;align-items:center;
+.foot{{position:absolute;left:{t['foot_left']}px;bottom:70px;display:flex;align-items:center;
   gap:12px;font-family:'PJS';font-weight:600;font-size:22px;letter-spacing:.2em;
   text-transform:uppercase;color:{t['muted']}}}
 .foot .sep{{opacity:.5;letter-spacing:0}}

@@ -56,6 +56,22 @@ def clean_category(c):
     return fixes.get(c, c)
 
 
+def hook_size(title):
+    """Step the display type down for longer names so the headline always
+    stays inside the backplate's clear zone."""
+    n = len(title or "")
+    longest = max((len(w) for w in (title or "").split()), default=0)
+    if longest >= 13:          # a single very long word sets the ceiling
+        return 84
+    if n <= 13:
+        return 112
+    if n <= 17:
+        return 104
+    if n <= 24:
+        return 92
+    return 80
+
+
 def sentences(text, limit):
     """Trim prose to at most `limit` sentences, preserving whole sentences."""
     if not text:
@@ -91,7 +107,11 @@ def recipe_spec(r):
     slides.append({
         "kind": "hook",
         "eyebrow": cat or "Cocktail Recipe",
+        # `kicker` is the one line the LLM writes on this slide — the hook.
+        # Left empty here; the caption step fills it in.
+        "kicker": None,
         "title": name,
+        "title_size": hook_size(name),
         "subtitle": lede,
         "meta": meta,
     })

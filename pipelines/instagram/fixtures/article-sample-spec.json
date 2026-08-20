@@ -1,0 +1,71 @@
+{
+  "theme": "learn",
+  "source": {
+    "type": "article",
+    "slug": "ice-the-secret-ingredient",
+    "name": "Ice: The Secret Ingredient That Makes or Breaks Your Cocktails"
+  },
+  "slides": [
+    {
+      "kind": "hook",
+      "eyebrow": "Mixology Techniques",
+      "kicker": "Most home bars get this wrong.",
+      "title": "Ice is an ingredient",
+      "title_size": 96,
+      "subtitle": "Not a garnish. Not an afterthought.",
+      "meta": ["Beginner", "7 min read"]
+    },
+    {
+      "kind": "list",
+      "eyebrow": "The science",
+      "title": "What ice actually does",
+      "items": [
+        { "label": "Temperature", "value": "Cools to serving temp" },
+        { "label": "Dilution", "value": "Integrates flavours" },
+        { "label": "Texture", "value": "Shapes mouthfeel" },
+        { "label": "Aroma", "value": "Releases compounds" },
+        { "label": "Presentation", "value": "Reads professional" }
+      ],
+      "note": "Five jobs — and only one of them is \"cold\"."
+    },
+    {
+      "kind": "list",
+      "eyebrow": "Know your cubes",
+      "title": "Three kinds of ice",
+      "items": [
+        { "label": "Large  ·  2–3 in", "value": "Slow melt" },
+        { "label": "Standard  ·  1 in", "value": "Balanced" },
+        { "label": "Crushed", "value": "Fast melt" }
+      ],
+      "note": "Surface area is the whole story: more surface, faster dilution."
+    },
+    {
+      "kind": "prose",
+      "eyebrow": "The dilution factor",
+      "title": "Water is not the enemy",
+      "paragraphs": [
+        "Ice doesn't only chill a drink — it melts into it. That water is doing real work: it binds the ingredients together, softens the edge of the alcohol, and opens up aromas that stay locked shut when a drink is too strong or too cold.",
+        "A cocktail served with no dilution isn't purer. It's unfinished."
+      ]
+    },
+    {
+      "kind": "list",
+      "eyebrow": "Put it to work",
+      "title": "Match the ice to the drink",
+      "items": [
+        { "label": "Old Fashioned, Manhattan", "value": "Large cube" },
+        { "label": "Highballs & mixers", "value": "Standard" },
+        { "label": "Juleps, swizzles, tiki", "value": "Crushed" },
+        { "label": "Neat whisky", "value": "One large" }
+      ],
+      "note": "Spirit-forward and slow-sipped? Go big. Long and refreshing? Go small."
+    },
+    {
+      "kind": "cta",
+      "eyebrow": "Learn more",
+      "title": "Go deeper.",
+      "subtitle": "The full guide, plus 1,000+ recipes that use it — in the Elixiary app.",
+      "button": "Read the guide"
+    }
+  ]
+}
