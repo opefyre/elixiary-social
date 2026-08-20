@@ -13,15 +13,19 @@ better than "share!".
 
 import re
 
-BRAND_TAGS = ["cocktails", "cocktailrecipe", "mixology", "homebar",
-              "cocktailsofinstagram", "drinkstagram"]
+# Instagram enforced a hard 5-hashtag cap in December 2025 (down from 30).
+# Going over doesn't just get trimmed — it suppresses distribution in Explore,
+# hashtag browse and recommendations. So we pick 5 deliberately, in the tiers
+# Instagram itself recommends: one broad, a few mid-size niche, one specific.
+BROAD_TAG = "cocktails"
+BRAND_TAG = "elixiary"
 
 SPIRIT_TAGS = {"vodka": "vodka", "rum": "rum", "gin": "gin",
                "whiskey": "whiskey", "brandy": "brandy",
                "tequila": "tequila", "mezcal": "mezcal"}
 
 MAX_LEN = 2200          # Instagram's hard caption limit
-MAX_TAGS = 12
+MAX_TAGS = 5            # platform-enforced since Dec 2025 — do not raise
 
 
 def _tag(row, prefix):
@@ -36,25 +40,30 @@ def _slug(s):
 
 
 def hashtags(row):
-    tags = list(BRAND_TAGS)
+    """At most 5, tiered: 1 broad + up to 3 mid-size niche + 1 specific."""
+    mid = []
     sp = _tag(row, "base_spirit_")
     if sp in SPIRIT_TAGS:
-        tags.append(SPIRIT_TAGS[sp])
-    for pref, fmt in (("flavor_", "{}cocktail"), ("season_", "{}drinks")):
-        v = _tag(row, pref)
-        if v:
-            tags.append(fmt.format(_slug(v)))
-    name = _slug(row.get("name"))
-    if name and len(name) < 24:
-        tags.append(name)
+        mid.append(SPIRIT_TAGS[sp])
     if row.get("is_mocktail"):
-        tags += ["mocktail", "zeroproof"]
-    seen, out = set(), []
-    for t in tags:
+        mid.append("mocktail")
+    fl = _tag(row, "flavor_")
+    if fl:
+        mid.append(f"{_slug(fl)}cocktail")
+    se = _tag(row, "season_")
+    if se:
+        mid.append(f"{_slug(se)}drinks")
+
+    # specific: the drink itself if it makes a usable tag, else the brand
+    name = _slug(row.get("name"))
+    specific = name if name and 4 < len(name) < 24 else BRAND_TAG
+
+    tags, seen = [], set()
+    for t in [BROAD_TAG] + mid[:3] + [specific]:
         if t and t not in seen:
             seen.add(t)
-            out.append("#" + t)
-    return out[:MAX_TAGS]
+            tags.append("#" + t)
+    return tags[:MAX_TAGS]
 
 
 def recipe_caption(row, hook=None):
