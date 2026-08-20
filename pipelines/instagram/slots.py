@@ -57,19 +57,37 @@ def _gql(query, variables):
 
 def occupied():
     """UTC datetimes already spoken for on the channel. Drafts count — one may
-    carry a time and would collide once approved."""
-    q = ("query P($i: PostsInput!){ posts(input:$i){ edges { node "
-         "{ id status dueAt } } } }")
-    data = _gql(q, {"i": {"organizationId": ORG,
-                          "filter": {"channelIds": [CHANNEL],
-                                     "status": ["scheduled", "draft",
-                                                "needs_approval", "sending"]}}})
-    taken = set()
-    for e in data["posts"]["edges"] or []:
-        due = (e.get("node") or {}).get("dueAt")
-        if due:
-            taken.add(datetime.fromisoformat(due.replace("Z", "+00:00"))
-                      .astimezone(timezone.utc).replace(second=0, microsecond=0))
+    carry a time and would collide once approved.
+
+    Paginated deliberately: the API returns 10 posts a page, and `first`/`after`
+    are arguments on the query itself, not fields of PostsInput. Reading only
+    the first page silently under-reports what is taken and double-books slots.
+    """
+    q = ("query P($i: PostsInput!, $first: Int, $after: String){ "
+         "posts(input:$i, first:$first, after:$after){ "
+         "edges { node { id status dueAt } } "
+         "pageInfo { hasNextPage endCursor } } }")
+    base = {"organizationId": ORG,
+            "filter": {"channelIds": [CHANNEL],
+                       "status": ["scheduled", "draft", "needs_approval",
+                                  "sending"]}}
+    taken, after, pages = set(), None, 0
+    while pages < 50:                       # backstop against a cursor loop
+        data = _gql(q, {"i": base, "first": 100, "after": after})
+        node = data["posts"]
+        for e in node.get("edges") or []:
+            due = (e.get("node") or {}).get("dueAt")
+            if due:
+                taken.add(datetime.fromisoformat(due.replace("Z", "+00:00"))
+                          .astimezone(timezone.utc)
+                          .replace(second=0, microsecond=0))
+        info = node.get("pageInfo") or {}
+        if not info.get("hasNextPage"):
+            break
+        after = info.get("endCursor")
+        if not after:
+            break
+        pages += 1
     return taken
 
 

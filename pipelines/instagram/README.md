@@ -189,6 +189,12 @@ reserves the slot, and `customScheduled` pins the exact time instead of letting
 Buffer snap it to the next queue opening. Setting `dueAt` *without*
 `saveToDraft` promotes the post out of draft state.
 
+**Changing the time on an existing draft takes two calls.** Sending `dueAt`
+and `saveToDraft` together silently keeps the old time while still reporting
+success — set the time first, then send `saveToDraft: true` to return it to
+review. Always read `dueAt` back; the mutation result reports success either
+way.
+
 ## Status sync
 
 `scripts/sync_status.py` reconciles the local DB with Buffer, and `daily_run`
