@@ -136,3 +136,27 @@ would spread a secret for no real gain. Create
 
 Note n8n 2.x replaced "Activate" with **Publish** (a named version). The
 `active` flag cannot be flipped by PATCHing the REST API alone.
+
+## Model selection is per task
+
+Both LLM steps run on Cloudflare Workers AI (free), but not on the same model —
+the right choice differs by task, measured rather than assumed:
+
+| Task | Model | Why |
+|---|---|---|
+| Article angle | `glm-5.2` | The only free model tested that reliably fills the structured schema. `llama-3.3-70b` and `mistral-small` returned empty sections. |
+| Recipe hook | `glm-5.2` | `mistral-small` is 10x faster but writes labels ("Spirit-forward Italian classic") rather than hooks ("Mint does the heavy lifting"). The hook is the most visible line, and this runs unattended, so quality wins. |
+
+Hook latency is 9-65s depending on Workers AI queue time. A full daily batch is
+typically ~2 min and worst case ~5 min, against a 900s service timeout.
+
+## What is generated vs read
+
+| Post part | Source |
+|---|---|
+| Recipe ingredients, method, numbers, pairings | database, verbatim |
+| Recipe hook line + caption opener | LLM, from the recipe's own fields |
+| Article slide content | LLM, restricted to the article text |
+| Captions, hashtags, URLs | template + database |
+
+No measurement or factual claim is ever model-invented.

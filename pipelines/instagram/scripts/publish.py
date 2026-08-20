@@ -33,6 +33,7 @@ import build_spec          # noqa: E402
 import caption as caption_mod  # noqa: E402
 import db                  # noqa: E402
 import generate_angle      # noqa: E402
+import hooks               # noqa: E402
 import pick_next           # noqa: E402
 import render as renderer  # noqa: E402
 
@@ -130,9 +131,13 @@ def prepare_recipe(conn, hook_override):
           f"pool {pick['pool']})")
 
     spec = build_spec.recipe_spec(row)
-    hook = hook_override or f"{row['name']}, start to finish."
-    spec["slides"][0]["kicker"] = hook
-    text = caption_mod.recipe_caption(row, hook=hook)
+    if hook_override:
+        kicker, caption_hook = hook_override, hook_override
+    else:
+        kicker, caption_hook = hooks.recipe_hook(row)
+        print(f"hook    {kicker}")
+    spec["slides"][0]["kicker"] = kicker
+    text = caption_mod.recipe_caption(row, hook=caption_hook)
     tags = caption_mod.hashtags(row)
     return post_id, spec, text, tags
 

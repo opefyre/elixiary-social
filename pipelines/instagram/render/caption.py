@@ -24,6 +24,7 @@ SPIRIT_TAGS = {"vodka": "vodka", "rum": "rum", "gin": "gin",
                "whiskey": "whiskey", "brandy": "brandy",
                "tequila": "tequila", "mezcal": "mezcal"}
 
+SITE = "elixiary.com"
 MAX_LEN = 2200          # Instagram's hard caption limit
 MAX_TAGS = 5            # platform-enforced since Dec 2025 — do not raise
 
@@ -66,6 +67,22 @@ def hashtags(row):
     return tags[:MAX_TAGS]
 
 
+def recipe_url(row):
+    """Canonical public URL, matching sitemap-recipes.xml."""
+    slug = (row.get("slug") or "").strip()
+    return f"{SITE}/cocktails/{slug}" if slug else None
+
+
+def article_url(a):
+    """Canonical public URL, matching sitemap-education.xml:
+    /education/<category>/<slug>."""
+    slug = (a.get("slug") or "").strip()
+    cat = (a.get("category") or "").strip()
+    if not slug:
+        return None
+    return f"{SITE}/education/{cat}/{slug}" if cat else f"{SITE}/education/{slug}"
+
+
 def recipe_caption(row, hook=None):
     name = row.get("name") or "This one"
     bits = [x for x in (row.get("difficulty"), row.get("prep_time"),
@@ -79,7 +96,9 @@ def recipe_caption(row, hook=None):
     parts = []
     parts.append(hook or f"{name}, start to finish.")
     parts.append("")
-    if lede:
+    # The generated hook is written from the flavour profile, so printing the
+    # profile underneath just says the same thing twice.
+    if lede and not hook:
         parts.append(lede)
         parts.append("")
     if bits:
@@ -91,7 +110,9 @@ def recipe_caption(row, hook=None):
     parts.append("Save it for your next round, and send it to whoever "
                  "usually makes the drinks.")
     parts.append("")
-    parts.append("Full recipe → link in bio")
+    url = recipe_url(row)
+    parts.append(f"Full recipe → {url}" if url
+                 else "Full recipe → link in bio")
 
     cap = "\n".join(parts).strip()
     if len(cap) > MAX_LEN:
@@ -172,7 +193,9 @@ def article_caption(article, angle=None):
     parts.append("Save it for the next time you are behind the bar, and send it "
                  "to someone still getting this wrong.")
     parts.append("")
-    parts.append("Full guide → link in bio")
+    url = article_url(article)
+    parts.append(f"Full guide → {url}" if url
+                 else "Full guide → link in bio")
 
     cap = "\n".join(parts).strip()
     if len(cap) > MAX_LEN:

@@ -99,8 +99,14 @@ def _extract_json(text):
 
 
 def complete_json(system, user, schema=None, backend="cf", max_tokens=2400,
-                  temperature=0.7, attempts=3):
-    """Ask for JSON and return a parsed dict. Retries on unparseable output."""
+                  temperature=0.7, attempts=3, model=None):
+    """Ask for JSON and return a parsed dict. Retries on unparseable output.
+
+    `model` overrides the default per call — the right model is task-dependent.
+    Measured on the same prompt: glm-5.2 handles the structured article angles
+    that smaller models fail outright, but takes ~20s; mistral-small returns an
+    equally good two-line hook in ~2s.
+    """
     last = None
     for n in range(attempts):
         try:
@@ -121,7 +127,7 @@ def complete_json(system, user, schema=None, backend="cf", max_tokens=2400,
                         "type": "json_schema", "json_schema": schema}
                 out = _post(
                     f"https://api.cloudflare.com/client/v4/accounts/"
-                    f"{CF_ACCOUNT}/ai/run/{CF_MODEL}", payload, token)
+                    f"{CF_ACCOUNT}/ai/run/{model or CF_MODEL}", payload, token)
                 if not out.get("success", True):
                     raise RuntimeError(f"Workers AI error: {out.get('errors')}")
                 res = out["result"]
