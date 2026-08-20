@@ -317,3 +317,21 @@ Mac, not in this repo.
 
 Only generations that already have an image qualify (101 of 272 for the
 configured account), since the picture is the point.
+
+
+## Slide upload prefixes
+
+Slides go to `social/<post_id>-<token>/`, where the token is generated once at
+claim time and kept in the post's `meta`.
+
+It used to be `social/<post_id>/`. Post ids come from a per-machine SQLite
+sequence while the R2 bucket is shared, so a dry run on a developer laptop
+that happened to reach the same id **overwrote a live post's slides, and on
+cleanup deleted them**. Three queued posts lost or mixed their images before
+this was caught, two of them due to publish the next morning.
+
+The token also means dry-run cleanup can only ever remove its own uploads.
+
+`sweep_orphans.py` protects `drafted`, `scheduled` and `published`. `scheduled`
+was missing from that list, which would have deleted the images out from under
+posts a human had already approved.

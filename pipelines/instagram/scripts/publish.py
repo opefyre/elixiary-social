@@ -12,6 +12,7 @@ Creates drafts only. There is deliberately no publish path in this file —
 import argparse
 import json
 import os
+import secrets as _secrets
 import subprocess
 import sys
 import tempfile
@@ -52,6 +53,25 @@ if os.path.abspath(db.__file__) != os.path.abspath(_expected):
 
 
 SLIDE_PREFIX = "social"
+
+
+def slide_prefix(conn, post_id):
+    """Per-post upload prefix.
+
+    It used to be social/<post_id>. Post ids come from a per-machine SQLite
+    sequence while the bucket is shared, so a dry run on a laptop that happened
+    to reach the same id overwrote — and on cleanup deleted — a live post's
+    slides on the server. The token is generated once, at claim time, and kept
+    in meta so the prefix is known even if the run dies mid-way.
+    """
+    row = db.get_post(conn, post_id) or {}
+    meta = json.loads(row.get("meta") or "{}")
+    token = meta.get("slide_token")
+    if not token:
+        token = _secrets.token_hex(5)
+        meta["slide_token"] = token
+        db.update(conn, post_id, meta=meta)
+    return f"{SLIDE_PREFIX}/{post_id}-{token}"
 BUFFER_API = "https://api.buffer.com"
 
 # Buffer's `metadata.instagram.firstComment` is paid-plan only. On Free the
@@ -303,15 +323,14 @@ def main():
         if problems:
             raise RuntimeError("spec rejected: " + "; ".join(problems))
 
+        prefix = slide_prefix(conn, post_id)
         with tempfile.TemporaryDirectory() as td:
             files = renderer.render(spec, td)
             print(f"rendered {len(files)} slides")
             urls = []
             for i, f in enumerate(files, 1):
-                key = f"{SLIDE_PREFIX}/{post_id}/slide-{i:02d}.png"
-                urls.append(upload_slide(f, key))
-            print(f"uploaded {len(urls)} slides to "
-                  f"r2://{r2.BUCKET}/{SLIDE_PREFIX}/{post_id}/")
+                urls.append(upload_slide(f, f"{prefix}/slide-{i:02d}.png"))
+            print(f"uploaded {len(urls)} slides to r2://{r2.BUCKET}/{prefix}/")
 
         for u in urls:
             if not verify_public(u):
@@ -328,7 +347,7 @@ def main():
             # a dry run must leave no trace: drop the uploads and the claim,
             # otherwise this item is consumed without ever being posted
             for i in range(1, len(urls) + 1):
-                delete_slide(f"{SLIDE_PREFIX}/{post_id}/slide-{i:02d}.png")
+                delete_slide(f"{prefix}/slide-{i:02d}.png")
             db.discard(conn, post_id)
             print(f"cleaned up {len(urls)} slides and released the claim")
             db.finish_run(conn, run_id, True, "dry run")

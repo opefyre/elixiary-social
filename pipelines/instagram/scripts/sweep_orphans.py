@@ -34,7 +34,10 @@ import r2  # noqa: E402
 
 PREFIX = "social"
 MAX_SLIDES_PROBE = 15
-PROTECTED = ("drafted", "published")
+# `scheduled` means a human approved it and it is waiting on its slot — its
+# slides must survive. Leaving it out of this list would have deleted the
+# images out from under approved posts.
+PROTECTED = ("drafted", "scheduled", "published")
 
 
 def exists(key):
@@ -53,11 +56,17 @@ def main():
     a = ap.parse_args()
 
     conn = db.connect()
-    protected, known = set(), set()
-    for r in conn.execute("SELECT id, status FROM posts").fetchall():
+    protected, known, prefixes = set(), set(), {}
+    for r in conn.execute("SELECT id, status, meta FROM posts").fetchall():
         known.add(r["id"])
         if r["status"] in PROTECTED:
             protected.add(r["id"])
+        try:
+            tok = (json.loads(r["meta"] or "{}") or {}).get("slide_token")
+        except Exception:
+            tok = None
+        if tok:
+            prefixes[r["id"]] = f"{PREFIX}/{r['id']}-{tok}"
 
     # autoincrement high-water mark still knows ids whose rows were deleted
     seq = conn.execute(
@@ -74,9 +83,11 @@ def main():
     for pid in range(1, high + 1):
         if pid in protected:
             continue
-        if not exists(f"{PREFIX}/{pid}/slide-01.png"):
+        # tokenised prefix when we have one, legacy social/<id> otherwise
+        base = prefixes.get(pid, f"{PREFIX}/{pid}")
+        if not exists(f"{base}/slide-01.png"):
             continue
-        keys = [f"{PREFIX}/{pid}/slide-{i:02d}.png"
+        keys = [f"{base}/slide-{i:02d}.png"
                 for i in range(1, MAX_SLIDES_PROBE + 1)]
         present = [k for k in keys if exists(k)]
         status = next((r["status"] for r in conn.execute(
@@ -89,7 +100,8 @@ def main():
 
     total = sum(len(p) for _, _, p in orphans)
     for pid, status, present in orphans:
-        print(f"  {PREFIX}/{pid}/  {len(present)} slides  ({status})")
+        print(f"  {prefixes.get(pid, PREFIX + '/' + str(pid))}/  "
+              f"{len(present)} slides  ({status})")
 
     if not a.apply:
         print(f"\n{len(orphans)} orphaned sets, {total} objects. "
