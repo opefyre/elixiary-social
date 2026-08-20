@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-One day's batch: 4 recipe carousels + 1 article carousel, all as Buffer drafts.
+One day's batch: recipe, article and home-bar carousels, all as Buffer drafts.
 
 Run once a day. Every item is independent — one failure does not stop the
 others, and the exit code reflects whether anything at all succeeded, so the
@@ -10,7 +10,7 @@ Prints a JSON summary on the last line for n8n to parse.
 
     python3 scripts/daily_run.py
     python3 scripts/daily_run.py --dry-run
-    python3 scripts/daily_run.py --recipes 4 --articles 1
+    python3 scripts/daily_run.py --recipes 3 --articles 1 --homebar 1
 """
 
 import argparse
@@ -66,8 +66,9 @@ def run_one(kind, dry):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--recipes", type=int, default=4)
+    ap.add_argument("--recipes", type=int, default=3)
     ap.add_argument("--articles", type=int, default=1)
+    ap.add_argument("--homebar", type=int, default=1)
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
 
@@ -89,10 +90,12 @@ def main():
         results.append(run_one("recipe", a.dry_run))
     for _ in range(a.articles):
         results.append(run_one("article", a.dry_run))
+    for _ in range(a.homebar):
+        results.append(run_one("homebar", a.dry_run))
 
     ok = sum(1 for r in results if r["ok"])
     summary = {
-        "requested": a.recipes + a.articles,
+        "requested": a.recipes + a.articles + a.homebar,
         "succeeded": ok,
         "failed": len(results) - ok,
         "dry_run": a.dry_run,

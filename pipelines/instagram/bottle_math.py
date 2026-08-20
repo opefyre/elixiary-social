@@ -176,7 +176,7 @@ if __name__ == "__main__":
 
 # ── build order ────────────────────────────────────────────────────────────
 
-def build_order(recipes, steps=10, bottles=None, pantry=None):
+def build_order(recipes, steps=10, bottles=None, pantry=None, seed=None):
     """Greedy shopping order: which bottle to buy next to unlock the most.
 
     Scoring weights every gap by 1/n^2, so a recipe one ingredient away counts
@@ -194,6 +194,11 @@ def build_order(recipes, steps=10, bottles=None, pantry=None):
     pairs = [(r, f) for r, f in pairs if f and f <= bottles]
 
     bar, made = set(), set()
+    if seed:
+        bar.add(seed)
+        for i, (r, f) in enumerate(pairs):
+            if not (f - bar):
+                made.add(i)
     out = []
     for _ in range(steps):
         score = {}
@@ -222,14 +227,16 @@ def build_order(recipes, steps=10, bottles=None, pantry=None):
     return out
 
 
-def order_carousel(recipes, steps=10, kicker=None, bottles=None, pantry=None):
+def order_carousel(recipes, steps=10, kicker=None, bottles=None, pantry=None,
+                   seed=None):
     """'Build your bar in this order' — the strongest version of the format,
     because the numbers compound and the advice is directly actionable."""
     import sys as _s
     _s.path.insert(0, os.path.join(HERE, "render"))
     from build_spec import fit, MAX_SLIDES
 
-    order = build_order(recipes, steps, bottles=bottles, pantry=pantry)
+    order = build_order(recipes, steps, bottles=bottles, pantry=pantry, seed=seed)
+    start = order[0]["total"] - order[0]["gained"] if order else 0
     if len(order) < steps:
         return None
     total = order[-1]["total"]
@@ -252,12 +259,17 @@ def order_carousel(recipes, steps=10, kicker=None, bottles=None, pantry=None):
 
     slides = [{
         "kind": "hook",
-        "eyebrow": "Build your home bar",
-        "kicker": kicker or "Buy them in this order.",
-        "title": f"{steps} bottles, {total} cocktails",
-        "title_size": 84,
+        "eyebrow": (f"You already own {_title(seed)}" if seed
+                    else "Build your home bar"),
+        "kicker": kicker or ("Here's what to buy next." if seed
+                             else "Buy them in this order."),
+        "title": (f"{steps} more bottles, {total} cocktails" if seed
+                  else f"{steps} bottles, {total} cocktails"),
+        "title_size": 78 if seed else 84,
         "subtitle": "Worked out across all 1,000+ recipes.",
-        "meta": [f"{gain_first} by bottle {half}", f"{total} by bottle {steps}"],
+        "meta": ([f"{start} with just {_title(seed)}", f"{total} after {steps} more"]
+                 if seed else
+                 [f"{gain_first} by bottle {half}", f"{total} by bottle {steps}"]),
     }, {
         "kind": "list",
         "eyebrow": f"Bottles 1-{half}",
@@ -395,3 +407,26 @@ def carousel(recipes, bar, kicker=None):
             "source": {"type": "homebar", "bar": bar, "makeable": len(makeable),
                        "unlock": top_fam, "after": after},
             "slides": slides[:MAX_SLIDES]}
+
+
+# ── variants ───────────────────────────────────────────────────────────────
+
+# Seeds let the format recur: "you already own gin, here's what's next" is a
+# different post and a different answer from the cold-start order.
+SEED_BOTTLES = ["gin", "vodka", "rum", "whiskey", "tequila", "brandy",
+                "orange liqueur", "sweet vermouth", "coffee liqueur",
+                "bitter aperitif", "sparkling wine", "amaretto"]
+STEP_CHOICES = [5, 8, 10, 12]
+
+
+def variants():
+    """Every (seed, steps) pair, cold start first."""
+    out = [(None, n) for n in STEP_CHOICES]
+    for seed in SEED_BOTTLES:
+        for n in STEP_CHOICES:
+            out.append((seed, n))
+    return out
+
+
+def variant_id(seed, steps):
+    return f"order:{seed or 'cold'}:{steps}"

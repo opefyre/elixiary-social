@@ -28,6 +28,7 @@ sys.path.insert(0, PIPE)
 sys.path.insert(0, os.path.join(PIPE, "llm"))
 sys.path.insert(0, HERE)
 import credentials         # noqa: E402
+import bottle_math         # noqa: E402
 import r2                  # noqa: E402
 import slots               # noqa: E402
 
@@ -185,9 +186,54 @@ def prepare_article(conn, hook_override):
     return post_id, spec, text, tags
 
 
+def prepare_homebar(conn, hook_override):
+    """The home-bar format has no queue of source items, so it cycles through
+    (seed bottle, bottle count) variants instead."""
+    import pick_next as pn
+    recipes = pn.query("SELECT to_jsonb(x) FROM (SELECT id,name,slug,"
+                       "ingredients_resolved FROM curated_recipes) x;")
+    master = pn.query("SELECT to_jsonb(m) FROM (SELECT id,category "
+                      "FROM ingredients_master) m;")
+    bottles, pantry = bottle_math.classify(recipes, master)
+
+    used = {sid for sid, _ in db.used_keys(conn, "homebar")}
+    recent = [m.get("seed") for m in db.recent_meta(conn, "homebar", 4)]
+
+    choice = None
+    for seed, steps in bottle_math.variants():
+        vid = bottle_math.variant_id(seed, steps)
+        if vid in used or seed in recent:
+            continue
+        choice = (seed, steps, vid)
+        break
+    if choice is None:
+        raise RuntimeError("no unused home-bar variants left")
+
+    seed, steps, vid = choice
+    spec = bottle_math.order_carousel(recipes, steps=steps, bottles=bottles,
+                                      pantry=pantry, seed=seed)
+    if spec is None:
+        raise RuntimeError(f"variant {vid} produced too few steps")
+    spec["source"]["seed"] = seed
+    print(f"picked  {vid}  ({spec['slides'][0]['title']})")
+
+    post_id = db.reserve(conn, "homebar", vid, "",
+                         {"seed": seed, "steps": steps,
+                          "total": spec["source"]["total"]})
+    if post_id is None:
+        raise RuntimeError(f"variant {vid} already used")
+
+    if hook_override:
+        spec["slides"][0]["kicker"] = hook_override
+    text = caption_mod.homebar_caption(spec["source"], hook=hook_override)
+    tags = caption_mod.homebar_hashtags(spec["source"])
+    return post_id, spec, text, tags
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--type", choices=["recipe", "article"], default="recipe")
+    ap.add_argument("--type", choices=["recipe", "article", "homebar"],
+                    default="recipe")
     ap.add_argument("--dry-run", action="store_true",
                     help="render and upload, but do not touch Buffer")
     ap.add_argument("--hook", help="override the hook line")
@@ -197,7 +243,8 @@ def main():
     run_id = db.start_run(conn, f"publish:{a.type}")
     post_id = None
     try:
-        prep = prepare_recipe if a.type == "recipe" else prepare_article
+        prep = {"recipe": prepare_recipe, "article": prepare_article,
+                "homebar": prepare_homebar}[a.type]
         post_id, spec, text, tags = prep(conn, a.hook)
 
         if not FIRST_COMMENT_SUPPORTED:

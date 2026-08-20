@@ -29,7 +29,7 @@ STATUSES = ("reserved", "rendered", "drafted", "scheduled", "published",
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS posts (
   id             INTEGER PRIMARY KEY AUTOINCREMENT,
-  source_type    TEXT NOT NULL CHECK (source_type IN ('recipe','article')),
+  source_type    TEXT NOT NULL CHECK (source_type IN ('recipe','article','homebar')),
   source_id      TEXT NOT NULL,
   angle          TEXT NOT NULL DEFAULT '',
   status         TEXT NOT NULL,
@@ -65,6 +65,28 @@ def now():
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+def _migrate(c):
+    """SQLite cannot alter a CHECK constraint, so widening source_type means
+    rebuilding the table. Only runs when the old constraint is still in place."""
+    row = c.execute("SELECT sql FROM sqlite_master WHERE type='table' "
+                    "AND name='posts'").fetchone()
+    if not row or "'homebar'" in (row["sql"] or ""):
+        return
+    cols = ("source_type, source_id, angle, status, buffer_post_id, channel_id, "
+            "caption, slide_urls, meta, error, created_at, updated_at")
+    c.executescript(f"""
+        PRAGMA foreign_keys=OFF;
+        BEGIN;
+        ALTER TABLE posts RENAME TO posts_old;
+        {SCHEMA}
+        INSERT INTO posts (id, {cols})
+            SELECT id, {cols} FROM posts_old;
+        DROP TABLE posts_old;
+        COMMIT;
+        PRAGMA foreign_keys=ON;
+    """)
+
+
 def connect(path=None):
     p = path or DB_PATH
     os.makedirs(os.path.dirname(p), exist_ok=True)
@@ -73,6 +95,7 @@ def connect(path=None):
     c.execute("PRAGMA journal_mode=WAL")
     c.execute("PRAGMA foreign_keys=ON")
     c.executescript(SCHEMA)
+    _migrate(c)
     return c
 
 

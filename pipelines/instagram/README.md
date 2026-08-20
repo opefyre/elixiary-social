@@ -250,3 +250,34 @@ same way.
 
 Hook latency is 7-69s (median ~38s), which is most of a daily batch's 6-9
 minutes. `ELIXIARY_HOOK_BUDGET` caps the per-hook spend.
+
+## Home-bar format
+
+A third content type, on the `HomeBar` plate. Unlike recipes and articles it
+has no queue of source items — it cycles through **52 variants** of
+`(seed bottle, bottle count)`, each producing a different answer:
+
+```
+order:cold:10     "10 bottles, 178 cocktails"
+order:gin:5       "You already own Gin — 5 more bottles, 122 cocktails"
+order:whiskey:8   "You already own Whiskey — 8 more, 160 cocktails"
+```
+
+`bottle_math.py` derives the buying order greedily from
+`ingredients_resolved`, scoring every gap at `1/n²` so a recipe one ingredient
+away counts four times one that is two away.
+
+Two things make the output sane:
+
+- **Only bottles are ranked.** `ingredients_master.category` separates
+  spirit/liqueur/wine/beer/bitters from groceries. Cream blocks more recipes
+  than any spirit, so an unfiltered ranking opens with "buy cream first".
+- **A normal kitchen is assumed** — any grocery appearing in 20+ recipes
+  (citrus, sugar, juice, milk, coffee) counts as already owned.
+
+The stats slide reads its claim off the numbers rather than asserting a fixed
+one: ordering by value front-loads the gains, so "later bottles are worth
+more" would contradict the figures printed beside it.
+
+Marlow is omitted from this theme's CTA — Sal already carries the plate, and
+two mascots in one corner read as a collision.

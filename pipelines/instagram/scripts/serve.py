@@ -14,7 +14,7 @@ it becomes mandatory. It is deliberately not used by default — the caller
 anyway, and embedding the value in a workflow would spread the secret for no
 real gain. Create the token if the service is ever bound beyond loopback.
 
-    POST /run     {"recipes": 4, "articles": 1, "dry_run": false}
+    POST /run     {"recipes": 3, "articles": 1, "homebar": 1, "dry_run": false}
     GET  /health
 
     python3 scripts/serve.py            # port 8787
@@ -53,9 +53,10 @@ def token():
         return None
 
 
-def run_daily(recipes, articles, dry):
+def run_daily(recipes, articles, dry, homebar=1):
     cmd = [sys.executable, os.path.join(HERE, "daily_run.py"),
-           "--recipes", str(recipes), "--articles", str(articles)]
+           "--recipes", str(recipes), "--articles", str(articles),
+           "--homebar", str(homebar)]
     if dry:
         cmd.append("--dry-run")
     p = subprocess.run(cmd, capture_output=True, text=True, timeout=MAX_SECONDS)
@@ -126,18 +127,19 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, json.JSONDecodeError):
             return self._send(400, {"error": "invalid JSON body"})
 
-        recipes = int(body.get("recipes", 4))
+        recipes = int(body.get("recipes", 3))
         articles = int(body.get("articles", 1))
+        homebar = int(body.get("homebar", 1))
         dry = bool(body.get("dry_run", False))
-        if not (0 <= recipes <= 8 and 0 <= articles <= 8):
-            return self._send(400, {"error": "recipes/articles must be 0-8"})
+        if not all(0 <= n <= 8 for n in (recipes, articles, homebar)):
+            return self._send(400, {"error": "counts must be 0-8"})
 
         if not _lock.acquire(blocking=False):
             return self._send(409, {"error": "a run is already in progress",
                                     "last": _last})
         try:
             _last["started"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
-            result = run_daily(recipes, articles, dry)
+            result = run_daily(recipes, articles, dry, homebar)
             _last["finished"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
             _last["summary"] = result.get("summary")
             self._send(200 if result["ok"] else 500, result)

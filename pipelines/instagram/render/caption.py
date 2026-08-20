@@ -201,3 +201,46 @@ def article_caption(article, angle=None):
     if len(cap) > MAX_LEN:
         cap = cap[:MAX_LEN].rsplit("\n", 1)[0]
     return cap
+
+
+# ── home bar ───────────────────────────────────────────────────────────────
+
+def homebar_hashtags(source):
+    mid = ["homebar", "bartending", "cocktailtips"]
+    tags, seen = [], set()
+    for t in [BROAD_TAG] + mid[:3] + [BRAND_TAG]:
+        if t and t not in seen:
+            seen.add(t)
+            tags.append("#" + t)
+    return tags[:MAX_TAGS]
+
+
+def homebar_caption(source, hook=None):
+    order = source.get("order") or []
+    seed = source.get("seed")
+    total = source.get("total")
+    steps = source.get("steps")
+
+    parts = []
+    if hook:
+        parts.append(hook)
+    elif seed:
+        parts.append(f"You own {seed}. {steps} more bottles and you can make "
+                     f"{total} cocktails.")
+    else:
+        parts.append(f"{steps} bottles is all it takes to make {total} cocktails "
+                     f"— if you buy them in the right order.")
+    parts.append("")
+    if order:
+        parts.append("The order: " + ", ".join(order) + ".")
+        parts.append("")
+    parts.append("Worked out across every recipe in the app, assuming a normal "
+                 "kitchen — citrus, sugar, juice, milk, coffee.")
+    parts.append("")
+    parts.append("Save it for your next shop, and send it to whoever keeps "
+                 "saying they can't make anything.")
+    parts.append("")
+    parts.append(f"Your own shelf → {SITE}")
+
+    cap = "\n".join(parts).strip()
+    return cap[:MAX_LEN]
