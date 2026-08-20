@@ -78,6 +78,35 @@ THEMES = {
         "grad": "linear-gradient(102deg,#C77C18 0%,#A85410 52%,#0D3929 100%)",
         "foot_left": 134,
         "nudge_right": 56,
+        "hook_align": "flex-end",
+        "cta_right": "330px",
+        "cta_mascot": True,
+        "card_right": 76,
+        "hook_pad": "150px 250px 146px 76px",
+    },
+    # HomeBar backplate — Sal with the app open. Clear zone is the upper
+    # band only, so hook copy is top-anchored rather than bottom-anchored.
+    "homebar": {
+        "bg": "homebar-bg.png",
+        "fg": "#FCFEFD",
+        "muted": "rgba(232,236,242,.74)",
+        "accent": "#F5C451",
+        "rule": "rgba(245,196,81,.24)",
+        # near-opaque: Sal's face showed through the panel and read as a
+        # rendering fault rather than a design choice
+        "card": "rgba(6,17,13,.975)",
+        "card_line": "rgba(245,196,81,.20)",
+        "chip_bg": "rgba(255,255,255,.06)",
+        "chip_line": "rgba(255,255,255,.14)",
+        "shadow": "0 24px 60px rgba(0,0,0,.45)",
+        "grad": "linear-gradient(102deg,#FBE2A0 0%,#F5C451 30%,#F59E0B 68%,#f97316 100%)",
+        "foot_left": 76,
+        "nudge_right": 140,
+        "cta_right": "540px",
+        "cta_mascot": False,
+        "card_right": 250,
+        "hook_align": "flex-start",
+        "hook_pad": "212px 300px 0 76px",
     },
     # Dark bottle-green — the Learn backplate
     "learn": {
@@ -94,7 +123,12 @@ THEMES = {
         "grad": "linear-gradient(102deg,#FBE2A0 0%,#F5C451 30%,#F59E0B 68%,#f97316 100%)",
         "foot_left": 76,
         "nudge_right": 140,
-    },
+            "hook_align": "flex-end",
+        "cta_right": "330px",
+        "cta_mascot": True,
+        "card_right": 76,
+        "hook_pad": "150px 250px 146px 76px",
+},
 }
 
 
@@ -262,7 +296,8 @@ def page_html(slide, theme_key, idx, total, assets):
     t = THEMES[theme_key]
     kind = slide.get("kind", "prose")
     if kind == "cta":
-        body = build_cta(slide, assets.get("marlow"))
+        body = build_cta(slide,
+                         assets.get("marlow") if t.get("cta_mascot", True) else None)
     else:
         body = BUILDERS.get(kind, build_prose)(slide)
 
@@ -296,14 +331,14 @@ body{{
   flex-direction:column}}
 
 /* hook + cta sit directly on the artwork, lower-left, clear of the photo */
-.hook{{justify-content:flex-end;padding-bottom:146px;padding-right:250px}}
+.hook{{justify-content:{t['hook_align']};padding:{t['hook_pad']}}}
 .rule{{width:74px;height:4px;border-radius:2px;background:{t['accent']};
   margin-bottom:26px;opacity:.95}}
 .kicker{{font-family:'PJS';font-weight:700;font-size:33px;line-height:1.16;
   letter-spacing:-.012em;color:{t['muted']};margin-bottom:14px;max-width:17ch}}
 .grad{{background:{t['grad']};-webkit-background-clip:text;background-clip:text;
   color:transparent}}
-.cta{{justify-content:center;padding-right:330px}}
+.cta{{justify-content:center;padding-right:{t['cta_right']}}}
 
 .eyebrow{{font-family:'PJS';font-weight:700;font-size:24px;letter-spacing:.26em;
   text-transform:uppercase;color:{t['accent']};margin-bottom:22px}}
@@ -322,6 +357,7 @@ body{{
 /* content card — lifts text off the photography */
 .card{{background:{t['card']};border:1px solid {t['card_line']};border-radius:26px;
   box-shadow:{t['shadow']};padding:56px 54px;margin:auto 0;
+  margin-right:{t['card_right'] - 76}px;
   backdrop-filter:blur(3px)}}
 .h2{{font-family:'PJS';font-weight:800;font-size:56px;line-height:1.04;
   letter-spacing:-.02em;margin-bottom:36px;text-wrap:balance}}
@@ -377,7 +413,8 @@ body{{
 
 .foot{{position:absolute;left:{t['foot_left']}px;bottom:70px;display:flex;align-items:center;
   gap:12px;font-family:'PJS';font-weight:600;font-size:22px;letter-spacing:.2em;
-  text-transform:uppercase;color:{t['muted']}}}
+  text-transform:uppercase;color:{t['fg']};opacity:.82;
+  text-shadow:0 1px 10px rgba(0,0,0,.75),0 0 3px rgba(0,0,0,.6)}}
 .foot .sep{{opacity:.5;letter-spacing:0}}
 .counter{{font-weight:700;color:{t['accent']};letter-spacing:.06em}}
 .counter .of{{color:{t['muted']}}}
