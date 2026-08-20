@@ -136,7 +136,7 @@ def sentences(text, limit):
 # discovered in a published post.
 LIMITS = {
     "hook_title": 52, "kicker": 52, "subtitle": 76,
-    "section_title": 40, "eyebrow": 30,
+    "section_title": 64, "eyebrow": 30,
     # list labels sit on one line beside a dotted leader; step text is a full
     # sentence in a wrapping block, so they need very different ceilings
     "item_label": 48, "item_value": 20, "step_text": 190,
@@ -195,7 +195,256 @@ def validate_spec(spec):
     return p
 
 
-def recipe_spec(r):
+
+# ── recipe angles ──────────────────────────────────────────────────────────
+#
+# One recipe supports several distinct posts, the same way one article does.
+# Unlike article angles these are NOT model-composed: each angle selects a
+# different set of database fields, so the content stays verbatim and no
+# measurement can be invented. Only the hook line is written by the LLM.
+#
+# 1047 recipes x ~5 usable angles is roughly 5000 posts — years of runway
+# instead of eight months.
+
+def _ing_items(r, limit=9):
+    out = []
+    for i in (r.get("ingredients") or [])[:limit]:
+        label = (i.get("name") or i.get("ingredient") or "").strip()
+        if label:
+            out.append({"label": fit(label, 46),
+                        "value": fit((i.get("measure") or "").strip(), 20)})
+    return out
+
+
+def _steps(r):
+    instr = r.get("instructions")
+    if isinstance(instr, dict):
+        return instr.get("steps") or [], instr.get("notes") or []
+    if isinstance(instr, list):
+        return instr, []
+    return [], []
+
+
+def _stats(r):
+    out = []
+    if r.get("abv_percent") is not None:
+        out.append({"value": f"{float(r['abv_percent']):g}%", "label": "ABV"})
+    if r.get("calories_kcal") is not None:
+        out.append({"value": str(r["calories_kcal"]), "label": "Calories"})
+    if r.get("sugar_g") is not None:
+        out.append({"value": f"{float(r['sugar_g']):g}g", "label": "Sugar"})
+    return out
+
+
+def _flags(r):
+    flags = [FLAG_LABELS.get(f, humanize(f)) for f in (r.get("health_flags") or [])]
+    if r.get("is_vegan"):
+        flags.append("Vegan")
+    if r.get("is_mocktail"):
+        flags.append("Mocktail")
+    if r.get("is_low_alcohol"):
+        flags.append("Low alcohol")
+    return sorted(set(flags))[:5]
+
+
+def _method_slides(r):
+    steps, notes = _steps(r)
+    if not steps:
+        return []
+    chunks = [steps[:5], steps[5:9]] if len(steps) > 6 else [steps[:6]]
+    out = []
+    for n, chunk in enumerate([c for c in chunks if c]):
+        out.append({
+            "kind": "steps",
+            "eyebrow": "Method" if n == 0 else "Method, continued",
+            "title": "How to make it" if n == 0 else " ",
+            "items": [fit(x, 186) for x in chunk],
+            "note": fit(" ".join(notes), 108) if (notes and n == len(chunks) - 1) else None,
+        })
+    return out
+
+
+def a_classic(r):
+    """The full build — ingredients, method, serving, pairings, numbers."""
+    out = []
+    items = _ing_items(r)
+    if items:
+        out.append({"kind": "list", "eyebrow": "What you'll need",
+                    "title": "Ingredients", "items": items,
+                    "note": fit(f"Glass: {r['glassware']}", 108)
+                            if r.get("glassware") else None})
+    out += _method_slides(r)
+    serving = sentences(r.get("serving_notes"), 3)
+    if serving:
+        out.append({"kind": "prose", "eyebrow": "Serve it right",
+                    "title": "Serving notes",
+                    "paragraphs": [fit(x, 250) for x in serving]})
+    stats = _stats(r)
+    if stats:
+        out.append({"kind": "stats", "eyebrow": "Good to know",
+                    "title": "The numbers", "items": stats[:3],
+                    "flags": _flags(r),
+                    "note": "Estimates — actual values vary with pour and brand."})
+    return out
+
+
+def a_story(r):
+    """Where it came from and what it tastes like."""
+    out = []
+    origin = sentences(r.get("origin_story"), 3)
+    if origin:
+        out.append({"kind": "prose", "eyebrow": "Origin",
+                    "title": "Where it comes from",
+                    "paragraphs": [fit(x, 250) for x in origin]})
+    flavour = sentences(r.get("flavor_profile"), 3)
+    if flavour:
+        out.append({"kind": "prose", "eyebrow": "The taste",
+                    "title": "What to expect",
+                    "paragraphs": [fit(x, 250) for x in flavour]})
+    items = _ing_items(r, 6)
+    if items:
+        out.append({"kind": "list", "eyebrow": "In the glass",
+                    "title": "What's in it", "items": items})
+    return out
+
+
+def a_swaps(r):
+    """Substitutions, variations and alternative glassware."""
+    out = []
+    subs = [x for x in (r.get("substitutions") or []) if isinstance(x, dict)]
+    if subs:
+        out.append({"kind": "list", "eyebrow": "No problem",
+                    "title": "Swap it out",
+                    "items": [{"label": fit(humanize(x.get("original")), 40),
+                               "value": fit(humanize(x.get("alternative")), 20)}
+                              for x in subs[:6]],
+                    "note": "Ratios stay 1:1 unless noted."})
+    tips = sentences(r.get("variations_tips"), 3)
+    if tips:
+        out.append({"kind": "prose", "eyebrow": "Make it yours",
+                    "title": "Variations", "paragraphs": [fit(x, 250) for x in tips]})
+    alts = r.get("glass_alternatives") or []
+    if alts:
+        out.append({"kind": "list", "eyebrow": "Serve it in",
+                    "title": "Glass alternatives",
+                    "items": [fit(humanize(g), 46) for g in alts[:5]],
+                    "note": fit(f"First choice: {r['glassware']}", 108)
+                            if r.get("glassware") else None})
+    return out
+
+
+def a_faq(r):
+    """The questions people actually ask."""
+    out = []
+    qs = [x for x in (r.get("faq") or []) if isinstance(x, dict) and x.get("q")]
+    for x in qs[:3]:
+        answer = sentences(x.get("a"), 2)
+        if not answer:
+            continue
+        out.append({"kind": "prose", "eyebrow": "Asked and answered",
+                    "title": fit(x["q"], 62),
+                    "paragraphs": [fit(p, 250) for p in answer]})
+    return out
+
+
+def a_pairing(r):
+    """What to eat with it and when to pour it."""
+    out = []
+    foods = r.get("pairing_foods") or []
+    if foods:
+        out.append({"kind": "list", "eyebrow": "Pairs with",
+                    "title": "What to serve alongside",
+                    "items": [{"label": fit(humanize(f), 46), "value": ""}
+                              for f in foods[:5]],
+                    "note": fit("Flavour notes: " + ", ".join(
+                        humanize(f) for f in (r.get("pairing_flavors") or [])[:4]), 108)
+                            if r.get("pairing_flavors") else None})
+    occ = r.get("occasions") or []
+    moods = r.get("moods") or []
+    if occ or moods:
+        out.append({"kind": "list", "eyebrow": "When to pour it",
+                    "title": "The right moment",
+                    "items": [fit(humanize(o), 46) for o in (occ + moods)[:5]]})
+    serving = sentences(r.get("serving_notes"), 3)
+    if serving:
+        out.append({"kind": "prose", "eyebrow": "Serve it right",
+                    "title": "Serving notes",
+                    "paragraphs": [fit(x, 250) for x in serving]})
+    return out
+
+
+def a_numbers(r):
+    """ABV, calories and dietary detail."""
+    stats = _stats(r)
+    if not stats:
+        return []
+    out = [{"kind": "stats", "eyebrow": "Good to know", "title": "The numbers",
+            "items": stats[:3], "flags": _flags(r),
+            "note": "Estimates — actual values vary with pour and brand."}]
+    allerg = r.get("allergens") or []
+    if allerg:
+        out.append({"kind": "list", "eyebrow": "Heads up",
+                    "title": "Allergens",
+                    "items": [fit(humanize(a), 46) for a in allerg[:5]]})
+    items = _ing_items(r, 6)
+    if items:
+        out.append({"kind": "list", "eyebrow": "In the glass",
+                    "title": "What's in it", "items": items})
+    return out
+
+
+def a_kit(r):
+    """The equipment and the presentation."""
+    out = []
+    equip = r.get("equipment") or []
+    if equip:
+        out.append({"kind": "list", "eyebrow": "The kit",
+                    "title": "What you need behind the bar",
+                    "items": [fit(humanize(e), 46) for e in equip[:6]]})
+    present = []
+    if r.get("glassware"):
+        present.append({"label": "Glass", "value": fit(r["glassware"], 20)})
+    if r.get("garnish"):
+        present.append({"label": "Garnish", "value": fit(r["garnish"], 20)})
+    if r.get("serving_temperature"):
+        present.append({"label": "Serve", "value": fit(r["serving_temperature"], 20)})
+    if r.get("prep_time"):
+        present.append({"label": "Takes", "value": fit(r["prep_time"], 20)})
+    if present:
+        out.append({"kind": "list", "eyebrow": "Presentation",
+                    "title": "How it's served", "items": present})
+    out += _method_slides(r)
+    return out
+
+
+RECIPE_ANGLES = [
+    {"id": "classic",   "eyebrow": None,             "build": a_classic},
+    {"id": "story",     "eyebrow": "The story",      "build": a_story},
+    {"id": "swaps",     "eyebrow": "Make it yours",  "build": a_swaps},
+    {"id": "faq",       "eyebrow": "Questions",      "build": a_faq},
+    {"id": "pairing",   "eyebrow": "Pairs with",     "build": a_pairing},
+    {"id": "numbers",   "eyebrow": "The numbers",    "build": a_numbers},
+    {"id": "kit",       "eyebrow": "The kit",        "build": a_kit},
+]
+ANGLES_BY_ID = {a["id"]: a for a in RECIPE_ANGLES}
+
+# An angle needs enough material to carry a post on its own.
+MIN_ANGLE_SLIDES = 2
+
+
+def available_angles(r):
+    """Angle ids this recipe actually has the data for."""
+    out = []
+    for a in RECIPE_ANGLES:
+        try:
+            if len(a["build"](r)) >= MIN_ANGLE_SLIDES:
+                out.append(a["id"])
+        except Exception:
+            continue
+    return out
+
+
+def recipe_spec(r, angle="classic"):
     slides = []
     name = r.get("name") or "Untitled"
     cat = clean_category(r.get("category"))
@@ -231,94 +480,8 @@ def recipe_spec(r):
         "meta": meta,
     })
 
-    # 2 — ingredients
-    ing = r.get("ingredients") or []
-    if ing:
-        items = []
-        for i in ing[:9]:
-            label = (i.get("name") or i.get("ingredient") or "").strip()
-            if not label:
-                continue
-            items.append({"label": fit(label, 46),
-                          "value": fit((i.get("measure") or "").strip(), 20)})
-        if items:
-            slides.append({
-                "kind": "list",
-                "eyebrow": "What you'll need",
-                "title": "Ingredients",
-                "items": items,
-                "note": fit(f"Glass: {r['glassware']}", 108)
-                        if r.get("glassware") else None,
-            })
-
-    # 3 — method (instructions is an OBJECT {steps[], notes[]}, not an array)
-    instr = r.get("instructions")
-    steps, notes = [], []
-    if isinstance(instr, dict):
-        steps = instr.get("steps") or []
-        notes = instr.get("notes") or []
-    elif isinstance(instr, list):
-        steps = instr
-    if steps:
-        # long methods split across two slides rather than shrinking the type
-        chunks = [steps[:5], steps[5:9]] if len(steps) > 6 else [steps[:6]]
-        for n, chunk in enumerate([c for c in chunks if c]):
-            slides.append({
-                "kind": "steps",
-                "eyebrow": "Method" if n == 0 else "Method, continued",
-                "title": "How to make it" if n == 0 else " ",
-                "items": [fit(x, 186) for x in chunk],
-                "note": fit(" ".join(notes), 108)
-                        if (notes and n == len(chunks) - 1) else None,
-            })
-
-    # 4 — serving
-    serving = sentences(r.get("serving_notes"), 3)
-    if serving:
-        slides.append({
-            "kind": "prose",
-            "eyebrow": "Serve it right",
-            "title": "Serving notes",
-            "paragraphs": [fit(x, 250) for x in serving],
-        })
-
-    # 5 — pairings
-    foods = r.get("pairing_foods") or []
-    flavs = r.get("pairing_flavors") or []
-    if foods or flavs:
-        items = [{"label": fit(humanize(f), 46), "value": ""} for f in foods[:5]]
-        slides.append({
-            "kind": "list",
-            "eyebrow": "Pairs with",
-            "title": "What to serve alongside",
-            "items": items or [humanize(f) for f in flavs[:5]],
-            "note": fit("Flavour notes: "
-                        + ", ".join(humanize(f) for f in flavs[:4]), 108)
-                    if flavs and items else None,
-        })
-
-    # 6 — the numbers
-    stats = []
-    if r.get("abv_percent") is not None:
-        stats.append({"value": f"{float(r['abv_percent']):g}%", "label": "ABV"})
-    if r.get("calories_kcal") is not None:
-        stats.append({"value": str(r["calories_kcal"]), "label": "Calories"})
-    if r.get("sugar_g") is not None:
-        stats.append({"value": f"{float(r['sugar_g']):g}g", "label": "Sugar"})
-    if stats:
-        flags = [FLAG_LABELS.get(f, humanize(f)) for f in (r.get("health_flags") or [])]
-        if r.get("is_vegan"):
-            flags.append("Vegan")
-        if r.get("is_mocktail"):
-            flags.append("Mocktail")
-        slides.append({
-            "kind": "stats",
-            "eyebrow": "Good to know",
-            "title": "The numbers",
-            "items": stats[:3],
-            "flags": sorted(set(flags))[:5],
-            "note": "Estimates — actual values vary with pour and brand.",
-        })
+    body = ANGLES_BY_ID.get(angle or "classic", ANGLES_BY_ID["classic"])["build"](r)
+    slides.extend(body)
 
     # 7 — cta: performable actions only, no fake button
     slides.append({
@@ -343,7 +506,7 @@ def recipe_spec(r):
     return {
         "theme": "recipe",
         "source": {"type": "recipe", "id": r.get("id"), "slug": r.get("slug"),
-                   "name": name},
+                   "name": name, "angle": angle or "classic"},
         "slides": slides[:MAX_SLIDES],
     }
 

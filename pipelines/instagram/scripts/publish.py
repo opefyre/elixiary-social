@@ -142,15 +142,15 @@ def prepare_recipe(conn, hook_override):
     pick, err = pick_next.pick_recipe(conn, dry=False)
     if err:
         raise RuntimeError(err)
-    post_id, row = pick["post_id"], pick["row"]
-    print(f"picked  #{post_id}  {row['name']}  ({pick['meta']['category']}, "
-          f"pool {pick['pool']})")
+    post_id, row, angle = pick["post_id"], pick["row"], pick["angle"]
+    print(f"picked  #{post_id}  {row['name']}  [{angle}]  "
+          f"({pick['meta']['category']}, pool {pick['pool']})")
 
-    spec = build_spec.recipe_spec(row)
+    spec = build_spec.recipe_spec(row, angle)
     if hook_override:
         kicker, caption_hook = hook_override, hook_override
     else:
-        kicker, caption_hook = hooks.recipe_hook(row)
+        kicker, caption_hook = hooks.recipe_hook(row, angle=angle)
         print(f"hook    {kicker}")
     spec["slides"][0]["kicker"] = kicker
     text = caption_mod.recipe_caption(row, hook=caption_hook)

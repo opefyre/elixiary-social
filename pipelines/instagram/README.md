@@ -106,8 +106,9 @@ not raise an alarm.
 Expect ~4-8 min per daily batch (5 carousels), against a 1500s service
 timeout. The variance is Workers AI queue time on the hook step.
 
-**Cadence: 5 posts a day (4 recipes + 1 article), one per slot.** At that rate
-the 1047 recipes last ~8.5 months and the ~430 article angles ~14 months.
+**Cadence: 5 posts a day (4 recipes + 1 article), one per slot.** With angles
+on both sides that is ~7,200 recipe-posts (~5 years at 4/day) and ~430
+article-posts (~14 months).
 Change it in one place — the `jsonBody` of the workflow's HTTP node — and
 `daily_run.py` defaults match.
 
@@ -203,3 +204,34 @@ calls it before picking anything.
 
 A post deleted in Buffer is recorded as `rejected` rather than removed: a human
 declining it is a signal, so the item stays out of the pool.
+
+
+## Angles
+
+Both content types yield several distinct posts per source item, which is what
+turns a finite catalogue into years of runway.
+
+**Articles** — the model composes the slides, restricted to the article text.
+Angle types rotate: primer, mistakes, comparison, checklist, myths, kit.
+
+**Recipes** — angles are *not* model-composed. Each selects a different set of
+database fields, so the content stays verbatim and no measurement can be
+invented. Only the hook is written by the LLM, and it is told which angle it is
+writing for so several posts from one recipe never open the same way.
+
+| Angle | Slides from | Recipes |
+|---|---|---|
+| `classic` | ingredients, method, serving notes, numbers | 1047 |
+| `story` | origin story, flavour profile, ingredients | 1047 |
+| `swaps` | substitutions, variation tips, glass alternatives | 1017 |
+| `faq` | the recipe's own Q&A pairs | 1047 |
+| `pairing` | food pairings, flavour notes, occasions, serving | 1047 |
+| `numbers` | ABV, calories, sugar, allergens, dietary flags | 975 |
+| `kit` | equipment, glass, garnish, serving temp, method | 1047 |
+
+An angle is offered only when it yields at least two content slides, so a
+sparse recipe never produces a thin post. Selection spaces out angle types as
+well as categories and spirits, and spreads across the catalogue rather than
+exhausting one recipe's seven angles first.
+
+Rows created before angles existed carry `angle=''` and are read as `classic`.

@@ -57,6 +57,16 @@ Two fields:
 
 They must not repeat each other. Return JSON only."""
 
+ANGLE_FOCUS = {
+    "classic": "the drink itself — how it tastes and why it is worth making",
+    "story":   "where the drink came from and what it tastes like",
+    "swaps":   "swapping ingredients and making the drink your own",
+    "faq":     "the questions people actually ask about this drink",
+    "pairing": "what to eat with it and when to serve it",
+    "numbers": "the alcohol, calories and dietary facts",
+    "kit":     "the equipment, glass and garnish it needs",
+}
+
 USER = """RECIPE BRIEF
 Name: {name}
 Category: {category}
@@ -67,7 +77,11 @@ Occasions: {occasions}
 Difficulty: {difficulty} · {prep} · served in a {glass}
 Alcohol-free: {mocktail}
 
-Write the kicker and caption_hook for this drink.
+THIS POST IS ABOUT: {focus}
+The hook must point at that, not at the drink in general — several posts are
+made from this same recipe and they must not open the same way.
+
+Write the kicker and caption_hook.
 
 Good kickers, for other drinks, to show register — do not reuse them:
   "Bitter, then bright."
@@ -103,7 +117,7 @@ def _valid(h):
     return True
 
 
-def recipe_hook(row, backend="cf"):
+def recipe_hook(row, angle="classic", backend="cf"):
     """Returns (kicker, caption_hook). Never raises — falls back instead."""
     name = row.get("name") or "This drink"
     fallback = (FALLBACK_KICKER.format(name=name),
@@ -124,6 +138,7 @@ def recipe_hook(row, backend="cf"):
         prep=row.get("prep_time") or "n/a",
         glass=row.get("glassware") or "glass",
         mocktail="yes" if row.get("is_mocktail") else "no",
+        focus=ANGLE_FOCUS.get(angle, ANGLE_FOCUS["classic"]),
     )
 
     for attempt in range(2):
