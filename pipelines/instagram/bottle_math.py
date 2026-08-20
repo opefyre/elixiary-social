@@ -76,6 +76,44 @@ STAPLE_PATTERNS = [
 ]
 
 
+# Categories from ingredients_master that represent something you go out and
+# buy for a bar. Everything else — citrus, dairy, syrups, juices — is a
+# grocery, and telling someone to "buy cream first" is absurd advice even
+# though cream blocks more recipes than any spirit.
+BOTTLE_CATEGORIES = {"spirit", "liqueur", "wine", "beer", "bitters"}
+
+# A grocery counts as already owned once it appears in at least this many
+# recipes: a normal kitchen has lemons, not passion fruit puree.
+COMMON_GROCERY_MIN = 20
+
+_classified = None
+
+
+def classify(recipes, master):
+    """Split ingredient families into bottles-to-buy and assumed groceries."""
+    global _classified
+    cat_by_id = {m["id"]: (m.get("category") or "") for m in master}
+    fam_cat, fam_n = {}, {}
+    for r in recipes:
+        for i in (r.get("ingredients_resolved") or []):
+            f = family(i.get("canonical"))
+            if not f:
+                continue
+            c = cat_by_id.get(i.get("masterId"), "")
+            fam_cat.setdefault(f, {})
+            fam_cat[f][c] = fam_cat[f].get(c, 0) + 1
+            fam_n[f] = fam_n.get(f, 0) + 1
+    bottles, pantry = set(), set()
+    for f, cats in fam_cat.items():
+        top = max(cats.items(), key=lambda kv: kv[1])[0]
+        if top in BOTTLE_CATEGORIES:
+            bottles.add(f)
+        elif fam_n[f] >= COMMON_GROCERY_MIN:
+            pantry.add(f)                 # common enough to assume
+    _classified = (bottles, pantry)
+    return bottles, pantry
+
+
 def family(canonical):
     """Map a canonical ingredient name to a shopping-level family."""
     c = (canonical or "").strip().lower()
@@ -134,6 +172,144 @@ if __name__ == "__main__":
     print("one bottle away:")
     for fam, rs in ranked[:8]:
         print(f"   + {fam:20} unlocks {len(rs):>3}   e.g. {rs[0]['name'][:34]}")
+
+
+# ── build order ────────────────────────────────────────────────────────────
+
+def build_order(recipes, steps=10, bottles=None, pantry=None):
+    """Greedy shopping order: which bottle to buy next to unlock the most.
+
+    Scoring weights every gap by 1/n^2, so a recipe one ingredient away counts
+    four times one that is two away. A naive "only count recipes this
+    completes" greedy is myopic — nothing completes early, so it opens with
+    absurd picks like amaretto third. This orders sensibly (lemon, vodka, gin,
+    lime) and lands in the same place.
+    """
+    bottles = bottles if bottles is not None else set()
+    pantry = pantry if pantry is not None else set()
+
+    pairs = [(r, recipe_families(r)) for r in recipes]
+    # the kitchen is assumed; only bottles are ranked
+    pairs = [(r, f - pantry) for r, f in pairs if f]
+    pairs = [(r, f) for r, f in pairs if f and f <= bottles]
+
+    bar, made = set(), set()
+    out = []
+    for _ in range(steps):
+        score = {}
+        for i, (r, f) in enumerate(pairs):
+            if i in made:
+                continue
+            gaps = f - bar
+            if not gaps:
+                continue
+            w = 1.0 / (len(gaps) ** 2)
+            for g in gaps:
+                if bottles and g not in bottles:
+                    continue
+                score[g] = score.get(g, 0.0) + w
+        if not score:
+            break
+        pick = max(score.items(), key=lambda kv: (kv[1], -len(kv[0])))[0]
+        bar.add(pick)
+        unlocked = []
+        for i, (r, f) in enumerate(pairs):
+            if i not in made and not (f - bar):
+                made.add(i)
+                unlocked.append(r)
+        out.append({"n": len(bar), "item": pick, "total": len(made),
+                    "gained": len(unlocked), "examples": unlocked})
+    return out
+
+
+def order_carousel(recipes, steps=10, kicker=None, bottles=None, pantry=None):
+    """'Build your bar in this order' — the strongest version of the format,
+    because the numbers compound and the advice is directly actionable."""
+    import sys as _s
+    _s.path.insert(0, os.path.join(HERE, "render"))
+    from build_spec import fit, MAX_SLIDES
+
+    order = build_order(recipes, steps, bottles=bottles, pantry=pantry)
+    if len(order) < steps:
+        return None
+    total = order[-1]["total"]
+    half = steps // 2
+    first_half, second_half = order[:half], order[half:]
+    gain_first = first_half[-1]["total"]
+    gain_second = total - gain_first
+
+    made_examples = []
+    for st in reversed(order):
+        for r in st["examples"]:
+            if r["name"] not in made_examples:
+                made_examples.append(r["name"])
+        if len(made_examples) >= 6:
+            break
+
+    def rows(chunk):
+        return [{"label": fit(_title(st["item"]), 38),
+                 "value": f"{st['total']}"} for st in chunk]
+
+    slides = [{
+        "kind": "hook",
+        "eyebrow": "Build your home bar",
+        "kicker": kicker or "Buy them in this order.",
+        "title": f"{steps} bottles, {total} cocktails",
+        "title_size": 84,
+        "subtitle": "Worked out across all 1,000+ recipes.",
+        "meta": [f"{gain_first} by bottle {half}", f"{total} by bottle {steps}"],
+    }, {
+        "kind": "list",
+        "eyebrow": f"Bottles 1-{half}",
+        "title": "Start here",
+        "items": rows(first_half),
+        "note": "The number is how many cocktails you can make by that point.",
+    }, {
+        "kind": "list",
+        "eyebrow": f"Bottles {half+1}-{steps}",
+        "title": "Then these",
+        "items": rows(second_half),
+        "note": f"Bottle {steps} alone adds {order[-1]['gained']} more drinks.",
+    }, {
+        # The shape of the curve is whatever the data says. Ordering bottles by
+        # value front-loads the gains, so claiming later bottles are worth more
+        # would contradict the numbers printed beside it.
+        "kind": "stats",
+        "eyebrow": "Where the value is",
+        "title": ("The first few do the work" if gain_first >= gain_second
+                  else "It keeps compounding"),
+        "items": [{"value": str(gain_first), "label": f"first {half}"},
+                  {"value": f"+{gain_second}", "label": f"next {steps-half}"},
+                  {"value": str(total), "label": "all {}".format(steps)}],
+        "flags": [],
+        "note": (f"Five bottles gets you {gain_first}. The next five add "
+                 f"{gain_second} more."),
+    }, {
+        "kind": "list",
+        "eyebrow": f"{total} drinks",
+        "title": "A few you'll unlock",
+        "items": [{"label": fit(n, 46), "value": ""} for n in made_examples[:6]],
+        "note": "Assumes a normal kitchen: citrus, sugar, juice, milk, coffee.",
+    }, {
+        "kind": "cta",
+        "eyebrow": "Free to start",
+        "title": "What's on your shelf?",
+        "subtitle": "Add your bottles once. Elixiary tells you what you can pour.",
+        "actions": [
+            {"icon": "save", "text": "Save for your next shop"},
+            {"icon": "send", "text": "Send to whoever stocks up"},
+            {"icon": "follow", "text": "Follow @elixiary.ai"},
+        ],
+        "link": "Your bar → elixiary.com",
+    }]
+    if len(slides) > 2:
+        slides[1]["save_hint"] = "Save this"
+
+    return {"theme": "homebar",
+            "source": {"type": "homebar", "variant": "build_order",
+                       "steps": steps, "total": total,
+                       "order": [st["item"] for st in order]},
+            "slides": slides[:MAX_SLIDES]}
 
 
 # ── carousel spec ──────────────────────────────────────────────────────────
