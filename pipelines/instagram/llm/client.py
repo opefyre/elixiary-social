@@ -7,9 +7,12 @@ account and has a free daily allowance. OpenRouter is supported as a fallback
 so the same code can run behind n8n's existing credential.
 
 Credentials, in order of preference:
-  CLOUDFLARE_API_TOKEN      a scoped token (preferred for anything long-lived)
-  wrangler's OAuth token    read from ~/Library/Preferences/.wrangler/config
-  OPENROUTER_API_KEY        with --backend openrouter
+  CLOUDFLARE_API_TOKEN       environment variable
+  <repo>/cloudflaretoken.txt a scoped API token (gitignored) — preferred for
+                             unattended runs, since it does not expire the way
+                             wrangler's OAuth token refreshes
+  wrangler's OAuth token     fallback, read from ~/Library/Preferences/.wrangler
+  OPENROUTER_API_KEY         with backend="openrouter"
 """
 
 import json
@@ -28,6 +31,25 @@ OR_MODEL = os.environ.get("ELIXIARY_OR_MODEL",
 
 WRANGLER_CFG = os.path.expanduser(
     "~/Library/Preferences/.wrangler/config/default.toml")
+# llm/ -> instagram/ -> pipelines/ -> <repo root>
+_REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                     "..", "..", ".."))
+TOKEN_FILE = os.path.join(_REPO, "cloudflaretoken.txt")
+
+
+def _cf_token():
+    """Env var, then the gitignored token file, then wrangler's OAuth token."""
+    tok = os.environ.get("CLOUDFLARE_API_TOKEN")
+    if tok:
+        return tok.strip()
+    try:
+        with open(TOKEN_FILE) as f:
+            tok = f.read().strip()
+            if tok:
+                return tok
+    except OSError:
+        pass
+    return _wrangler_token()
 
 
 def _wrangler_token():
@@ -81,9 +103,11 @@ def complete_json(system, user, schema=None, backend="cf", max_tokens=2400,
     for n in range(attempts):
         try:
             if backend == "cf":
-                token = os.environ.get("CLOUDFLARE_API_TOKEN") or _wrangler_token()
+                token = _cf_token()
                 if not token:
-                    raise RuntimeError("no Cloudflare credential available")
+                    raise RuntimeError(
+                        "no Cloudflare credential: set CLOUDFLARE_API_TOKEN, "
+                        "add cloudflaretoken.txt, or log in with wrangler")
                 payload = {
                     "messages": [{"role": "system", "content": system},
                                  {"role": "user", "content": user}],
@@ -99,11 +123,19 @@ def complete_json(system, user, schema=None, backend="cf", max_tokens=2400,
                 if not out.get("success", True):
                     raise RuntimeError(f"Workers AI error: {out.get('errors')}")
                 res = out["result"]
-                text = (res.get("response")
-                        if isinstance(res.get("response"), str)
-                        else json.dumps(res.get("response"))
-                        if res.get("response") is not None
-                        else res["choices"][0]["message"]["content"])
+                if isinstance(res.get("response"), str):
+                    text = res["response"]
+                elif res.get("response") is not None:
+                    text = json.dumps(res["response"])
+                else:
+                    choice = res["choices"][0]
+                    text = choice["message"].get("content") or ""
+                    if not text.strip():
+                        # glm-5.2 and gpt-oss are reasoning models: if the token
+                        # budget is spent on reasoning, content comes back empty
+                        raise ValueError(
+                            f"empty content (finish_reason="
+                            f"{choice.get('finish_reason')}) — raise max_tokens")
             else:
                 key = os.environ.get("OPENROUTER_API_KEY")
                 if not key:

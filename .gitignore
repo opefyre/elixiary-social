@@ -4,6 +4,8 @@ supabase.txt
 supabaseapi.txt
 # Buffer GraphQL API key
 bufferapi.txt
+# Cloudflare API token (Workers AI)
+cloudflaretoken.txt
 
 # Generic secret patterns — belt and braces
 .env
