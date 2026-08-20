@@ -27,7 +27,9 @@ REPO = os.path.abspath(os.path.join(PIPE, "..", ".."))
 sys.path.insert(0, os.path.join(PIPE, "llm"))
 sys.path.insert(0, os.path.join(PIPE, "state"))
 import client as llm  # noqa: E402
+sys.path.insert(0, PIPE)
 import db  # noqa: E402
+import credentials  # noqa: E402
 
 ANGLE_KINDS = [
     ("primer", "a practical primer: what it is and why it matters"),
@@ -165,7 +167,7 @@ from the article above:
 
 
 def fetch_article(where):
-    conn = open(os.path.join(REPO, "supabase.txt")).read().strip()
+    conn = credentials.get("supabase")
     sql = (f"SELECT to_jsonb(a) FROM (SELECT id,slug,title,excerpt,category,"
            f"difficulty,read_time,content FROM education_articles "
            f"WHERE {where} AND status='published' LIMIT 1) a;")

@@ -21,7 +21,11 @@ import sys
 from datetime import date
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "state"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import db  # noqa: E402
+import credentials  # noqa: E402
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "render"))
+from build_spec import clean_category  # noqa: E402
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                     "..", "..", ".."))
@@ -44,8 +48,7 @@ SPIRIT_WINDOW = 4
 
 
 def query(sql):
-    with open(CONN_FILE) as f:
-        conn = f.read().strip()
+    conn = credentials.get("supabase")
     out = subprocess.run(
         ["psql", conn, "-At", "-c", "SET default_transaction_read_only=on;",
          "-c", sql],
@@ -95,7 +98,7 @@ def pick_recipe(conn, dry):
         s = 0.0
         if f"season_{season}" in (r.get("tags") or []):
             s += 3.0
-        if r.get("category") in recent_cats:
+        if clean_category(r.get("category")) in recent_cats:
             s -= 4.0
         if tag_of(r, "base_spirit_") in recent_spirits:
             s -= 3.0
@@ -105,7 +108,7 @@ def pick_recipe(conn, dry):
 
     scored.sort(key=lambda x: -x[0])
     score, best = scored[0]
-    meta = {"category": best.get("category"),
+    meta = {"category": clean_category(best.get("category")),
             "spirit": tag_of(best, "base_spirit_"),
             "season": tag_of(best, "season_"),
             "name": best.get("name"), "slug": best.get("slug")}
@@ -144,7 +147,7 @@ def pick_article(conn, dry):
     score, best = scored[0]
 
     prior = sorted(a for sid, a in used if sid == best["id"] and a)
-    meta = {"category": best.get("category"), "title": best.get("title"),
+    meta = {"category": clean_category(best.get("category")), "title": best.get("title"),
             "slug": best.get("slug")}
     return {"post_id": None, "score": round(score, 3), "meta": meta,
             "row": best, "used_angles": prior, "pool": len(rows),

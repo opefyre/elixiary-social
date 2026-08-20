@@ -43,17 +43,66 @@ def humanize(tag):
     return s[:1].upper() + s[1:] if s else s
 
 
+# The category column is not normalised: the same bucket appears as a display
+# name ("Highball Long"), a tidier variant ("Highballs & Long Drinks") and a
+# raw slug ("cat_highball_long"). Collapse all three onto one label.
+CATEGORY_CANON = {
+    "highball long": "Highballs & Long Drinks",
+    "short shaken citrus": "Short & Shaken Citrus",
+    "short spirit forward": "Spirit-Forward",
+    "soft zero proof": "Zero-Proof",
+    "coffee tea": "Coffee & Tea Cocktails",
+    "spritz sparkling": "Spritz & Sparkling",
+    "punch party": "Punch & Party",
+    "milk egg cream": "Milk, Egg & Cream",
+    "beer cocktail": "Beer Cocktails",
+    "shot shooter": "Shots & Shooters",
+    "tiki tropical": "Tiki & Tropical",
+    "smash julep swizzle": "Smash, Julep & Swizzle",
+    "wine vermouth aperitif": "Wine, Vermouth & Aperitif",
+    "frozen blended": "Frozen & Blended",
+    "liqueur cordial": "Liqueurs & Cordials",
+    "digestif after dinner": "Digestifs",
+    "hot": "Hot Drinks",
+}
+# no useful label — fall back to the generic eyebrow
+CATEGORY_EMPTY = {"unknown other", "unknown", "other", ""}
+
+
 def clean_category(c):
-    """Recipe categories aren't normalized in the DB — collapse the duplicates."""
     if not c:
         return None
-    c = c.strip()
-    fixes = {
-        "Highball Long": "Highballs & Long Drinks",
-        "Coffee Tea": "Coffee & Tea Cocktails",
-        "Shot Shooter": "Shots & Shooters",
-    }
-    return fixes.get(c, c)
+    key = str(c).strip().lower()
+    if key.startswith("cat_"):
+        key = key[4:]
+    key = key.replace("_", " ").replace("&", " ").replace(",", " ")
+    key = " ".join(key.split())
+    if key in CATEGORY_EMPTY:
+        return None
+    if key in CATEGORY_CANON:
+        return CATEGORY_CANON[key]
+    # already-tidy variants such as "highballs long drinks" land here
+    for canon in CATEGORY_CANON.values():
+        norm = " ".join(canon.lower().replace("&", " ").replace(",", " ")
+                        .replace("-", " ").split())
+        if key == norm or key.rstrip("s") == norm.rstrip("s"):
+            return canon
+    return str(c).strip().title()
+
+
+def fit(text, limit, ellipsis="…"):
+    """Trim to `limit` on a word boundary. Content that doesn't fit is shortened
+    here rather than rejected later — the catalogue has plenty of long
+    ingredient names and drink titles, and they are all still postable."""
+    if not text:
+        return text
+    t = " ".join(str(text).split())
+    if len(t) <= limit:
+        return t
+    cut = t[:limit - 1].rsplit(" ", 1)[0].rstrip(",;:-(")
+    if len(cut) < limit * 0.5:          # one very long word — hard cut
+        cut = t[:limit - 1]
+    return cut + ellipsis
 
 
 def hook_size(title):
@@ -61,6 +110,8 @@ def hook_size(title):
     stays inside the backplate's clear zone."""
     n = len(title or "")
     longest = max((len(w) for w in (title or "").split()), default=0)
+    if n > 34:                 # very long names drop to the smallest step
+        return 68
     if longest >= 13:          # a single very long word sets the ceiling
         return 84
     if n <= 13:
@@ -84,9 +135,11 @@ def sentences(text, limit):
 # limits silently runs off the artboard. Checked before rendering rather than
 # discovered in a published post.
 LIMITS = {
-    "hook_title": 34, "kicker": 52, "subtitle": 76,
+    "hook_title": 52, "kicker": 52, "subtitle": 76,
     "section_title": 40, "eyebrow": 30,
-    "item_label": 38, "item_value": 20,
+    # list labels sit on one line beside a dotted leader; step text is a full
+    # sentence in a wrapping block, so they need very different ceilings
+    "item_label": 48, "item_value": 20, "step_text": 190,
     "paragraph": 260, "note": 110,
 }
 MAX_ITEMS = 9
@@ -123,12 +176,13 @@ def validate_spec(spec):
             cap = MAX_STEPS if kind == "steps" else MAX_ITEMS
             if len(items) > cap:
                 p.append(f"{w}: {len(items)} items, max {cap}")
+            label_key = "step_text" if kind == "steps" else "item_label"
             for it in items:
                 if isinstance(it, dict):
-                    too_long(w, it.get("label"), "item_label")
+                    too_long(w, it.get("label"), label_key)
                     too_long(w, it.get("value"), "item_value")
                 else:
-                    too_long(w, it, "item_label")
+                    too_long(w, it, label_key)
             paras = s.get("paragraphs") or []
             if kind == "prose" and not paras:
                 p.append(f"{w}: no paragraphs")
@@ -153,7 +207,7 @@ def recipe_spec(r):
     # whole — a mid-phrase ellipsis reads worse than no lede at all. Otherwise
     # fall back to a scannable tag line, e.g. "Tequila · Citrus · Winter".
     lede = (sentences(r.get("flavor_profile"), 1) or [None])[0]
-    if lede and len(lede) > 116:
+    if lede and len(lede) > 76:
         lede = None
     if not lede:
         tags = r.get("tags") or []
@@ -167,12 +221,12 @@ def recipe_spec(r):
 
     slides.append({
         "kind": "hook",
-        "eyebrow": cat or "Cocktail Recipe",
+        "eyebrow": fit(cat or "Cocktail Recipe", 30),
         # `kicker` is the one line the LLM writes on this slide — the hook.
         # Left empty here; the caption step fills it in.
         "kicker": None,
-        "title": name,
-        "title_size": hook_size(name),
+        "title": fit(name, 52),
+        "title_size": hook_size(fit(name, 52)),
         "subtitle": lede,
         "meta": meta,
     })
@@ -185,14 +239,16 @@ def recipe_spec(r):
             label = (i.get("name") or i.get("ingredient") or "").strip()
             if not label:
                 continue
-            items.append({"label": label, "value": (i.get("measure") or "").strip()})
+            items.append({"label": fit(label, 46),
+                          "value": fit((i.get("measure") or "").strip(), 20)})
         if items:
             slides.append({
                 "kind": "list",
                 "eyebrow": "What you'll need",
                 "title": "Ingredients",
                 "items": items,
-                "note": f"Glass: {r['glassware']}" if r.get("glassware") else None,
+                "note": fit(f"Glass: {r['glassware']}", 108)
+                        if r.get("glassware") else None,
             })
 
     # 3 — method (instructions is an OBJECT {steps[], notes[]}, not an array)
@@ -211,8 +267,9 @@ def recipe_spec(r):
                 "kind": "steps",
                 "eyebrow": "Method" if n == 0 else "Method, continued",
                 "title": "How to make it" if n == 0 else " ",
-                "items": chunk,
-                "note": " ".join(notes) if (notes and n == len(chunks) - 1) else None,
+                "items": [fit(x, 186) for x in chunk],
+                "note": fit(" ".join(notes), 108)
+                        if (notes and n == len(chunks) - 1) else None,
             })
 
     # 4 — serving
@@ -222,20 +279,21 @@ def recipe_spec(r):
             "kind": "prose",
             "eyebrow": "Serve it right",
             "title": "Serving notes",
-            "paragraphs": serving,
+            "paragraphs": [fit(x, 250) for x in serving],
         })
 
     # 5 — pairings
     foods = r.get("pairing_foods") or []
     flavs = r.get("pairing_flavors") or []
     if foods or flavs:
-        items = [{"label": humanize(f), "value": ""} for f in foods[:5]]
+        items = [{"label": fit(humanize(f), 46), "value": ""} for f in foods[:5]]
         slides.append({
             "kind": "list",
             "eyebrow": "Pairs with",
             "title": "What to serve alongside",
             "items": items or [humanize(f) for f in flavs[:5]],
-            "note": ("Flavour notes: " + ", ".join(humanize(f) for f in flavs[:4]))
+            "note": fit("Flavour notes: "
+                        + ", ".join(humanize(f) for f in flavs[:4]), 108)
                     if flavs and items else None,
         })
 

@@ -43,11 +43,13 @@ def _cf_token():
     if tok:
         return tok.strip()
     try:
-        with open(TOKEN_FILE) as f:
-            tok = f.read().strip()
-            if tok:
-                return tok
-    except OSError:
+        import sys
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        import credentials as _s
+        tok = _s.get("cloudflare", required=False)
+        if tok:
+            return tok
+    except Exception:
         pass
     return _wrangler_token()
 

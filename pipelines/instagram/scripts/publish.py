@@ -24,8 +24,10 @@ REPO = os.path.abspath(os.path.join(PIPE, "..", ".."))
 sys.path.insert(0, os.path.join(PIPE, "state"))
 sys.path.insert(0, os.path.join(PIPE, "render"))
 
+sys.path.insert(0, PIPE)
 sys.path.insert(0, os.path.join(PIPE, "llm"))
 sys.path.insert(0, HERE)
+import credentials         # noqa: E402
 import build_spec          # noqa: E402
 import caption as caption_mod  # noqa: E402
 import db                  # noqa: E402
@@ -56,8 +58,7 @@ def wrangler_bin():
 
 
 def buffer_key():
-    with open(os.path.join(REPO, "bufferapi.txt")) as f:
-        return f.read().strip()
+    return credentials.get("buffer")
 
 
 def gql(query, variables=None):

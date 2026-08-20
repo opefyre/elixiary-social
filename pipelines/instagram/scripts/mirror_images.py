@@ -56,9 +56,12 @@ def log(msg):
         print(msg, flush=True)
 
 
+sys.path.insert(0, os.path.join(REPO, "pipelines", "instagram"))
+
+
 def conn_string():
-    with open(CONN_FILE) as f:
-        return f.read().strip()
+    import credentials
+    return credentials.get("supabase")
 
 
 def fetch_rows(limit=None):
