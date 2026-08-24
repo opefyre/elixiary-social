@@ -87,7 +87,10 @@ def main():
         base = prefixes.get(pid, f"{PREFIX}/{pid}")
         if not exists(f"{base}/slide-01.png"):
             continue
-        keys = [f"{base}/slide-{i:02d}.png"
+        # tt-*.png are the 9:16 TikTok frames of the same slides; they live
+        # under the same prefix and would otherwise be left behind forever
+        keys = [f"{base}/{stem}-{i:02d}.png"
+                for stem in ("slide", "tt")
                 for i in range(1, MAX_SLIDES_PROBE + 1)]
         present = [k for k in keys if exists(k)]
         status = next((r["status"] for r in conn.execute(

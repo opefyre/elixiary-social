@@ -50,6 +50,27 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_posts_unique
 CREATE INDEX IF NOT EXISTS idx_posts_created ON posts (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_posts_status  ON posts (status);
 
+-- Mirrors of a post on other channels. createPost takes a single channelId,
+-- so cross-posting means a second Buffer draft pointing at re-framed slides.
+-- Kept out of `posts` so selection, variety and uniqueness stay one-row-per-
+-- item: a TikTok mirror is not a second piece of content.
+CREATE TABLE IF NOT EXISTS crossposts (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  post_id        INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  service        TEXT NOT NULL,
+  channel_id     TEXT NOT NULL,
+  buffer_post_id TEXT,
+  slide_urls     TEXT,
+  status         TEXT NOT NULL,
+  error          TEXT,
+  created_at     TEXT NOT NULL,
+  updated_at     TEXT NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_crosspost_unique
+  ON crossposts (post_id, service);
+CREATE INDEX IF NOT EXISTS idx_crosspost_status ON crossposts (status);
+
 CREATE TABLE IF NOT EXISTS runs (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   kind        TEXT NOT NULL,
@@ -126,6 +147,22 @@ def recent_meta(conn, source_type, limit=8):
     return out
 
 
+def crossposts_for(conn, post_id):
+    rows = conn.execute("SELECT * FROM crossposts WHERE post_id=?",
+                        (post_id,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def open_crossposts(conn):
+    """Mirrors still awaiting a verdict, for the status sync."""
+    rows = conn.execute(
+        "SELECT c.*, p.source_type FROM crossposts c JOIN posts p ON p.id=c.post_id "
+        "WHERE c.status IN ('drafted','scheduled') AND c.buffer_post_id IS NOT NULL "
+        "ORDER BY c.id"
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
 def counts(conn):
     rows = conn.execute(
         "SELECT source_type, status, COUNT(*) n FROM posts "
@@ -188,6 +225,40 @@ def discard(conn, post_id):
     if row and row["status"] in ("drafted", "published"):
         raise ValueError(f"refusing to discard post {post_id}: {row['status']}")
     conn.execute("DELETE FROM posts WHERE id=?", (post_id,))
+    conn.commit()
+
+
+def add_crosspost(conn, post_id, service, channel_id, buffer_post_id=None,
+                  slide_urls=None, status="drafted", error=None):
+    """Record a mirror. Replaces any earlier attempt for the same service so a
+    retry after a failure doesn't collide on the unique index."""
+    if status not in STATUSES:
+        raise ValueError(f"bad status: {status}")
+    conn.execute(
+        "INSERT INTO crossposts (post_id, service, channel_id, buffer_post_id,"
+        " slide_urls, status, error, created_at, updated_at)"
+        " VALUES (?,?,?,?,?,?,?,?,?)"
+        " ON CONFLICT (post_id, service) DO UPDATE SET"
+        " channel_id=excluded.channel_id, buffer_post_id=excluded.buffer_post_id,"
+        " slide_urls=excluded.slide_urls, status=excluded.status,"
+        " error=excluded.error, updated_at=excluded.updated_at",
+        (post_id, service, channel_id, buffer_post_id,
+         json.dumps(slide_urls or []), status, error, now(), now()))
+    conn.commit()
+
+
+def update_crosspost(conn, cp_id, **fields):
+    allowed = {"status", "buffer_post_id", "slide_urls", "error"}
+    bad = set(fields) - allowed
+    if bad:
+        raise ValueError(f"unknown fields: {bad}")
+    if fields.get("status") and fields["status"] not in STATUSES:
+        raise ValueError(f"bad status: {fields['status']}")
+    if "slide_urls" in fields and not isinstance(fields["slide_urls"], str):
+        fields["slide_urls"] = json.dumps(fields["slide_urls"])
+    sets = ", ".join(f"{k}=?" for k in fields)
+    conn.execute(f"UPDATE crossposts SET {sets}, updated_at=? WHERE id=?",
+                 (*fields.values(), now(), cp_id))
     conn.commit()
 
 

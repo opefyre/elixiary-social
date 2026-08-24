@@ -41,7 +41,11 @@ def rows(sql, params=None):
         try:
             conn.set_session(readonly=True, autocommit=True)
             with conn.cursor() as cur:
-                cur.execute(sql, params or ())
+                # Passing an empty sequence still puts psycopg2 in
+                # interpolation mode, so a literal % in the SQL — ILIKE
+                # '%2 min%', "|| '% ABV'" — raises "tuple index out of
+                # range". None skips interpolation entirely.
+                cur.execute(sql, params) if params else cur.execute(sql)
                 out = []
                 for r in cur.fetchall():
                     v = r[0]

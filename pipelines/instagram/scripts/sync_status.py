@@ -113,11 +113,33 @@ def sync(conn=None, dry=False, quiet=False):
                 fields["meta"] = meta
             db.update(conn, r["id"], **fields)
 
+    # Mirrors are separate Buffer posts with their own approval, so a TikTok
+    # draft can be scheduled or deleted independently of its Instagram twin.
+    mirrors = db.open_crossposts(conn)
+    for m in mirrors:
+        try:
+            node = fetch(m["buffer_post_id"])
+        except Exception as ex:
+            if not quiet:
+                print(f"  {m['post_id']:>3} {m['service']} lookup failed: "
+                      f"{str(ex)[:80]}")
+            continue
+        new = "rejected" if node is None else MAP.get(node["status"], "drafted")
+        if new == m["status"]:
+            continue
+        if not quiet:
+            print(f"  {m['post_id']:>3} {m['service']:7} {m['status']:9} -> "
+                  f"{new:9} ({'deleted in Buffer' if node is None else 'buffer=' + node['status']})")
+        changed += 1
+        if not dry:
+            db.update_crosspost(conn, m["id"], status=new)
+
     if not quiet:
         verb = "would change" if dry else "changed"
-        print(f"\nchecked {len(rows)}, {verb} {changed}")
+        print(f"\nchecked {len(rows)} posts + {len(mirrors)} mirrors, "
+              f"{verb} {changed}")
         print("counts:", db.counts(conn))
-    return len(rows), changed
+    return len(rows) + len(mirrors), changed
 
 
 def main():

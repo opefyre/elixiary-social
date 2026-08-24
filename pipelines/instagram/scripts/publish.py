@@ -42,6 +42,7 @@ import generate_angle      # noqa: E402
 import hooks               # noqa: E402
 import pick_next           # noqa: E402
 import render as renderer  # noqa: E402
+import vertical            # noqa: E402
 
 # A stray copy of db.py anywhere earlier on sys.path would silently resolve to
 # a different, empty tracking database — the pool would look untouched and
@@ -83,6 +84,14 @@ CHANNEL_ELIXIARY = "6a855825ccaf649a67d4db86"
 # finkavo is a separate business on the same Buffer account. Never post to it.
 CHANNEL_BLOCKLIST = {"6a7b98a8b2d9d577435cbebe": "finkavo"}
 
+# Same account, second surface. TikTok shows photo posts full-screen 9:16, so
+# the mirror carries re-framed slides rather than the 4:5 Instagram ones.
+CHANNEL_TIKTOK = "6a8825c2ccaf649a67eab6b0"
+ALLOWED_CHANNELS = {CHANNEL_ELIXIARY: "instagram", CHANNEL_TIKTOK: "tiktok"}
+
+# Off switch, so a TikTok outage can never hold up the Instagram post.
+TIKTOK_ENABLED = os.environ.get("ELIXIARY_TIKTOK", "1") not in ("0", "false", "")
+
 
 def buffer_key():
     return credentials.get("buffer")
@@ -120,11 +129,30 @@ def verify_public(url):
     return r2.exists(url.rsplit(r2.PUBLIC_BASE + "/", 1)[-1])
 
 
-def create_draft(channel_id, text, image_urls, first_comment=None, due_at=None):
+def post_metadata(channel_id, first_comment=None, title=None):
+    if channel_id == CHANNEL_TIKTOK:
+        # `title` is TikTok's headline for a photo post; the caption still
+        # carries the full text. There is deliberately no isAiGenerated here:
+        # Buffer rejects it on photo posts ("TikTok photo posts do not support
+        # AI content disclosure"), so Marlow's disclosure rides in the caption,
+        # which already says he wrote the recipe and generated the photograph.
+        return {"tiktok": {**({"title": title[:90]} if title else {})}}
+    # Instagram requires an explicit type. Multiple assets on a `post` become
+    # a carousel. Hashtags would ride in the first comment on a paid plan.
+    return {"instagram": {
+        "type": "post",
+        "shouldShareToFeed": True,
+        **({"firstComment": first_comment}
+           if (first_comment and FIRST_COMMENT_SUPPORTED) else {}),
+    }}
+
+
+def create_draft(channel_id, text, image_urls, first_comment=None, due_at=None,
+                 title=None):
     if channel_id in CHANNEL_BLOCKLIST:
         raise RuntimeError(
             f"refusing to post to {CHANNEL_BLOCKLIST[channel_id]} ({channel_id})")
-    if channel_id != CHANNEL_ELIXIARY:
+    if channel_id not in ALLOWED_CHANNELS:
         raise RuntimeError(f"unexpected channel {channel_id}")
 
     q = """
@@ -145,20 +173,40 @@ def create_draft(channel_id, text, image_urls, first_comment=None, due_at=None):
         **({"dueAt": due_at} if due_at else {}),
         "saveToDraft": True,                      # never publishes on its own
         "assets": [{"image": {"url": u}} for u in image_urls],
-        # Instagram requires an explicit type. Multiple assets on a `post`
-        # become a carousel. Hashtags ride in the first comment so the
-        # caption stays readable.
-        "metadata": {"instagram": {
-            "type": "post",
-            "shouldShareToFeed": True,
-            **({"firstComment": first_comment}
-               if (first_comment and FIRST_COMMENT_SUPPORTED) else {}),
-        }},
+        "metadata": post_metadata(channel_id, first_comment, title),
     }})
     res = data["createPost"]
     if "message" in res and res.get("message"):
         raise RuntimeError(f"Buffer refused the draft: {res['message']}")
     return res["post"]
+
+
+def mirror_tiktok(conn, post_id, text, image_urls, due_at):
+    """Second draft, same caption, same slot, 9:16 frames. Never raises: the
+    Instagram post is already live in Buffer by this point, and losing the
+    mirror must not mark it failed."""
+    title = (text or "").split("\n")[0].strip()
+    try:
+        if not due_at:
+            # Backfilled mirrors of posts that already went out on Instagram
+            # arrive with no slot. Give them one on TikTok's own calendar so
+            # they don't sit timeless, and so two of them can't land together.
+            free = slots.next_free(1, channel=CHANNEL_TIKTOK)
+            if free:
+                due_at = slots.to_buffer(free[0])
+                print(f"tiktok  no source slot — placed {slots.local_str(free[0])}")
+        post = create_draft(CHANNEL_TIKTOK, text, image_urls, due_at=due_at,
+                            title=title)
+        db.add_crosspost(conn, post_id, "tiktok", CHANNEL_TIKTOK,
+                         post["id"], image_urls, status="drafted")
+        print(f"tiktok  mirrored  buffer_post_id={post['id']}  "
+              f"status={post['status']}")
+        return post
+    except Exception as ex:
+        db.add_crosspost(conn, post_id, "tiktok", CHANNEL_TIKTOK,
+                         None, image_urls, status="failed", error=str(ex)[:500])
+        print(f"tiktok  mirror failed: {str(ex)[:200]}", file=sys.stderr)
+        return None
 
 
 def prepare_recipe(conn, hook_override):
@@ -377,6 +425,7 @@ def main():
             raise RuntimeError("spec rejected: " + "; ".join(problems))
 
         prefix = slide_prefix(conn, post_id)
+        tt_urls = []
         with tempfile.TemporaryDirectory() as td:
             files = renderer.render(spec, td)
             print(f"rendered {len(files)} slides")
@@ -385,10 +434,28 @@ def main():
                 urls.append(upload_slide(f, f"{prefix}/slide-{i:02d}.png"))
             print(f"uploaded {len(urls)} slides to r2://{r2.BUCKET}/{prefix}/")
 
+            # The mirror is a bonus surface. If re-framing or uploading it
+            # fails, the Instagram post — the thing that was actually picked
+            # and reserved — still goes out.
+            if TIKTOK_ENABLED:
+                try:
+                    tt = vertical.wrap(files, os.path.join(td, "tt"))
+                    tt_urls = [upload_slide(f, f"{prefix}/tt-{i:02d}.png")
+                               for i, f in enumerate(tt, 1)]
+                    print(f"re-framed {len(tt_urls)} slides 9:16 for TikTok")
+                except Exception as ex:
+                    tt_urls = []
+                    print(f"tiktok  frames failed ({str(ex)[:120]}) — "
+                          f"Instagram unaffected")
+
         for u in urls:
             if not verify_public(u):
                 raise RuntimeError(f"slide not publicly reachable: {u}")
         print("all slides verified publicly reachable")
+
+        if tt_urls and not all(verify_public(u) for u in tt_urls):
+            print("tiktok  frames not publicly reachable — skipping the mirror")
+            tt_urls = []
 
         db.update(conn, post_id, status="rendered", caption=text, slide_urls=urls)
 
@@ -399,10 +466,15 @@ def main():
             print(f"caption:\n{text}")
             # a dry run must leave no trace: drop the uploads and the claim,
             # otherwise this item is consumed without ever being posted
+            print(f"tiktok : {len(tt_urls)} frames"
+                  if tt_urls else "tiktok : skipped")
             for i in range(1, len(urls) + 1):
                 delete_slide(f"{prefix}/slide-{i:02d}.png")
+            for i in range(1, len(tt_urls) + 1):
+                delete_slide(f"{prefix}/tt-{i:02d}.png")
             db.discard(conn, post_id)
-            print(f"cleaned up {len(urls)} slides and released the claim")
+            print(f"cleaned up {len(urls) + len(tt_urls)} slides "
+                  f"and released the claim")
             db.finish_run(conn, run_id, True, "dry run")
             return
 
@@ -422,6 +494,9 @@ def main():
             meta = json.loads(db.get_post(conn, post_id).get("meta") or "{}")
             meta["due_at"] = slot
             db.update(conn, post_id, meta=meta)
+        if tt_urls:
+            mirror_tiktok(conn, post_id, text, tt_urls, slot)
+
         db.finish_run(conn, run_id, True, f"buffer post {post['id']}")
         print(f"\nDRAFT CREATED  buffer_post_id={post['id']}  "
               f"status={post['status']}"

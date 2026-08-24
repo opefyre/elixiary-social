@@ -55,9 +55,12 @@ def _gql(query, variables):
     return out["data"]
 
 
-def occupied():
-    """UTC datetimes already spoken for on the channel. Drafts count — one may
+def occupied(channel=None):
+    """UTC datetimes already spoken for on a channel. Drafts count — one may
     carry a time and would collide once approved.
+
+    Channels are counted separately: a TikTok mirror sitting at 5 PM does not
+    make 5 PM unavailable on Instagram, and vice versa.
 
     Paginated deliberately: the API returns 10 posts a page, and `first`/`after`
     are arguments on the query itself, not fields of PostsInput. Reading only
@@ -68,7 +71,7 @@ def occupied():
          "edges { node { id status dueAt } } "
          "pageInfo { hasNextPage endCursor } } }")
     base = {"organizationId": ORG,
-            "filter": {"channelIds": [CHANNEL],
+            "filter": {"channelIds": [channel or CHANNEL],
                        "status": ["scheduled", "draft", "needs_approval",
                                   "sending"]}}
     taken, after, pages = set(), None, 0
@@ -106,9 +109,9 @@ def candidates(after=None, days=LOOKAHEAD_DAYS):
                 yield utc
 
 
-def next_free(count=1, taken=None):
-    """The next `count` unoccupied slots, as UTC datetimes."""
-    taken = set(taken) if taken is not None else occupied()
+def next_free(count=1, taken=None, channel=None):
+    """The next `count` unoccupied slots on a channel, as UTC datetimes."""
+    taken = set(taken) if taken is not None else occupied(channel)
     out = []
     for utc in candidates():
         if utc in taken:

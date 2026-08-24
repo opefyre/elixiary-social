@@ -29,6 +29,17 @@ import r2  # noqa: E402
 LIVE = ("reserved", "rendered", "drafted", "scheduled")
 
 
+def _missing(urls):
+    """URLs R2 no longer serves. Raises if the check itself is broken (a 403
+    to our own reader would otherwise report every post as fine)."""
+    out = []
+    for u in urls:
+        key = u.split(r2.PUBLIC_BASE + "/", 1)[-1]
+        if not r2.exists(key):
+            out.append(u)
+    return out
+
+
 def verify(conn=None, quiet=False):
     """Returns (checked, [broken]). Never raises on a single bad URL."""
     conn = conn or db.connect()
@@ -37,38 +48,41 @@ def verify(conn=None, quiet=False):
         "FROM posts WHERE slide_urls IS NOT NULL AND status IN "
         "(%s) ORDER BY id" % ",".join("?" * len(LIVE)), LIVE).fetchall()
 
+    # A mirror points at its own re-framed frames under the same prefix, so it
+    # can break on its own — checking the Instagram slides says nothing about it.
+    mirrors = [m for m in db.open_crossposts(conn) if m["status"] in LIVE]
+
+    items = [(r["id"], r["source_type"], r["status"], r["buffer_post_id"],
+              r["slide_urls"], (r["caption"] or "")) for r in rows]
+    items += [(m["post_id"], f"{m['source_type']}/{m['service']}", m["status"],
+               m["buffer_post_id"], m["slide_urls"], "") for m in mirrors]
+
     broken, checked = [], 0
-    for r in rows:
+    for pid, kind, status, bpid, raw, caption in items:
         try:
-            urls = json.loads(r["slide_urls"] or "[]")
+            urls = json.loads(raw or "[]")
         except Exception:
             urls = []
         if not urls:
             continue
         checked += 1
-        missing = []
-        for u in urls:
-            key = u.split(r2.PUBLIC_BASE + "/", 1)[-1]
-            try:
-                if not r2.exists(key):
-                    missing.append(u)
-            except Exception as ex:
-                # a 403 means the check itself is broken; say so rather than
-                # reporting every post as fine
-                return checked, [{"id": None, "error": str(ex)[:160]}]
+        try:
+            missing = _missing(urls)
+        except Exception as ex:
+            return checked, [{"id": None, "error": str(ex)[:160]}]
         if missing:
             broken.append({
-                "id": r["id"], "type": r["source_type"], "status": r["status"],
-                "buffer_post_id": r["buffer_post_id"],
+                "id": pid, "type": kind, "status": status,
+                "buffer_post_id": bpid,
                 "missing": len(missing), "of": len(urls),
-                "caption": (r["caption"] or "").split("\n")[0][:60],
+                "caption": caption.split("\n")[0][:60],
             })
             if not quiet:
-                print(f"  BROKEN post {r['id']} ({r['source_type']}, "
-                      f"{r['status']}): {len(missing)}/{len(urls)} slides gone "
-                      f"— {r['buffer_post_id']}")
+                print(f"  BROKEN post {pid} ({kind}, {status}): "
+                      f"{len(missing)}/{len(urls)} slides gone — {bpid}")
     if not quiet:
-        print(f"image check: {checked} queued posts, {len(broken)} broken")
+        print(f"image check: {checked} queued posts "
+              f"({len(mirrors)} mirrors), {len(broken)} broken")
     return checked, broken
 
 

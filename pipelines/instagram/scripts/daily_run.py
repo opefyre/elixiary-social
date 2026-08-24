@@ -68,10 +68,17 @@ def run_one(kind, dry, extra=None):
     t0 = time.time()
     p = subprocess.run(cmd, capture_output=True, text=True)
     out = (p.stdout or "") + (p.stderr or "")
-    buffer_id = None
-    for line in out.splitlines():
-        if "buffer_post_id=" in line:
-            buffer_id = line.split("buffer_post_id=")[1].split()[0]
+    # Two lines now carry a buffer_post_id — the Instagram draft and its
+    # TikTok mirror. Anchor on the prefix rather than the last match, so
+    # reordering the output can never swap which id gets reported.
+    def _id(prefix):
+        for line in out.splitlines():
+            if line.startswith(prefix) and "buffer_post_id=" in line:
+                return line.split("buffer_post_id=")[1].split()[0]
+        return None
+
+    buffer_id = _id("DRAFT CREATED")
+    mirror_id = _id("tiktok  mirrored")
     detail = ""
     for line in out.splitlines():
         if line.startswith("picked") or line.startswith("FAILED"):
@@ -80,6 +87,7 @@ def run_one(kind, dry, extra=None):
         "type": kind,
         "ok": p.returncode == 0,
         "buffer_post_id": buffer_id,
+        "tiktok_post_id": mirror_id,
         "seconds": round(time.time() - t0, 1),
         "detail": detail,
         "error": None if p.returncode == 0 else out.strip()[-400:],
@@ -162,6 +170,7 @@ def main():
         "failed": len(results) - ok,
         "dry_run": a.dry_run,
         "drafts": [r["buffer_post_id"] for r in results if r["buffer_post_id"]],
+        "mirrored": sum(1 for r in results if r.get("tiktok_post_id")),
         "broken_images": broken,
         "results": results,
     }
@@ -175,7 +184,7 @@ def main():
     db.finish_run(conn, run_id, ok > 0,
                   json.dumps({k: summary[k] for k in
                               ("requested", "succeeded", "failed", "drafts",
-                               "broken_images")}))
+                               "mirrored", "broken_images")}))
 
     print(json.dumps(summary))
     # non-zero only if nothing at all worked, so a single miss doesn't page anyone
