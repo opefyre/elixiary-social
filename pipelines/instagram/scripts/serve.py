@@ -14,7 +14,8 @@ it becomes mandatory. It is deliberately not used by default — the caller
 anyway, and embedding the value in a workflow would spread the secret for no
 real gain. Create the token if the service is ever bound beyond loopback.
 
-    POST /run     {"recipes": 3, "articles": 1, "marlow": 1, "dry_run": false}
+    POST /run     {}                        # today's weekly plan
+    POST /run     {"only": "recipe,marlow"}  # ad-hoc, ignores the plan
     GET  /health
 
     python3 scripts/serve.py            # port 8787
@@ -53,13 +54,11 @@ def token():
         return None
 
 
-def run_daily(recipes, articles, dry, homebar=-1, marlow=1, shortlists=None):
-    cmd = [sys.executable, os.path.join(HERE, "daily_run.py"),
-           "--articles", str(articles),
-           "--homebar", str(homebar), "--marlow", str(marlow)]
-    if recipes is not None and recipes >= 0:
-        cmd += ["--recipes", str(recipes)]
-    if shortlists is not None:
+def run_daily(only=None, shortlists=None, dry=False):
+    cmd = [sys.executable, os.path.join(HERE, "daily_run.py")]
+    if only:
+        cmd += ["--only", str(only)]
+    if shortlists:
         cmd += ["--shortlists", str(shortlists)]
     if dry:
         cmd.append("--dry-run")
@@ -131,23 +130,21 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, json.JSONDecodeError):
             return self._send(400, {"error": "invalid JSON body"})
 
-        recipes = int(body.get("recipes", -1))
+        # An empty body runs today's weekly plan; `only` is the ad-hoc
+        # escape hatch for a post asked for outside the schedule.
+        only = body.get("only")
         shortlists = body.get("shortlists")
-        articles = int(body.get("articles", 1))
-        homebar = int(body.get("homebar", -1))
-        marlow = int(body.get("marlow", 1))
         dry = bool(body.get("dry_run", False))
-        if not all(0 <= n <= 8 for n in (articles, marlow)) \
-                or not (-1 <= homebar <= 8) or not (-1 <= recipes <= 8):
-            return self._send(400, {"error": "counts must be 0-8"})
+        for name, v in (("only", only), ("shortlists", shortlists)):
+            if v is not None and not isinstance(v, str):
+                return self._send(400, {"error": f"{name} must be a string"})
 
         if not _lock.acquire(blocking=False):
             return self._send(409, {"error": "a run is already in progress",
                                     "last": _last})
         try:
             _last["started"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
-            result = run_daily(recipes, articles, dry, homebar, marlow,
-                               shortlists)
+            result = run_daily(only, shortlists, dry)
             _last["finished"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
             _last["summary"] = result.get("summary")
             self._send(200 if result["ok"] else 500, result)

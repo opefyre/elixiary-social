@@ -2,7 +2,7 @@
 """
 Posting slots.
 
-Five fixed times a day, local to the channel's timezone:
+Two fixed times a day, local to the channel's timezone:
     11:00, 13:00, 15:00, 17:00, 19:00  (Europe/Lisbon)
 
 Times are stored in Buffer as UTC. Lisbon runs UTC+1 in summer, so an 11 AM
@@ -29,7 +29,7 @@ sys.path.insert(0, HERE)
 import credentials  # noqa: E402
 
 SLOT_HOURS = [int(h) for h in
-              os.environ.get("ELIXIARY_SLOT_HOURS", "11,13,15,17,19").split(",")]
+              os.environ.get("ELIXIARY_SLOT_HOURS", "13,19").split(",")]
 TZ_NAME = os.environ.get("ELIXIARY_TZ", "Europe/Lisbon")
 ORG = "6a259ca246478440c6253929"
 CHANNEL = "6a855825ccaf649a67d4db86"        # elixiary.ai

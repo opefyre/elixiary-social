@@ -103,7 +103,7 @@ n8n only schedules, reports and gives you a manual trigger.
 rest, and it exits non-zero only if *nothing* succeeded, so a single miss does
 not raise an alarm.
 
-Expect ~4-8 min per daily batch (5 carousels), against a 1500s service
+Expect ~2-4 min per daily batch (2 carousels), against a 1500s service
 timeout. The variance is Workers AI queue time on the hook step.
 
 **Cadence: 5 posts a day (4 recipes + 1 article), one per slot.** With angles
@@ -170,14 +170,14 @@ No measurement or factual claim is ever model-invented.
 
 ## Posting slots
 
-Five fixed times a day, local to `Europe/Lisbon`:
+Two fixed times a day, local to `Europe/Lisbon`, on both channels:
 
 ```
-11:00   13:00   15:00   17:00   19:00
+13:00   19:00
 ```
 
-Buffer stores times in UTC, and Lisbon is UTC+1 in summer, so an 11 AM slot
-reads as `10:00Z`. The offset is computed via `zoneinfo`, never hardcoded, so
+Buffer stores times in UTC, and Lisbon is UTC+1 in summer, so a 1 PM slot
+reads as `12:00Z`. The offset is computed via `zoneinfo`, never hardcoded, so
 the October DST change is handled.
 
 A new post takes the earliest slot not already occupied by a scheduled or
@@ -290,24 +290,47 @@ two mascots in one corner read as a collision.
 
 ## Weekly mix
 
-Five posts a day, one per slot:
+Two posts a day, one per slot — 14 a week across six formats. Too few for
+per-day counts with recipes as filler, so the mix is a fixed calendar in
+`daily_run.WEEK_PLAN`:
 
-| Day | Recipes | Article | Marlow | Home bar | Shortlists |
-|---|---|---|---|---|---|
-| Mon | 1 | 1 | 1 | — | Rule of Three, Full Proof |
-| Tue | 1 | 1 | 1 | 1 | Two Minutes Flat |
-| Wed | 2 | 1 | 1 | — | Light Work |
-| Thu | 1 | 1 | 1 | — | Rule of Three, No Proof Needed |
-| Fri | 1 | 1 | 1 | — | Two Minutes Flat, Full Proof |
-| Sat | 1 | 1 | 1 | 1 | Light Work |
-| Sun | 2 | 1 | 1 | — | No Proof Needed |
+| Day | 13:00 | 19:00 |
+|---|---|---|
+| Mon | recipe | shortlist |
+| Tue | marlow | home bar |
+| Wed | recipe | article |
+| Thu | marlow | shortlist |
+| Fri | recipe | article |
+| Sat | marlow | shortlist |
+| Sun | recipe | shortlist |
 
-`homebar: -1` in the workflow body means "decide from the weekday"
-(`ELIXIARY_HOMEBAR_DAYS`, default Tue+Sat). Recipes absorb whatever is left,
-so a day always fills five slots.
+Per week: recipe 4, shortlist 4, marlow 3, article 2, home bar 1.
 
-Home bar is twice weekly because it has ~52 variants — daily exhausted it in
-seven weeks.
+Home bar is once a week because it has ~52 variants — that stretches them over
+a year, and it works better as a recurring anchor than as filler.
+
+Four shortlist slots a week across five series means no series can own a fixed
+weekday, so `daily_run.next_series` rotates by least-recently-used, reading
+what actually ran rather than a calendar. A newly added series sorts first.
+
+### Ad-hoc posts
+
+Anything outside the plan. `--only` overrides the day's calendar, and a post
+can be placed off the fixed grid:
+
+```bash
+python3 scripts/publish.py --type recipe --at "2026-08-27 15:30"
+python3 scripts/publish.py --type marlow --asap
+curl -X POST http://127.0.0.1:8787/run -d '{"only":"recipe,marlow"}'
+```
+
+`--at` takes local time and refuses anything in the past; `--asap` uses the
+earliest time `ELIXIARY_MIN_LEAD_HOURS` allows. Neither consumes a fixed slot,
+so an occasion post does not displace the schedule.
+
+`scripts/cancel_post.py <id>` withdraws a queued post — its Buffer draft, its
+TikTok mirror, its slides — and drops the row so the content returns to the
+pool. It refuses published posts, and needs `--force` for one you approved.
 
 ## Ask Marlow
 

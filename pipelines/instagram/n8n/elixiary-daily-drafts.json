@@ -1,5 +1,5 @@
 {
-  "name": "Elixiary \u2014 Instagram daily drafts",
+  "name": "Elixiary — Instagram daily drafts",
   "nodes": [
     {
       "parameters": {
@@ -38,7 +38,7 @@
         "url": "http://127.0.0.1:8787/run",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ articles: 1, marlow: 1, homebar: -1, recipes: -1, dry_run: false }) }}",
+        "jsonBody": "={{ JSON.stringify({ dry_run: false }) }}",
         "options": {
           "timeout": 1500000,
           "response": {
@@ -49,7 +49,7 @@
         }
       },
       "id": "exec-1",
-      "name": "Build the day\u2019s five posts",
+      "name": "Build the day’s posts",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
@@ -125,7 +125,7 @@
         "errorMessage": "={{ ($json.brokenCount ? $json.brokenCount + ' queued post(s) have unreachable slides: ' + JSON.stringify($json.brokenImages) : 'Elixiary daily run produced no drafts: ' + JSON.stringify($json.results || $json.reason)) }}"
       },
       "id": "err-1",
-      "name": "Problem \u2014 check images or run",
+      "name": "Problem — check images or run",
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
@@ -139,7 +139,7 @@
       "main": [
         [
           {
-            "node": "Build the day\u2019s five posts",
+            "node": "Build the day’s posts",
             "type": "main",
             "index": 0
           }
@@ -150,7 +150,7 @@
       "main": [
         [
           {
-            "node": "Build the day\u2019s five posts",
+            "node": "Build the day’s posts",
             "type": "main",
             "index": 0
           }
@@ -179,14 +179,14 @@
         ],
         [
           {
-            "node": "Problem \u2014 check images or run",
+            "node": "Problem — check images or run",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Build the day\u2019s five posts": {
+    "Build the day’s posts": {
       "main": [
         [
           {

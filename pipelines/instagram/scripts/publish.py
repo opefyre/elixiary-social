@@ -18,6 +18,7 @@ import sys
 import tempfile
 import urllib.error
 import urllib.request
+from datetime import datetime, timedelta, timezone
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PIPE = os.path.abspath(os.path.join(HERE, ".."))
@@ -179,6 +180,31 @@ def create_draft(channel_id, text, image_urls, first_comment=None, due_at=None,
     if "message" in res and res.get("message"):
         raise RuntimeError(f"Buffer refused the draft: {res['message']}")
     return res["post"]
+
+
+def adhoc_time(at=None, asap=False):
+    """A time off the fixed 13:00/19:00 grid, for a post asked for outside the
+    schedule. Returns None when neither flag is given, so the caller falls
+    back to the next fixed slot."""
+    if not at and not asap:
+        return None
+    now = datetime.now(timezone.utc)
+    if asap:
+        return (now + timedelta(hours=slots.MIN_LEAD_HOURS)).replace(
+            second=0, microsecond=0)
+    tz = slots._tz()
+    for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M", "%Y-%m-%d %H"):
+        try:
+            local = datetime.strptime(at, fmt).replace(tzinfo=tz)
+            break
+        except ValueError:
+            local = None
+    if local is None:
+        raise RuntimeError(f"could not read --at {at!r}; use '2026-08-27 15:30'")
+    when = local.astimezone(timezone.utc).replace(second=0, microsecond=0)
+    if when <= now:
+        raise RuntimeError(f"--at {at} is in the past ({slots.local_str(when)})")
+    return when
 
 
 def mirror_tiktok(conn, post_id, text, image_urls, due_at):
@@ -403,6 +429,10 @@ def main():
     ap.add_argument("--dry-run", action="store_true",
                     help="render and upload, but do not touch Buffer")
     ap.add_argument("--hook", help="override the hook line")
+    ap.add_argument("--at", help="ad-hoc: post at this local time instead of "
+                                 "the next fixed slot, e.g. '2026-08-27 15:30'")
+    ap.add_argument("--asap", action="store_true",
+                    help="ad-hoc: earliest allowed time, off the fixed grid")
     a = ap.parse_args()
 
     conn = db.connect()
@@ -480,11 +510,17 @@ def main():
 
         slot = None
         try:
-            free = slots.next_free(1)
-            if free:
-                slot = slots.to_buffer(free[0])
-                print(f"slot    {slots.local_str(free[0])}")
+            when = adhoc_time(a.at, a.asap)
+            if when is None:
+                free = slots.next_free(1)
+                when = free[0] if free else None
+            if when:
+                slot = slots.to_buffer(when)
+                print(f"slot    {slots.local_str(when)}"
+                      + ("  (ad-hoc)" if (a.at or a.asap) else ""))
         except Exception as ex:
+            if a.at or a.asap:
+                raise
             print(f"slot    unavailable ({str(ex)[:80]}) — Buffer will queue it")
 
         post = create_draft(CHANNEL_ELIXIARY, text, urls, fcomment, due_at=slot)

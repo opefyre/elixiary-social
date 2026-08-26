@@ -39,26 +39,48 @@ if os.path.abspath(db.__file__) != os.path.abspath(_expected):
 
 PUBLISH = os.path.join(HERE, "publish.py")
 
-# The home-bar format has only ~52 variants, so daily would exhaust it in
-# seven weeks. Twice a week gives it half a year, and it works better as a
-# recurring anchor than as filler. Mon=0 .. Sun=6.
-HOMEBAR_WEEKDAYS = {int(x) for x in
-                    os.environ.get("ELIXIARY_HOMEBAR_DAYS", "1,5").split(",")}
-SLOTS_PER_DAY = int(os.environ.get("ELIXIARY_SLOTS_PER_DAY", "5"))
-
-# Each shortlist series runs twice a week, spread so no day carries more than
-# two. Mon=0 .. Sun=6.
-SHORTLIST_WEEKDAYS = {
-    "rule-of-three":    {0, 3},
-    "two-minutes-flat": {1, 4},
-    "light-work":       {2, 5},
-    "no-proof-needed":  {3, 6},
-    "full-proof":       {0, 4},
+# Two posts a day — 13:00 and 19:00 Europe/Lisbon — leaves 14 slots a week
+# for six formats, which is too few for per-day counts with recipes as filler.
+# The mix is a fixed weekly calendar instead. Mon=0 .. Sun=6.
+#
+#   recipe 4  ·  shortlist 4  ·  marlow 3  ·  article 2  ·  homebar 1
+#
+# Home bar stays rare on purpose: there are only ~52 variants, and one a week
+# stretches them over a year while still reading as a recurring anchor.
+WEEK_PLAN = {
+    0: ["recipe", "shortlist"],   # Mon
+    1: ["marlow", "homebar"],     # Tue
+    2: ["recipe", "article"],     # Wed
+    3: ["marlow", "shortlist"],   # Thu
+    4: ["recipe", "article"],     # Fri
+    5: ["marlow", "shortlist"],   # Sat
+    6: ["recipe", "shortlist"],   # Sun
 }
 
+FORMATS = ("recipe", "article", "homebar", "marlow", "shortlist")
 
-def shortlists_for(weekday):
-    return [sid for sid, days in SHORTLIST_WEEKDAYS.items() if weekday in days]
+
+def plan_for(weekday):
+    return list(WEEK_PLAN.get(weekday, []))
+
+
+def next_series(conn, n=1):
+    """Shortlist series, least recently used first.
+
+    Four shortlist slots a week across five series means no series can own a
+    fixed weekday any more, so the rotation is driven by what actually ran.
+    A series never posted sorts first, so a newly added one leads.
+    """
+    import shortlist
+    seen = {}
+    for r in conn.execute(
+            "SELECT source_id, MAX(id) mx FROM posts WHERE source_type='shortlist' "
+            "GROUP BY source_id").fetchall():
+        sid = (r["source_id"] or "").rsplit(":", 1)[0]
+        seen[sid] = max(seen.get(sid, 0), r["mx"] or 0)
+    order = sorted((s["id"] for s in shortlist.SERIES),
+                   key=lambda sid: (seen.get(sid, -1), sid))
+    return order[:n]
 
 
 def run_one(kind, dry, extra=None):
@@ -96,28 +118,23 @@ def run_one(kind, dry, extra=None):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--recipes", type=int, default=3)
-    ap.add_argument("--articles", type=int, default=1)
-    ap.add_argument("--homebar", type=int, default=-1,
-                    help="-1 = decide from the weekday schedule")
-    ap.add_argument("--marlow", type=int, default=1)
+    ap.add_argument("--only", default=None,
+                    help="comma-separated formats to run instead of today's "
+                         "plan, e.g. --only recipe,marlow (ad-hoc posts)")
     ap.add_argument("--shortlists", default=None,
-                    help="comma-separated series ids; omit to use the weekday map")
+                    help="comma-separated series ids; omit to rotate by "
+                         "least-recently-used")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
 
-    # Home bar runs on its scheduled weekdays; on other days the slot goes
-    # back to recipes so the day still fills all five.
     weekday = date.today().weekday()
-    if a.shortlists is None:
-        series = shortlists_for(weekday)
+    if a.only:
+        kinds = [k.strip() for k in a.only.split(",") if k.strip()]
+        bad = [k for k in kinds if k not in FORMATS]
+        if bad:
+            raise SystemExit(f"unknown format(s): {bad}; expected {FORMATS}")
     else:
-        series = [x for x in a.shortlists.split(",") if x.strip()]
-
-    if a.homebar < 0:
-        a.homebar = 1 if weekday in HOMEBAR_WEEKDAYS else 0
-        a.recipes = max(0, SLOTS_PER_DAY - a.articles - a.homebar
-                        - a.marlow - len(series))
+        kinds = plan_for(weekday)
 
     conn = db.connect()
     run_id = db.start_run(conn, "daily")
@@ -131,18 +148,23 @@ def main():
     except Exception as ex:
         print(f"  [sync ] skipped: {str(ex)[:120]}")
 
-    results = []
+    # Series are chosen once, up front: picking inside the loop would hand
+    # two shortlists in the same run the same least-recently-used series.
+    forced = ([x.strip() for x in a.shortlists.split(",") if x.strip()]
+              if a.shortlists else None)
+    wanted = kinds.count("shortlist")
+    series = (forced or next_series(conn, wanted)) if wanted else []
 
-    for _ in range(a.recipes):
-        results.append(run_one("recipe", a.dry_run))
-    for _ in range(a.articles):
-        results.append(run_one("article", a.dry_run))
-    for _ in range(a.marlow):
-        results.append(run_one("marlow", a.dry_run))
-    for sid in series:
-        results.append(run_one("shortlist", a.dry_run, extra=["--series", sid]))
-    for _ in range(a.homebar):
-        results.append(run_one("homebar", a.dry_run))
+    print(f"  [plan ] {date.today():%a %d %b}: {', '.join(kinds) or 'nothing'}"
+          + (f"  (series: {', '.join(series)})" if series else ""))
+
+    results = []
+    queue = list(series)
+    for kind in kinds:
+        extra = None
+        if kind == "shortlist" and queue:
+            extra = ["--series", queue.pop(0)]
+        results.append(run_one(kind, a.dry_run, extra=extra))
 
     # Buffer fetches media at publish time, so a slide that vanishes between
     # now and then fails silently. Check every queued post, not just today's.
@@ -164,8 +186,8 @@ def main():
 
     ok = sum(1 for r in results if r["ok"])
     summary = {
-        "requested": (a.recipes + a.articles + a.homebar + a.marlow
-                      + len(series)),
+        "requested": len(kinds),
+        "plan": kinds,
         "succeeded": ok,
         "failed": len(results) - ok,
         "dry_run": a.dry_run,
