@@ -23,6 +23,9 @@ from datetime import date
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PIPE = os.path.abspath(os.path.join(HERE, ".."))
+# PIPE first, then state — so state/db.py still wins the `import db` below,
+# while `slots` (which reads the posting calendar) resolves from the root.
+sys.path.insert(0, PIPE)
 sys.path.insert(0, os.path.join(PIPE, "state"))
 import db  # noqa: E402
 
@@ -59,9 +62,35 @@ WEEK_PLAN = {
 
 FORMATS = ("recipe", "article", "homebar", "marlow", "shortlist")
 
+# How many posts one run creates. Matches the calendar's two-a-day.
+POSTS_PER_RUN = int(os.environ.get("ELIXIARY_POSTS_PER_RUN", "2"))
+
 
 def plan_for(weekday):
     return list(WEEK_PLAN.get(weekday, []))
+
+
+def kinds_for_slots(n=POSTS_PER_RUN):
+    """Formats for the next n free slots, keyed to the day each slot lands on.
+
+    The queue deliberately runs a day ahead, so a Thursday run fills Friday's
+    slots. Reading the calendar with today's weekday put Thursday's formats on
+    Friday and shifted the whole week — and the size of the shift moved with
+    how deep the queue happened to be. Each slot picks its own format instead:
+    the 13:00 Friday slot always gets Friday's 13:00 entry.
+    """
+    import slots
+    tz = slots._tz()
+    out = []
+    for utc in slots.next_free(n):
+        local = utc.astimezone(tz)
+        plan = plan_for(local.weekday())
+        if not plan:
+            continue
+        i = (slots.SLOT_HOURS.index(local.hour)
+             if local.hour in slots.SLOT_HOURS else 0)
+        out.append(plan[i] if i < len(plan) else plan[-1])
+    return out
 
 
 def next_series(conn, n=1):
@@ -127,14 +156,20 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
 
-    weekday = date.today().weekday()
     if a.only:
         kinds = [k.strip() for k in a.only.split(",") if k.strip()]
         bad = [k for k in kinds if k not in FORMATS]
         if bad:
             raise SystemExit(f"unknown format(s): {bad}; expected {FORMATS}")
     else:
-        kinds = plan_for(weekday)
+        try:
+            kinds = kinds_for_slots()
+        except Exception as ex:
+            # Buffer unreachable: fall back to today's row rather than skipping
+            # the run entirely. Wrong day, but a post beats no post.
+            kinds = plan_for(date.today().weekday())
+            print(f"  [plan ] slot lookup failed ({str(ex)[:70]}) — "
+                  f"using today's row")
 
     conn = db.connect()
     run_id = db.start_run(conn, "daily")
@@ -155,7 +190,7 @@ def main():
     wanted = kinds.count("shortlist")
     series = (forced or next_series(conn, wanted)) if wanted else []
 
-    print(f"  [plan ] {date.today():%a %d %b}: {', '.join(kinds) or 'nothing'}"
+    print(f"  [plan ] {', '.join(kinds) or 'nothing'}"
           + (f"  (series: {', '.join(series)})" if series else ""))
 
     results = []
@@ -205,8 +240,8 @@ def main():
 
     db.finish_run(conn, run_id, ok > 0,
                   json.dumps({k: summary[k] for k in
-                              ("requested", "succeeded", "failed", "drafts",
-                               "mirrored", "broken_images")}))
+                              ("requested", "plan", "succeeded", "failed",
+                               "drafts", "mirrored", "broken_images")}))
 
     print(json.dumps(summary))
     # non-zero only if nothing at all worked, so a single miss doesn't page anyone
