@@ -19,7 +19,7 @@ import os
 import subprocess
 import sys
 import time
-from datetime import date
+from datetime import date, datetime, timedelta
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PIPE = os.path.abspath(os.path.join(HERE, ".."))
@@ -62,28 +62,39 @@ WEEK_PLAN = {
 
 FORMATS = ("recipe", "article", "homebar", "marlow", "shortlist")
 
-# How many posts one run creates. Matches the calendar's two-a-day.
-POSTS_PER_RUN = int(os.environ.get("ELIXIARY_POSTS_PER_RUN", "2"))
+# A run fills every free slot between now and the end of the horizon, rather
+# than a fixed two. The schedule trigger does not backfill: when the spare Mac
+# was down across one 09:00 window, that day created nothing, and because each
+# run made exactly two posts the queue never recovered — it just ran a day
+# shallower until it hit empty. Filling to a depth instead means the next run
+# after any outage catches up on its own.
+QUEUE_DAYS = int(os.environ.get("ELIXIARY_QUEUE_DAYS", "2"))    # today + tomorrow
+MAX_PER_RUN = int(os.environ.get("ELIXIARY_MAX_PER_RUN", "6"))  # runaway guard
 
 
 def plan_for(weekday):
     return list(WEEK_PLAN.get(weekday, []))
 
 
-def kinds_for_slots(n=POSTS_PER_RUN):
-    """Formats for the next n free slots, keyed to the day each slot lands on.
+def kinds_for_slots(days=QUEUE_DAYS, cap=MAX_PER_RUN):
+    """Formats for every free slot inside the horizon, keyed to the day each
+    slot lands on.
 
-    The queue deliberately runs a day ahead, so a Thursday run fills Friday's
-    slots. Reading the calendar with today's weekday put Thursday's formats on
-    Friday and shifted the whole week — and the size of the shift moved with
-    how deep the queue happened to be. Each slot picks its own format instead:
-    the 13:00 Friday slot always gets Friday's 13:00 entry.
+    The queue deliberately runs ahead, so a Thursday run fills Friday's slots.
+    Reading the calendar with today's weekday put Thursday's formats on Friday
+    and shifted the whole week — and the size of the shift moved with how deep
+    the queue happened to be. Each slot picks its own format instead: the 13:00
+    Friday slot always gets Friday's 13:00 entry, whenever it was created.
     """
     import slots
     tz = slots._tz()
+    horizon = (datetime.now(tz) + timedelta(days=days - 1)).replace(
+        hour=23, minute=59, second=59, microsecond=0)
     out = []
-    for utc in slots.next_free(n):
+    for utc in slots.next_free(cap):
         local = utc.astimezone(tz)
+        if local > horizon:
+            break
         plan = plan_for(local.weekday())
         if not plan:
             continue

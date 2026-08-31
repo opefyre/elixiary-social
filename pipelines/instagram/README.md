@@ -313,6 +313,22 @@ Four shortlist slots a week across five series means no series can own a fixed
 weekday, so `daily_run.next_series` rotates by least-recently-used, reading
 what actually ran rather than a calendar. A newly added series sorts first.
 
+### Catching up after an outage
+
+A run fills every free slot between now and the end of `ELIXIARY_QUEUE_DAYS`
+(default 2 — today and tomorrow), capped at `ELIXIARY_MAX_PER_RUN`. In steady
+state that is two posts, because today is already stocked.
+
+This matters because n8n's schedule trigger does not backfill. The spare Mac
+was down across one 09:00 window on 30 August; that day created nothing, and
+since each run made exactly two posts the queue never recovered — it ran a day
+shallower until it hit empty and a day went out with no posts at all. Filling
+to a depth means the next run after any outage catches up by itself.
+
+Note the same-day 13:00 slot is only reachable when the run starts at or
+before 09:00 local, since `ELIXIARY_MIN_LEAD_HOURS` (default 4) has to fit
+before it. A catch-up run that starts late fills 19:00 and tomorrow instead.
+
 ### Ad-hoc posts
 
 Anything outside the plan. `--only` overrides the day's calendar, and a post
