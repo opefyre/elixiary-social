@@ -1,0 +1,11 @@
+{
+  "name": "elixiary-social-tools",
+  "private": true,
+  "description": "Local CLI tools. Only scripts/mirror_images.py needs these — the daily pipeline talks to R2 over the REST API and needs no wrangler.",
+  "scripts": {
+    "postinstall": "wrangler --version"
+  },
+  "dependencies": {
+    "wrangler": "4.124.0"
+  }
+}

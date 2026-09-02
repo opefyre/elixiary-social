@@ -16,6 +16,9 @@ secrets/
 **/secrets.*
 *secret*
 *credential*
+# ...but this one only *resolves* credentials, it never holds a value.
+# It is imported by everything, so the repo will not run without it.
+!pipelines/instagram/credentials.py
 *.pem
 *.key
 *.p8
@@ -67,8 +70,11 @@ tmp/
 # ─── Local-only Claude workspace (ops skill stays off GitHub) ──────────
 .claude/
 
-# local tool installs (wrangler)
-.tools/
+# local tool installs (wrangler, for the one-off Drive -> R2 mirror).
+# The manifest stays so `npm install --prefix .tools` can rebuild it; the
+# 234MB of node_modules does not belong in git.
+.tools/*
+!.tools/package.json
 
 # local pipeline state (SQLite) — not shared, machine-specific
 pipelines/instagram/state/*.db
