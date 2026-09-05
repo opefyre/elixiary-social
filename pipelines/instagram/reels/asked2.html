@@ -92,7 +92,13 @@ const rows=[...$('rows').children];
 // long names shrink to fit the card rather than wrapping into the line beneath
 (()=>{const el=$('name_l');let fs=64;el.style.fontSize=fs+'px';while(el.scrollWidth>720&&fs>40){fs-=2;el.style.fontSize=fs+'px'}})();
 let t=0;
-window.render=function(time){t=time;
+// Frame 0 is the cover. Instagram and TikTok take the first frame when a video
+// arrives through the API, and a black typing screen makes a black cover. So
+// frame 0 renders the fully composed reveal for one frame — 33ms, seen as the
+// cover, not as content — and the story starts on frame 1.
+const COVER_AT = 7.0;
+window.render=function(time){ renderAt(time < 1/30 ? COVER_AT : time); };
+function renderAt(time){t=time;
   const pre=t<T.reveal, rv=seg(t,T.reveal,.9);
   // photo: bloom in, slow push, parallax (bg drifts slower than hero)
   const push=1+0.07*clamp((t-T.reveal)/(T.end-T.reveal),0,1);
