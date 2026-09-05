@@ -1,0 +1,125 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'InterV';src:url(__INTER__) format('woff2');font-weight:100 900}
+@font-face{font-family:'PJS';src:url(__PJS__) format('woff2');font-weight:100 900}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#0a0a0a}
+body{font-family:'InterV',-apple-system,system-ui,sans-serif;color:#fff;position:relative}
+.abs{position:absolute;will-change:transform,opacity}
+/* photo: blurred fill behind, sharp hero on top -- the native reel treatment for a square image */
+#bg{position:absolute;inset:-60px;background:url(__PHOTO__) center/cover;filter:blur(38px) brightness(.55) saturate(1.15)}
+#hero{position:absolute;left:0;top:420px;width:1080px;height:1080px;background:url(__PHOTO__) center/cover;transform-origin:center}
+#vig{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,0) 62%,rgba(0,0,0,.72) 100%)}
+#dark{position:absolute;inset:0;background:#0a0a0a}
+#hint{position:absolute;inset:-60px;background:url(__PHOTO__) center/cover;filter:blur(60px) brightness(.22) saturate(1.2)}
+/* phone-native ask bar */
+#bar{position:absolute;left:80px;top:740px;width:800px;min-height:132px;border-radius:48px;background:rgba(28,28,30,.92);
+  border:1.5px solid rgba(255,255,255,.14);display:flex;align-items:center;padding:28px 40px;gap:24px;
+  box-shadow:0 30px 80px rgba(0,0,0,.6)}
+#bar .ic{width:44px;height:44px;border-radius:50%;background:#F5C451;flex:none;display:grid;place-items:center}
+#bar .ic i{width:16px;height:16px;border-radius:50%;background:#0a0a0a;display:block}
+#typed{font-size:42px;font-weight:500;color:#fff;white-space:normal;line-height:1.25;letter-spacing:-.01em;word-break:break-word}
+#typed .ph{color:rgba(255,255,255,.38)}
+#cur{display:inline-block;width:4px;height:52px;background:#F5C451;vertical-align:-8px;margin-left:4px}
+#dots{position:absolute;left:120px;top:960px;display:flex;gap:14px;align-items:center}
+#dots i{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.85);display:block}
+/* instagram-native text labels */
+.lab{display:inline-block;padding:14px 26px;border-radius:18px;background:#fff;color:#111;
+  font-weight:700;font-size:54px;line-height:1.15;letter-spacing:-.02em;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.lab.small{font-size:38px;font-weight:600;padding:12px 22px;border-radius:14px}
+.lab.gold{background:#F5C451;color:#111}
+.lab.dark{background:rgba(20,20,20,.86);color:#fff;backdrop-filter:blur(8px)}
+#why_l{max-width:800px;display:inline-block}
+.outl{font-weight:800;font-size:60px;letter-spacing:-.02em;line-height:1.1;
+  text-shadow:0 2px 0 #000,0 -2px 0 #000,2px 0 0 #000,-2px 0 0 #000,0 6px 24px rgba(0,0,0,.6)}
+.marlow{width:260px;height:260px}
+.marlow img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 18px 30px rgba(0,0,0,.5))}
+#end{position:absolute;inset:0;background:#06110d;font-family:'PJS',system-ui,sans-serif}
+#end .logo{width:120px;height:120px;border-radius:50%;display:block;margin:0 auto 26px}
+#end .h{font-size:64px;font-weight:800;text-align:center;letter-spacing:-.02em;line-height:1.05}
+#end .s{font-size:40px;font-weight:600;color:#F5C451;text-align:center;margin-top:22px;letter-spacing:.02em}
+#end .u{font-size:32px;font-weight:600;color:rgba(252,254,253,.6);text-align:center;margin-top:14px;letter-spacing:.14em;text-transform:uppercase}
+.wm{position:absolute;left:80px;top:300px;font-size:30px;font-weight:700;letter-spacing:.06em;color:rgba(255,255,255,.72);
+  text-shadow:0 2px 12px rgba(0,0,0,.7)}
+.guides{position:absolute;inset:0;pointer-events:none;display:none}
+.guides i{position:absolute;background:rgba(255,0,80,.18)}
+.guides u{position:absolute;left:80px;right:200px;top:280px;bottom:500px;border:2px dashed rgba(0,255,160,.6)}
+</style></head><body>
+<div id="bg"></div><div id="hero"></div><div id="vig"></div><div id="dark"></div><div id="hint"></div>
+<div id="wm" class="abs wm">@elixiary.ai</div>
+
+<div id="ask" class="abs" style="left:80px;top:560px"><span class="lab dark small">I asked an AI for&hellip;</span></div>
+<div id="bar"><div class="ic"><i></i></div><div id="typed"><span class="ph">Ask Marlow anything</span></div></div>
+<div id="dots"><i></i><i></i><i></i></div>
+
+<div id="name" class="abs" style="left:80px;top:1250px;width:800px"><span id="name_l" class="lab">The Slow Reset</span></div>
+<div id="tag" class="abs" style="left:80px;top:1345px"><span class="lab small gold">it named it that.</span></div>
+
+<div id="ing" class="abs" style="left:80px;top:470px;display:flex;flex-direction:column;gap:16px;align-items:flex-start"></div>
+<div id="why" class="abs" style="left:80px;top:1250px;width:800px"><span class="lab dark small" id="why_l"></span></div>
+
+<div id="next" class="abs outl" style="left:80px;top:560px;width:800px">what should I ask it next? &#128071;</div>
+
+<div id="m" class="abs marlow" style="left:720px;top:1360px"><img id="m_img" src=""></div>
+
+<div id="end"><div class="abs" style="left:80px;right:80px;top:640px">
+  <img class="logo" src="__LOGO__"><div class="h">Invent yours.</div>
+  <div class="s">elixiary.com</div><div class="u">free &middot; ask Marlow anything</div></div></div>
+
+<div id="guides" class="guides"><i style="left:0;right:0;top:0;height:280px"></i><i style="left:0;right:0;bottom:0;height:500px"></i>
+  <i style="right:0;top:280px;bottom:500px;width:200px"></i><i style="left:0;top:280px;bottom:500px;width:80px"></i><u></u></div>
+<script>
+const D = __DATA__;      // {prompt, name, ingredients:[...], why, marlow:{...}}
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x)); const lerp=(a,b,u)=>a+(b-a)*u;
+const E={out:u=>1-Math.pow(1-u,3),in:u=>u*u*u,pop:u=>{const c=2.2;return 1+(c+1)*Math.pow(u-1,3)+c*Math.pow(u-1,2)},
+         back:u=>{const c=1.5;return 1+(c+1)*Math.pow(u-1,3)+c*Math.pow(u-1,2)}};
+const seg=(t,t0,d,e=E.out)=>e(clamp((t-t0)/d,0,1)); const $=id=>document.getElementById(id);
+const set=(el,{x=0,y=0,s=1,o=1,r=0}={})=>{el.style.opacity=o;el.style.transform=`translate(${x}px,${y}px) scale(${s}) rotate(${r}deg)`};
+// timeline
+const T=Object.assign({type0:0.25, typeDur:1.6, think:2.0, reveal:3.6, name:4.3, ing:6.4, why:8.9, next:11.0, end:13.2, endDur:15.0}, __TIMING__);
+const typeText=D.prompt;
+
+$('ing').innerHTML=D.ingredients.slice(0,4).map(s=>`<span class="lab small">${s}</span>`).join('');
+const ings=[...$('ing').children];
+$('name_l').textContent=D.name; $('why_l').textContent=D.why;
+const marlow=(kind,t0,{x=720,y=1360,hold=9,d=.5}={})=>{const u=seg(t,t0,d,E.pop),out=seg(t,t0+hold,.3,E.in);
+  $('m_img').src=D.marlow[kind];$('m').style.left=x+'px';$('m').style.top=y+'px';
+  set($('m'),{s:lerp(.3,1,u)*(1-.3*out),o:Math.min(u*2,1)*(1-out),y:lerp(50,0,u),r:lerp(-12,0,u)})};
+let t=0;
+window.render=function(time){ t=time;
+  const pre=t<T.reveal;                       // dark "asking" phase vs photo phase
+  $('dark').style.opacity = pre?1:1-seg(t,T.reveal,.12);
+  $('hint').style.opacity = pre?seg(t,0,.6)*(1-seg(t,T.reveal-.15,.15,E.in)):0;
+  // photo: snap in with a scale settle and slow push; hero slides up a little for the label
+  const rv=seg(t,T.reveal,.45,E.pop);
+  const push=1+0.06*clamp((t-T.reveal)/(T.end-T.reveal),0,1);
+  const lift= t<T.ing? 0 : lerp(0,-140,seg(t,T.ing-.2,.5));
+  $('hero').style.transform=`translateY(${lift}px) scale(${lerp(1.18,1,rv)*push})`;
+  $('hero').style.opacity=pre?0:1; $('bg').style.opacity=pre?0:1; $('vig').style.opacity=pre?0:1;
+  set($('wm'),{o:pre?0:seg(t,T.reveal+.2,.4)});
+  // ask phase
+  const a=seg(t,0.05,.4,E.back); set($('ask'),{o:pre?a:0,y:lerp(20,0,a)});
+  const b=seg(t,0.12,.45,E.pop); $('bar').style.opacity=pre?Math.min(b*2,1):0; $('bar').style.transform=`scale(${lerp(.9,1,b)})`;
+  const n=Math.round(clamp((t-T.type0)/T.typeDur,0,1)*typeText.length);
+  const blink=Math.floor(t*2.6)%2===0;
+  $('typed').innerHTML = n===0 ? '<span class="ph">Ask Marlow anything</span><span id="cur"></span>'
+                         : typeText.slice(0,n)+(blink||t<T.think?'<span id="cur"></span>':'');
+  const th=t>=T.think&&pre; $('dots').style.opacity=th?seg(t,T.think,.25):0;
+  [...$('dots').children].forEach((d,i)=>{const p=Math.sin((t-T.think)*7-i*1.1);d.style.transform=`translateY(${-8*Math.max(0,p)}px)`;d.style.opacity=.45+.55*Math.max(0,p)});
+  // photo phase labels
+  const nm=seg(t,T.name,.45,E.pop); set($('name'),{o:t>=T.name&&t<T.ing?Math.min(nm*2,1)*(1-seg(t,T.ing-.25,.25,E.in)):0,s:lerp(1.25,1,nm),y:lerp(30,0,nm)});
+  const tg=seg(t,T.name+.55,.35,E.back); set($('tag'),{o:t>=T.name&&t<T.ing?tg*(1-seg(t,T.ing-.25,.25,E.in)):0,y:lerp(16,0,tg)});
+  ings.forEach((el,i)=>{const u=seg(t,T.ing+i*.28,.4,E.back);const v=t>=T.ing&&t<T.next?1-seg(t,T.next-.25,.25,E.in):0;set(el,{o:v*Math.min(u*2,1),x:lerp(-60,0,u)})});
+  const wy=seg(t,T.why,.45,E.back); set($('why'),{o:t>=T.why&&t<T.next?wy*(1-seg(t,T.next-.25,.25,E.in)):0,y:lerp(26,0,wy)});
+  const nx=seg(t,T.next,.45,E.pop); set($('next'),{o:t>=T.next&&t<T.end?Math.min(nx*2,1):0,s:lerp(1.3,1,nx)});
+  // end card
+  const en=seg(t,T.end,.35); $('end').style.opacity=t>=T.end?en:0; $('end').style.transform=`scale(${lerp(1.04,1,en)})`;
+  // marlow
+  set($('m'),{o:0});
+  if(t>=T.think&&t<T.reveal) marlow('thinking',T.think+.1,{x:600,y:900,hold:T.reveal-T.think-.35});
+  else if(t>=T.name+.3&&t<T.ing) marlow('skeptical',T.name+.3,{x:70,y:930,hold:T.ing-T.name-.6});
+  else if(t>=T.why+.2&&t<T.next) marlow('happy',T.why+.2,{x:70,y:960,hold:T.next-T.why-.5});
+  else if(t>=T.next+.2&&t<T.end) marlow('cheers',T.next+.2,{x:70,y:960,hold:T.end-T.next-.5});
+};
+window.showGuides=v=>{$('guides').style.display=v?'block':'none'}; window.render(0);
+</script></body></html>
