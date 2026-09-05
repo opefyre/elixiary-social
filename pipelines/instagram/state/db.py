@@ -29,7 +29,7 @@ STATUSES = ("reserved", "rendered", "drafted", "scheduled", "published",
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS posts (
   id             INTEGER PRIMARY KEY AUTOINCREMENT,
-  source_type    TEXT NOT NULL CHECK (source_type IN ('recipe','article','homebar','marlow','shortlist')),
+  source_type    TEXT NOT NULL CHECK (source_type IN ('recipe','article','homebar','marlow','shortlist','reel')),
   source_id      TEXT NOT NULL,
   angle          TEXT NOT NULL DEFAULT '',
   status         TEXT NOT NULL,
@@ -91,7 +91,7 @@ def _migrate(c):
     rebuilding the table. Only runs when the old constraint is still in place."""
     row = c.execute("SELECT sql FROM sqlite_master WHERE type='table' "
                     "AND name='posts'").fetchone()
-    if not row or "'shortlist'" in (row["sql"] or ""):
+    if not row or "'reel'" in (row["sql"] or ""):
         return
     cols = ("source_type, source_id, angle, status, buffer_post_id, channel_id, "
             "caption, slide_urls, meta, error, created_at, updated_at")
