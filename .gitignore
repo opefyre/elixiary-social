@@ -89,3 +89,7 @@ pipelines/instagram/node_modules/
 
 # cached remote images used by photo slides
 pipelines/instagram/render/.imgcache/
+
+# derived on each machine: tempo catalogue and per-reel track rotation log
+pipelines/instagram/reels/music/.catalogue.json
+pipelines/instagram/reels/.music-used.json

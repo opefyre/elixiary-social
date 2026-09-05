@@ -55,5 +55,24 @@ chrome zones so placement is checked, not trusted. Needs `puppeteer-core`
 (`npm install --prefix .tools puppeteer-core`) and ffmpeg — both on the laptop
 and the spare Mac, so either can render.
 
-A silent AAC track is muxed in. Add a trending sound in the Instagram editor
-before posting.
+## Music
+
+Tracks live in `reels/music/`. `music.py` measures each one's tempo (onset
+autocorrelation, harmonic-scored, pure Python) and loudness, and rotates
+least-recently-used per reel so consecutive posts never share a track.
+
+Tempo is only trusted when the top three candidates agree within 6 BPM. For
+those tracks the climb is beat-snapped: each bottle step becomes a whole
+number of beats near the designed 1.66s and the climb starts on a beat, so
+every count lands on a downbeat. Tracks with an unstable read still play, at
+the designed timing — a wrong snap is worse than none.
+
+Audio is trimmed to the reel, normalised to -14 LUFS (the social-platform
+target), and faded over the last 1.4s.
+
+```bash
+python3 reels/music.py --refresh          # rebuild the tempo catalogue
+python3 reels/build.py spec.json --tiles tiles --out reel.mp4                 # rotates
+python3 reels/build.py spec.json --tiles tiles --out reel.mp4 --music midnight-momentum.mp3
+python3 reels/build.py spec.json --tiles tiles --out reel.mp4 --music none    # silent
+```

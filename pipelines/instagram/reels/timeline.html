@@ -105,7 +105,8 @@ const seg=(t,t0,d,e=E.out)=>e(clamp((t-t0)/d,0,1));
 const $=id=>document.getElementById(id);
 
 // ── timeline (seconds) ────────────────────────────────────────────────────
-const T={hook:0, turn:1.15, climb:2.35, stepDur:1.66, recap:10.65, cta:12.7, end:15.0};
+// timing can be overridden by the build so the climb's cuts sit on the beat
+const T=Object.assign({hook:0, turn:1.15, climb:2.35, stepDur:1.66, recap:10.65, cta:12.7, end:15.0}, __TIMING__);
 const stepAt=k=>T.climb+(k-1)*T.stepDur;
 
 // ── build mosaic: 9 x 12 grid, scattered fill order per step ─────────────
