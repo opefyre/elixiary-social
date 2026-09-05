@@ -1,0 +1,211 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'PJS';src:url(__PJS__) format('woff2');font-weight:100 900}
+@font-face{font-family:'InterV';src:url(__INTER__) format('woff2');font-weight:100 900}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#06110d}
+body{font-family:'PJS',system-ui,sans-serif;color:#FCFEFD;position:relative}
+#stage{position:absolute;inset:0;overflow:hidden}
+.abs{position:absolute;will-change:transform,opacity}
+/* mosaic: 9 x 12 full-bleed, tiles pop in as recipes unlock */
+#mosaic{position:absolute;left:0;top:0;width:1080px;height:1920px}
+.tile{position:absolute;width:120px;height:160px;overflow:hidden;opacity:0;
+  transform-origin:center;background:#0b1f18}
+.tile img{width:100%;height:100%;object-fit:cover;display:block}
+#scrim{position:absolute;inset:0;background:
+  linear-gradient(180deg,rgba(6,17,13,.92) 0%,rgba(6,17,13,.86) 34%,
+  rgba(6,17,13,.55) 62%,rgba(6,17,13,.30) 100%)}
+#glow{position:absolute;inset:0;background:
+  radial-gradient(110% 50% at 50% 6%,rgba(13,57,41,.85) 0%,rgba(13,57,41,0) 62%)}
+.eyebrow{font-size:30px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#F5C451}
+.huge{font-size:112px;font-weight:800;line-height:1;letter-spacing:-.03em;white-space:nowrap}
+.gold{color:#F5C451}
+.dim{color:rgba(252,254,253,.66)}
+.name{font-size:84px;font-weight:800;letter-spacing:-.01em;text-transform:capitalize;white-space:nowrap}
+.count{font-size:300px;font-weight:800;line-height:.86;letter-spacing:-.055em;color:#F5C451;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.delta{font-size:44px;font-weight:700;color:rgba(252,254,253,.8)}
+.ex{font-size:38px;font-weight:600;color:rgba(252,254,253,.7);line-height:1.45}
+.ex b{color:#FCFEFD}
+.step{font-size:30px;font-weight:700;letter-spacing:.18em;color:rgba(252,254,253,.62)}
+.prog{display:flex;gap:12px;width:800px}
+.prog i{height:10px;flex:1;border-radius:6px;background:rgba(252,254,253,.16);position:relative;overflow:hidden}
+.prog i b{position:absolute;left:0;top:0;bottom:0;background:#F5C451;width:0}
+.bar{width:0;height:10px;background:#F5C451;border-radius:6px}
+.row{font-size:56px;font-weight:700;line-height:1.5;white-space:nowrap}
+.row span{color:#F5C451;display:inline-block;min-width:150px;font-variant-numeric:tabular-nums}
+.marlow{width:280px;height:280px}
+.marlow img{width:100%;height:100%;object-fit:contain;display:block;
+  filter:drop-shadow(0 18px 30px rgba(0,0,0,.45))}
+.logo{width:96px;height:96px;border-radius:50%;display:block}
+.handle{font-size:40px;font-weight:700;letter-spacing:.02em}
+.site{font-size:34px;font-weight:600;color:rgba(252,254,253,.66);letter-spacing:.12em;text-transform:uppercase}
+.guides{position:absolute;inset:0;pointer-events:none;display:none}
+.guides i{position:absolute;background:rgba(255,0,80,.18)}
+.guides u{position:absolute;left:80px;right:200px;top:280px;bottom:500px;border:2px dashed rgba(0,255,160,.6)}
+</style></head><body>
+<div id="stage">
+  <div id="mosaic"></div>
+  <div id="scrim"></div><div id="glow"></div>
+
+  <!-- HOOK -->
+  <div id="h_eye" class="abs eyebrow" style="left:80px;top:330px">1,047 cocktails, analysed</div>
+  <div id="h_a" class="abs huge" style="left:80px;top:400px">5 bottles.</div>
+  <div id="h_b" class="abs huge gold" style="left:80px;top:530px"><span id="h_n">0</span> cocktails.</div>
+
+  <!-- TURN -->
+  <div id="t_a" class="abs huge" style="left:80px;top:400px">You don't need<br>a 6th.</div>
+  <div id="t_b" class="abs dim" style="left:80px;top:660px;font-size:44px;font-weight:600">Buy them in this order &darr;</div>
+
+  <!-- CLIMB -->
+  <div id="c_step" class="abs step" style="left:80px;top:330px">1 / 5</div>
+  <div id="c_prog" class="abs prog" style="left:80px;top:384px">
+    <i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div>
+  <div id="c_bar" class="abs bar" style="left:80px;top:440px"></div>
+  <div id="c_name" class="abs name" style="left:80px;top:462px">Gin</div>
+  <div id="c_num" class="abs count" style="left:70px;top:566px">20</div>
+  <div id="c_delta" class="abs delta" style="left:80px;top:846px">+20 new drinks</div>
+  <div id="c_ex" class="abs ex" style="left:80px;top:918px"></div>
+
+  <!-- RECAP -->
+  <div id="r_eye" class="abs eyebrow" style="left:80px;top:330px">the whole bar</div>
+  <div id="r_list" class="abs" style="left:80px;top:392px"></div>
+  <div id="r_sum" class="abs huge gold" style="left:80px;top:880px">= 104 cocktails.</div>
+
+  <!-- CTA -->
+  <div id="k_a" class="abs huge" style="left:80px;top:430px">Save this<br>before you shop.</div>
+  <div id="k_sub" class="abs dim" style="left:80px;top:690px;font-size:38px;font-weight:500;line-height:1.35">Every count computed from<br>1,047 real recipes.</div>
+  <div id="k_brand" class="abs" style="left:80px;top:860px;display:flex;align-items:center;gap:22px">
+    <img class="logo" src="__LOGO__"><div><div class="handle">@elixiary.ai</div><div class="site">elixiary.com</div></div></div>
+
+  <!-- MARLOW -->
+  <div id="m" class="abs marlow" style="left:700px;top:1080px"><img id="m_img" src=""></div>
+
+  <div id="guides" class="guides"><i style="left:0;right:0;top:0;height:280px"></i>
+    <i style="left:0;right:0;bottom:0;height:500px"></i>
+    <i style="right:0;top:280px;bottom:500px;width:200px"></i>
+    <i style="left:0;top:280px;bottom:500px;width:80px"></i><u></u></div>
+</div>
+<script>
+const SPEC = __SPEC__;
+const MARLOW = __MARLOW__;   // {skeptical:'path', cheers:..., happy:..., thinking:...}
+const TILE_DIR = "__TILES__";
+
+// ── easing ────────────────────────────────────────────────────────────────
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,u)=>a+(b-a)*u;
+const E={
+  out:u=>1-Math.pow(1-u,3),
+  in:u=>u*u*u,
+  io:u=>u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2,
+  back:u=>{const c=1.6;return 1+(c+1)*Math.pow(u-1,3)+c*Math.pow(u-1,2)},
+  pop:u=>{const c=2.4;return 1+(c+1)*Math.pow(u-1,3)+c*Math.pow(u-1,2)},
+};
+const seg=(t,t0,d,e=E.out)=>e(clamp((t-t0)/d,0,1));
+const $=id=>document.getElementById(id);
+
+// ── timeline (seconds) ────────────────────────────────────────────────────
+const T={hook:0, turn:1.15, climb:2.35, stepDur:1.66, recap:10.65, cta:12.7, end:15.0};
+const stepAt=k=>T.climb+(k-1)*T.stepDur;
+
+// ── build mosaic: 9 x 12 grid, scattered fill order per step ─────────────
+let seed=7; const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff};
+const cells=[]; for(let r=0;r<12;r++)for(let c=0;c<9;c++)cells.push({x:c*120,y:r*160});
+for(let i=cells.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[cells[i],cells[j]]=[cells[j],cells[i]]}
+const tiles=[]; let ci=0;
+SPEC.forEach((s,si)=>s.recipes.forEach((r,ri)=>{
+  const cell=cells[ci++]; const el=document.createElement('div'); el.className='tile';
+  el.style.left=cell.x+'px'; el.style.top=cell.y+'px';
+  const img=document.createElement('img'); img.src=`${TILE_DIR}/${r.id}.jpg`; el.appendChild(img);
+  $('mosaic').appendChild(el);
+  // each step's tiles stagger in over ~1.0s, so the wall visibly grows
+  tiles.push({el, t0: stepAt(si+1)+0.18+ri*(1.0/s.recipes.length), rot:(rnd()-.5)*10,
+              outT: T.turn+0.05+rnd()*0.5});
+}));
+
+// recap rows
+$('r_list').innerHTML=SPEC.map(s=>`<div class="row"><span>${s.total}</span> ${s.item}</div>`).join('');
+const rows=[...$('r_list').children];
+const progs=[...$('c_prog').querySelectorAll('i b')];
+
+function set(el,{x=0,y=0,s=1,o=1,r=0}={}){
+  el.style.opacity=o; el.style.transform=`translate(${x}px,${y}px) scale(${s}) rotate(${r}deg)`;
+}
+function hide(...els){els.forEach(e=>e.style.opacity=0)}
+function marlow(kind,t0,{x=700,y=1080,hold=9,d=.55}={}){
+  const u=seg(t,t0,d,E.pop); const out=seg(t,t0+hold,.35,E.in);
+  $('m_img').src=MARLOW[kind]; $('m').style.left=x+'px'; $('m').style.top=y+'px';
+  set($('m'),{s:lerp(.3,1,u)*(1-.3*out),o:Math.min(u*2,1)*(1-out),y:lerp(60,0,u),r:lerp(-14,0,u)});
+}
+
+let t=0;
+window.render=function(time){
+  t=time;
+  // mosaic: tiles pop, whole wall drifts slowly and dims under text-heavy beats
+  const drift=-t*6;
+  $('mosaic').style.transform=`translateY(${drift}px) scale(${1+t*0.004})`;
+  const wallO = t<T.turn ? .55 : t<T.recap ? .62 : t<T.cta ? lerp(.62,.9,seg(t,T.recap,.8)) : lerp(.9,.28,seg(t,T.cta,.6));
+  $('mosaic').style.opacity=wallO;
+  for(const tl of tiles){
+    if(t<tl.t0){ const gone=seg(t,tl.outT,.24,E.in); set(tl.el,{s:1-.5*gone,o:1-gone,r:gone*tl.rot}); }
+    else { const u=seg(t,tl.t0,.26,E.pop); set(tl.el,{s:lerp(.4,1,u),o:u,r:lerp(tl.rot,0,u)}); }
+  }
+  $('scrim').style.opacity = t<T.recap?1:t<T.cta?lerp(1,.88,seg(t,T.recap,.8)):1;
+
+  // ── hook ──
+  { const a=seg(t,0.02,.42,E.pop), b=seg(t,0.32,.42,E.pop), e=seg(t,0.12,.4);
+    const out=seg(t,T.turn-.22,.22,E.in);
+    set($('h_eye'),{o:e*(1-out),y:lerp(-20,0,e)-out*40});
+    set($('h_a'),{s:lerp(1.6,1,a),o:Math.min(a*3,1)*(1-out),y:-out*60});
+    set($('h_b'),{s:lerp(1.4,1,b),o:Math.min(b*3,1)*(1-out),x:lerp(60,0,b),y:-out*60});
+    const n=Math.round(lerp(0,104,seg(t,0.36,.62,E.out))); $('h_n').textContent=n; }
+
+  // ── turn ──
+  { const a=seg(t,T.turn+.02,.45,E.pop), b=seg(t,T.turn+.45,.4);
+    const out=seg(t,T.climb-.2,.2,E.in);
+    set($('t_a'),{s:lerp(1.5,1,a),o:Math.min(a*3,1)*(1-out),y:-out*60});
+    set($('t_b'),{o:b*(1-out),y:lerp(24,0,b)-out*60}); }
+
+  // ── climb ──
+  { const k=Math.floor((t-T.climb)/T.stepDur)+1; const on=t>=T.climb&&t<T.recap;
+    const k1=clamp(k,1,5); const s=SPEC[k1-1]; const t0=stepAt(k1);
+    const inU=seg(t,t0,.4,E.pop); const outU=seg(t,T.recap-.22,.22,E.in);
+    const v=on?1-outU:0;
+    $('c_step').textContent=`${k1} / 5`;
+    progs.forEach((b,i)=>{ b.style.width = i<k1-1?'100%':i===k1-1?(seg(t,t0+.05,.5)*100)+'%':'0%'; });
+    set($('c_step'),{o:v*seg(t,T.climb,.3)}); set($('c_prog'),{o:v*seg(t,T.climb,.3)});
+    $('c_bar').style.width=(seg(t,t0,.5)*140)+'px'; set($('c_bar'),{o:v});
+    $('c_name').textContent=s.item;
+    set($('c_name'),{o:v*Math.min(inU*3,1),x:lerp(-70,0,inU)});
+    const prev=k1>1?SPEC[k1-2].total:0;
+    const num=Math.round(lerp(prev,s.total,seg(t,t0+.1,.75,E.out)));
+    $('c_num').textContent=num;
+    const punch=1+.06*Math.sin(Math.PI*clamp((t-(t0+.85))/.22,0,1));   // lands with a thump
+    set($('c_num'),{o:v*Math.min(inU*2,1),s:lerp(.85,1,inU)*punch});
+    $('c_delta').textContent=`+${s.gained} new drinks`;
+    const dU=seg(t,t0+.5,.35); set($('c_delta'),{o:v*dU,y:lerp(18,0,dU)});
+    $('c_ex').innerHTML=s.examples.slice(0,2).map(x=>`<b>${x.replace(/\s*\(.*?\)/,'')}</b>`).join(' &middot; ');
+    const eU=seg(t,t0+.62,.35); set($('c_ex'),{o:v*eU,y:lerp(18,0,eU)}); }
+
+  // ── recap ──
+  { const on=t>=T.recap; const out=seg(t,T.cta-.2,.2,E.in); const v=on?1-out:0;
+    const e=seg(t,T.recap,.35); set($('r_eye'),{o:v*e,y:lerp(-16,0,e)});
+    rows.forEach((r,i)=>{const u=seg(t,T.recap+.1+i*.11,.4,E.back); set(r,{o:v*Math.min(u*2,1),x:lerp(-60,0,u)})});
+    const sU=seg(t,T.recap+.8,.45,E.pop); set($('r_sum'),{o:v*Math.min(sU*3,1),s:lerp(1.3,1,sU)}); }
+
+  // ── cta ──
+  { const on=t>=T.cta; const v=on?1:0;
+    const a=seg(t,T.cta+.02,.45,E.pop); set($('k_a'),{o:v*Math.min(a*3,1),s:lerp(1.4,1,a)});
+    const b=seg(t,T.cta+.4,.4); set($('k_sub'),{o:v*b,y:lerp(20,0,b)});
+    const c=seg(t,T.cta+.7,.45,E.back); set($('k_brand'),{o:v*Math.min(c*2,1),y:lerp(30,0,c)}); }
+
+  // ── marlow beats ──
+  hide($('m'));
+  if(t>=T.turn && t<T.climb+.2) marlow('skeptical', T.turn+.28, {x:700,y:640,hold:T.climb-T.turn-.5});
+  else if(t>=stepAt(5)+.6 && t<T.recap+.25) marlow('thinking', stepAt(5)+.6, {x:700,y:640,hold:T.recap-stepAt(5)-.9});
+  else if(t>=T.recap+.3 && t<T.cta) marlow('cheers', T.recap+.3, {x:700,y:520,hold:T.cta-T.recap-.7});
+  else if(t>=T.cta+.3) marlow('happy', T.cta+.3, {x:560,y:1060,hold:99});
+};
+window.showGuides=v=>{$('guides').style.display=v?'block':'none'};
+window.render(0);
+</script></body></html>

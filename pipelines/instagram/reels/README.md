@@ -36,19 +36,24 @@ at the top of the frame and the caption eats the bottom.
 
 ## Build
 
+One HTML timeline, captured frame by frame. `timeline.html` positions every
+element as a function of time — `window.render(t)` — and `capture.js` drives
+headless Chrome through it at 30fps in a single browser session, so a 15s reel
+is ~450 screenshots in under two minutes. Slide-and-zoom on still images reads
+as a slideshow; this is real motion: the counter ticks, the wall of 104 real
+recipe photos blows away at the turn and is rebuilt bottle by bottle, Marlow
+reacts on the beats.
+
 ```bash
-python3 reels/spec.py --out /tmp/spec.json      # needs the database
-python3 reels/frames.py /tmp/spec.json --out /tmp/frames
-python3 reels/frames.py /tmp/spec.json --out /tmp/guides --guides
-python3 reels/assemble.py /tmp/frames --out reel.mp4
+python3 reels/spec.py  --out spec.json                # needs the database
+python3 reels/tiles.py spec.json --out tiles          # 104 photos from R2, sips-cut
+python3 reels/build.py spec.json --tiles tiles --out reel.mp4 [--preview] [--guides]
 ```
 
-`assemble.py` needs ffmpeg, which is on the laptop but **not** on the spare Mac
-(no Homebrew there), so reels are a laptop-side build for now. Buffer's
-`AssetInput` accepts `video`, so the existing publish path can carry them once
-that is resolved.
+`--preview` captures at 6fps for a fast look; `--guides` paints Instagram's
+chrome zones so placement is checked, not trusted. Needs `puppeteer-core`
+(`npm install --prefix .tools puppeteer-core`) and ffmpeg — both on the laptop
+and the spare Mac, so either can render.
 
-Cuts are hard, not dissolves: a cross-fading reel reads as a slideshow, and the
-counter needs to land. Each beat gets a slow push so no frame is ever static.
-A silent AAC track is muxed in — add a trending sound in the Instagram editor
+A silent AAC track is muxed in. Add a trending sound in the Instagram editor
 before posting.

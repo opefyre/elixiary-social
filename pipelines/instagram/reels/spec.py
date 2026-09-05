@@ -89,12 +89,18 @@ def build(steps=5):
                 out.add(r["id"])
         return out
 
+    names = {r["id"]: r["name"] for r in recipes}
     bar, prev, spec = [], set(), []
     for s in order:
         bar.append(s["item"])
         now = unlocked(bar)
+        new = now - prev
+        # every newly unlocked recipe, so the reel can show the actual drinks
+        # as they stack up -- the mosaic is the proof of the number
         spec.append({"n": s["n"], "item": s["item"], "total": s["total"],
-                     "gained": s["gained"], "examples": examples(now - prev)})
+                     "gained": s["gained"], "examples": examples(new),
+                     "recipes": sorted(({"id": i, "name": names[i]} for i in new),
+                                       key=lambda x: x["name"])})
         prev = now
     return spec
 
