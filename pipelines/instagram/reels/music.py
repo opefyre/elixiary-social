@@ -94,7 +94,7 @@ def catalogue(refresh=False):
     return rows
 
 
-def pick(lo=95, hi=140, exclude=()):
+def pick(lo=80, hi=140, exclude=()):
     """Least-recently-used track inside the tempo band."""
     used = json.load(open(LOG)) if os.path.exists(LOG) else {}
     # only tracks whose tempo we can actually cut to
