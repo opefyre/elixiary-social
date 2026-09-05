@@ -12,6 +12,33 @@ AI spend near zero and stops the model inventing recipe facts.
 import json
 import re
 import sys
+import urllib.request
+
+# The Drive->R2 mirror wrote every curated photo as curated-recipes/<id>.<ext>
+# with the extension sniffed from the bytes, so it has to be probed. One HEAD
+# per candidate; r2.dev refuses the default agent.
+R2_PUBLIC = "https://pub-dfe281321d524908ae12d89d86e1a8f6.r2.dev"
+_photo_cache = {}
+
+
+def recipe_photo(rid):
+    """Public URL of a curated recipe's mirrored photo, or None."""
+    if rid in _photo_cache:
+        return _photo_cache[rid]
+    url = None
+    for ext in ("png", "jpg", "jpeg", "webp"):
+        cand = f"{R2_PUBLIC}/curated-recipes/{rid}.{ext}"
+        try:
+            req = urllib.request.Request(cand, method="HEAD",
+                                         headers={"User-Agent": "elixiary-social/1.0"})
+            with urllib.request.urlopen(req, timeout=15) as r:
+                if r.status == 200:
+                    url = cand
+                    break
+        except Exception:
+            continue
+    _photo_cache[rid] = url
+    return url
 
 MAX_SLIDES = 10
 
@@ -163,7 +190,7 @@ def validate_spec(spec):
         kind = s.get("kind")
         w = f"slide {i} ({kind})"
         too_long(w, s.get("eyebrow"), "eyebrow")
-        if kind == "hook":
+        if kind in ("hook", "photo"):
             too_long(w, s.get("title"), "hook_title")
             too_long(w, s.get("kicker"), "kicker")
             too_long(w, s.get("subtitle"), "subtitle")
@@ -468,8 +495,15 @@ def recipe_spec(r, angle="classic"):
                     break
         lede = " · ".join(picked[:3]) or None
 
+    # Open on the cocktail itself when the photo is mirrored: a full-bleed
+    # image is what stops a thumb in the feed, and the hook rides on top of
+    # it. Recipes without a mirrored photo keep the paper hook.
+    photo = recipe_photo(r.get("id")) if r.get("image_url") else None
     slides.append({
-        "kind": "hook",
+        "kind": "photo" if photo else "hook",
+        **({"image": photo, "pill": "RECIPE",
+            "meta": [x for x in (r.get("difficulty"), r.get("prep_time")) if x][:2]}
+           if photo else {}),
         "eyebrow": fit(cat or "Cocktail Recipe", 30),
         # `kicker` is the one line the LLM writes on this slide — the hook.
         # Left empty here; the caption step fills it in.

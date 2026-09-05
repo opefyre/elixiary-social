@@ -388,6 +388,13 @@ BUILDERS = {
 
 def page_html(slide, theme_key, idx, total, assets):
     t = THEMES[theme_key]
+    # A full-bleed photo is dark whatever the backplate, so its type is always
+    # light. Without this the paper theme's green-on-cream text disappears.
+    if slide.get("kind") == "photo":
+        t = {**t, "fg": "#FCFEFD", "muted": "rgba(252,254,253,.72)",
+             "accent": "#F5C451", "rule": "rgba(245,196,81,.30)",
+             "chip_bg": "rgba(255,255,255,.10)", "chip_line": "rgba(255,255,255,.22)",
+             "grad": THEMES["create"]["grad"]}
     kind = slide.get("kind", "prose")
     if kind == "cta":
         body = build_cta(slide,
@@ -526,7 +533,7 @@ body{{
 .marlow{{position:absolute;right:44px;bottom:104px;width:290px;height:auto;
   filter:drop-shadow(0 22px 34px rgba(0,0,0,.42))}}
 
-.foot{{position:absolute;left:{t['foot_left']}px;bottom:70px;display:flex;align-items:center;
+.foot{{position:absolute;z-index:3;left:{t['foot_left']}px;bottom:70px;display:flex;align-items:center;
   gap:12px;font-family:'PJS';font-weight:600;font-size:22px;letter-spacing:.2em;
   text-transform:uppercase;color:{t['fg']};opacity:.82;
   text-shadow:0 1px 10px rgba(0,0,0,.75),0 0 3px rgba(0,0,0,.6)}}

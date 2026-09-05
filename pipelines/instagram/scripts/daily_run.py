@@ -46,17 +46,21 @@ PUBLISH = os.path.join(HERE, "publish.py")
 # for six formats, which is too few for per-day counts with recipes as filler.
 # The mix is a fixed weekly calendar instead. Mon=0 .. Sun=6.
 #
-#   recipe 4  ·  shortlist 4  ·  marlow 3  ·  article 2  ·  homebar 1
+#   recipe 7  ·  shortlist 4  ·  article 2  ·  homebar 1
+#
+# Marlow-generated recipes are no longer carousels: they are the reel series
+# (reels/asked2.html), built from the same rows. Their three slots went to
+# recipes, which now open on the cocktail photo.
 #
 # Home bar stays rare on purpose: there are only ~52 variants, and one a week
 # stretches them over a year while still reading as a recurring anchor.
 WEEK_PLAN = {
     0: ["recipe", "shortlist"],   # Mon
-    1: ["marlow", "homebar"],     # Tue
+    1: ["recipe", "homebar"],     # Tue
     2: ["recipe", "article"],     # Wed
-    3: ["marlow", "shortlist"],   # Thu
+    3: ["recipe", "shortlist"],   # Thu
     4: ["recipe", "article"],     # Fri
-    5: ["marlow", "shortlist"],   # Sat
+    5: ["recipe", "shortlist"],   # Sat
     6: ["recipe", "shortlist"],   # Sun
 }
 
