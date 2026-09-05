@@ -53,7 +53,7 @@ def write_html(r, workdir, timing, design="asked2"):
     for k in ("skeptical", "cheers", "happy", "thinking"):
         shutil.copy(os.path.join(core.ASSETS, f"expr-{k}-256.png"), os.path.join(assets, f"{k}.png"))
         marlow[k] = f"assets/{k}.png"
-    for f in ("logo.png", "sal-thinking.png", "sal-shaking.png"):
+    for f in ("logo.png", "sal-thinking.png", "sal-shaking.png", "sal-head-surprised.png", "sal-pose-offering-drink.png", "sal-pose-shrug.png"):
         shutil.copy(os.path.join(core.ASSETS, f), os.path.join(assets, f))
     fonts = os.path.join(HERE, "..", "render", "fonts")
     data = {"prompt": r["prompt"], "name": r["name"], "ingredients": ingredients(r.get("ingredients")),
@@ -61,7 +61,7 @@ def write_html(r, workdir, timing, design="asked2"):
     html = (tpl.replace("__INTER__", data_uri(os.path.join(fonts, "Inter-latin.woff2")))
                .replace("__PJS__", data_uri(os.path.join(fonts, "PlusJakartaSans-latin.woff2")))
                .replace("__PHOTO__", "assets/photo.png").replace("__LOGO__", "assets/logo.png")
-               .replace("__SAL_THINK__", "assets/sal-thinking.png").replace("__SAL_SHAKE__", "assets/sal-shaking.png")
+               .replace("__SAL_THINK__", "assets/sal-thinking.png").replace("__SAL_SHAKE__", "assets/sal-shaking.png").replace("__SAL_SURPRISED__", "assets/sal-head-surprised.png").replace("__SAL_OFFER__", "assets/sal-pose-offering-drink.png").replace("__SAL_SHRUG__", "assets/sal-pose-shrug.png")
                .replace("__DATA__", json.dumps(data)).replace("__TIMING__", json.dumps(timing or {})))
     p = os.path.join(workdir, "reel.html"); open(p, "w").write(html); return p
 

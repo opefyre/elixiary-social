@@ -65,6 +65,9 @@ body{font-family:'InterV',-apple-system,system-ui,sans-serif;color:#fff;position
 <div id="next" class="abs card glass" style="left:80px;top:1120px;max-width:800px"><div class="h1">what should I<br>ask it next?</div>
   <div class="small" style="margin-top:14px">tell me in the comments &#128071;</div></div>
 <div id="m" class="abs char" style="left:600px;top:840px;width:250px;height:250px"><img id="m_img" src=""></div>
+<div id="salr" class="abs" style="left:560px;top:1210px;width:330px;height:330px"><img src="__SAL_SURPRISED__" style="width:100%;height:100%;object-fit:contain;object-position:right bottom;display:block;filter:drop-shadow(0 22px 34px rgba(0,0,0,.5))"></div>
+<div id="salb" class="abs" style="left:590px;top:540px;width:330px;height:580px"><img src="__SAL_OFFER__" style="width:100%;height:100%;object-fit:contain;object-position:right bottom;display:block;filter:drop-shadow(0 22px 34px rgba(0,0,0,.5))"></div>
+<div id="sals" class="abs" style="left:590px;top:540px;width:330px;height:580px"><img src="__SAL_SHRUG__" style="width:100%;height:100%;object-fit:contain;object-position:right bottom;display:block;filter:drop-shadow(0 22px 34px rgba(0,0,0,.5))"></div>
 
 <div id="end"><div class="abs" style="left:80px;right:80px;top:600px"><img class="logo" src="__LOGO__"><div class="t">Invent yours.</div>
   <div class="s">elixiary.com</div><div class="u">free &middot; ask Marlow anything</div><div class="u" style="margin-top:34px;color:rgba(252,254,253,.5)">@elixiary.ai</div></div>
@@ -94,8 +97,8 @@ window.render=function(time){t=time;
   // photo: bloom in, slow push, parallax (bg drifts slower than hero)
   const push=1+0.07*clamp((t-T.reveal)/(T.end-T.reveal),0,1);
   const room=seg(t,T.build-.3,.9);            // build + ask phases: photo lifts out of the way
-  const lift=lerp(0,-300,room), shrink=lerp(1,.78,room);
-  $('hero').style.transform=`translateY(${lift}px) scale(${lerp(1.16,1,rv)*push*shrink})`;
+  const lift=lerp(0,-330,room), shrink=lerp(1,.62,room);
+  $('hero').style.transform=`translate(${lerp(0,-235,room)}px,${lift}px) scale(${lerp(1.16,1,rv)*push*shrink})`;
   $('hero').style.filter=`brightness(${lerp(1.6,1,rv)}) blur(${lerp(10,0,rv)}px)`;
   $('hero').style.borderRadius = `${lerp(0,56,room)}px`;
   $('bg').style.transform=`translateY(${lift*0.3}px) scale(${1+0.02*clamp((t-T.reveal)/10,0,1)})`;
@@ -115,6 +118,9 @@ window.render=function(time){t=time;
   rise($('sal'),T.think+.15,.9,{y:80,hold:T.reveal-T.think-.75,dOut:.4});
   // photo phase
   rise($('name'),T.name,.9,{hold:T.build-T.name-.9,dOut:.55});
+  rise($('salr'),T.reveal+.35,.8,{y:70,hold:T.name+1.6-(T.reveal+.35),dOut:.5});
+  rise($('salb'),T.build+.25,.9,{y:80,hold:T.next-T.build-1.0,dOut:.5});
+  rise($('sals'),T.next+.25,.9,{y:80,hold:T.end-T.next-1.0,dOut:.5});
   rise($('build'),T.build,.9,{hold:T.next-T.build-.9,dOut:.55});
   rows.forEach((r,i)=>{const u=seg(t,T.build+.35+i*.32,.7);r.style.opacity=u;r.style.transform=`translateX(${lerp(-26,0,u)}px)`;r.style.filter=`blur(${lerp(8,0,u)}px)`});
   rise($('next'),T.next,.9,{hold:T.end-T.next-.9,dOut:.5});
@@ -123,7 +129,7 @@ window.render=function(time){t=time;
   const mar=(k,t0,hold)=>{$('m_img').src=D.marlow[k];const u=seg(t,t0,.8,E.back),o=seg(t,t0+hold,.45,E.in);
     $('m').style.opacity=Math.min(u*2,1)*(1-o);$('m').style.transform=`translateY(${lerp(60,0,u)}px) scale(${lerp(.6,1,u)}) rotate(${lerp(-10,0,u)}deg)`};
   if(t>=T.name+.6&&t<T.build) mar('skeptical',T.name+.6,T.build-T.name-1.2);
-  else if(t>=T.next+.4&&t<T.end) mar('cheers',T.next+.4,T.end-T.next-.9);
+
   // end
   const en=seg(t,T.end,.7); $('end').style.opacity=t>=T.end?en:0; $('end').style.transform=`scale(${lerp(1.03,1,en)})`;
   rise($('salend'),T.end+.4,.9,{y:90});
