@@ -1,0 +1,130 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'PJS';src:url(__PJS__) format('woff2');font-weight:100 900}
+@font-face{font-family:'InterV';src:url(__INTER__) format('woff2');font-weight:100 900}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#07100c}
+body{font-family:'InterV',-apple-system,system-ui,sans-serif;color:#fff;position:relative}
+.abs{position:absolute;will-change:transform,opacity,filter}
+/* photo layers: soft fill behind, sharp hero in front, both parallax */
+#bg{position:absolute;inset:-80px;background:url(__PHOTO__) center/cover;filter:blur(44px) brightness(.5) saturate(1.2)}
+#hero{position:absolute;left:0;top:400px;width:1080px;height:1080px;background:url(__PHOTO__) center/cover;
+  border-radius:0;transform-origin:center}
+#vig{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,16,12,.6) 0%,rgba(7,16,12,0) 28%,rgba(7,16,12,0) 60%,rgba(7,16,12,.82) 100%)}
+#hint{position:absolute;inset:-80px;background:url(__PHOTO__) center/cover;filter:blur(70px) brightness(.28) saturate(1.3)}
+#dark{position:absolute;inset:0;background:radial-gradient(90% 60% at 50% 40%,#0e1f17 0%,#07100c 70%)}
+/* liquid glass: no strokes, radius everywhere, light from the top-left */
+.glass{background:linear-gradient(135deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,.10) 45%,rgba(255,255,255,.06) 100%);
+  backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);
+  border-radius:34px;box-shadow:0 22px 60px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.28),inset 0 -1px 0 rgba(0,0,0,.12)}
+.chip{display:inline-flex;align-items:center;gap:16px;padding:20px 32px;border-radius:999px;font-size:34px;font-weight:500;color:rgba(255,255,255,.92)}
+.card{padding:34px 40px;font-family:'PJS',system-ui,sans-serif}
+.h1{font-family:'PJS';font-size:64px;font-weight:700;line-height:1.08;letter-spacing:-.025em;color:#fff}
+.h2{font-family:'PJS';font-size:46px;font-weight:600;line-height:1.15;letter-spacing:-.02em;color:#fff}
+.small{font-size:34px;font-weight:500;color:rgba(255,255,255,.74);line-height:1.35}
+.gold{color:#F5C451}
+.row{display:flex;align-items:baseline;gap:22px;font-size:40px;font-weight:500;line-height:1.35}
+.row span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.row b{font-family:'PJS';font-weight:600;color:#F5C451;min-width:150px;font-variant-numeric:tabular-nums}
+/* ask bar */
+#bar{position:absolute;left:80px;top:760px;width:800px;padding:30px 36px;border-radius:44px;
+  display:flex;align-items:center;gap:22px;overflow:hidden}
+#bar .orb{width:46px;height:46px;border-radius:50%;flex:none;background:radial-gradient(circle at 35% 35%,#FBE2A0,#F5C451 55%,#c98a12);box-shadow:0 0 30px rgba(245,196,81,.55)}
+#typed{font-size:42px;font-weight:500;line-height:1.28;letter-spacing:-.01em;color:#fff;word-break:break-word}
+#typed .ph{color:rgba(255,255,255,.4)}
+#cur{display:inline-block;width:4px;height:48px;background:#F5C451;vertical-align:-8px;margin-left:4px;border-radius:2px}
+#barglow{position:absolute;left:80px;top:760px;width:800px;height:132px;border-radius:44px;
+  box-shadow:0 0 0 0 rgba(245,196,81,0);pointer-events:none}
+.char{width:300px;height:300px}.char img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 22px 34px rgba(0,0,0,.5))}
+.mark{width:40px;height:40px;border-radius:50%;display:block}
+#end{position:absolute;inset:0;background:radial-gradient(80% 55% at 50% 38%,#12301f 0%,#07100c 75%)}
+#end .logo{width:150px;height:150px;border-radius:50%;display:block;margin:0 auto 34px;box-shadow:0 0 90px rgba(245,196,81,.25)}
+#end .t{font-family:'PJS';font-size:70px;font-weight:700;text-align:center;letter-spacing:-.025em;line-height:1.05}
+#end .s{font-family:'PJS';font-size:40px;font-weight:600;color:#F5C451;text-align:center;margin-top:26px}
+#end .u{font-size:30px;font-weight:500;color:rgba(252,254,253,.6);text-align:center;margin-top:16px;letter-spacing:.06em}
+.guides{position:absolute;inset:0;pointer-events:none;display:none}
+.guides i{position:absolute;background:rgba(255,0,80,.18)}
+.guides u{position:absolute;left:80px;right:200px;top:280px;bottom:500px;border:2px dashed rgba(0,255,160,.6)}
+</style></head><body>
+<div id="dark"></div><div id="hint"></div><div id="bg"></div><div id="hero"></div><div id="vig"></div>
+
+<div id="wm" class="abs chip glass" style="left:80px;top:290px;padding:12px 22px 12px 14px;font-size:28px"><img class="mark" src="__LOGO__">@elixiary.ai</div>
+
+<div id="ask" class="abs chip glass" style="left:80px;top:610px">I asked an AI for&hellip;</div>
+<div id="barglow"></div>
+<div id="bar" class="glass"><div class="orb"></div><div id="typed"><span class="ph">Ask Marlow anything</span></div></div>
+<div id="think" class="abs chip glass" style="left:80px;top:1010px">Marlow is thinking<span id="dots">&hellip;</span></div>
+<div id="sal" class="abs char" style="left:60px;top:1130px"><img src="__SAL_THINK__"></div>
+
+<div id="name" class="abs card glass" style="left:80px;top:1230px;max-width:800px"><div id="name_l" class="h1">Name</div>
+  <div class="small" style="margin-top:12px">it named it that.</div></div>
+
+<div id="build" class="abs card glass" style="left:80px;top:1120px;width:800px"><div class="h2 gold" style="margin-bottom:22px">the build</div><div id="rows"></div></div>
+
+<div id="next" class="abs card glass" style="left:80px;top:1120px;max-width:800px"><div class="h1">what should I<br>ask it next?</div>
+  <div class="small" style="margin-top:14px">tell me in the comments &#128071;</div></div>
+<div id="m" class="abs char" style="left:600px;top:840px;width:250px;height:250px"><img id="m_img" src=""></div>
+
+<div id="end"><div class="abs" style="left:80px;right:80px;top:600px"><img class="logo" src="__LOGO__"><div class="t">Invent yours.</div>
+  <div class="s">elixiary.com</div><div class="u">free &middot; ask Marlow anything</div></div>
+  <div id="salend" class="abs" style="left:640px;top:1040px;width:400px;height:640px"><img src="__SAL_STAND__" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 24px 40px rgba(0,0,0,.55))"></div></div>
+
+<div id="guides" class="guides"><i style="left:0;right:0;top:0;height:280px"></i><i style="left:0;right:0;bottom:0;height:500px"></i>
+  <i style="right:0;top:280px;bottom:500px;width:200px"></i><i style="left:0;top:280px;bottom:500px;width:80px"></i><u></u></div>
+<script>
+const D=__DATA__;
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x)); const lerp=(a,b,u)=>a+(b-a)*u;
+const E={out:u=>1-Math.pow(1-u,3),in:u=>u*u*u,io:u=>u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2,
+  soft:u=>1-Math.pow(1-u,4), back:u=>{const c=1.3;return 1+(c+1)*Math.pow(u-1,3)+c*Math.pow(u-1,2)}};
+const seg=(t,t0,d,e=E.soft)=>e(clamp((t-t0)/d,0,1)); const $=id=>document.getElementById(id);
+// every element enters by rising, sharpening and fading in -- and leaves the same way in reverse
+const rise=(el,t0,d=.7,{y=36,s=.96,hold=99,dOut=.5}={})=>{const u=seg(t,t0,d),o=seg(t,t0+hold,dOut,E.in);
+  el.style.opacity=u*(1-o); el.style.filter=`blur(${lerp(14,0,u)+o*10}px)`;
+  el.style.transform=`translateY(${lerp(y,0,u)-o*24}px) scale(${lerp(s,1,u)})`};
+const T=Object.assign({type0:.35,typeDur:2.2,think:2.9,reveal:4.6,name:5.3,build:9.0,next:13.4,end:16.4,total:18.5},__TIMING__);
+$('name_l').textContent=D.name;
+$('rows').innerHTML=D.ingredients.slice(0,4).map(s=>{s=s.replace(/\s*\(.*?\)/g,'');const m=s.match(/^([\d./]+\s*\w*)\s+(.*)$/);return `<div class="row"><b>${m?m[1]:''}</b><span>${m?m[2]:s}</span></div>`}).join('');
+const rows=[...$('rows').children];
+// long names shrink to fit the card rather than wrapping into the line beneath
+(()=>{const el=$('name_l');let fs=64;el.style.fontSize=fs+'px';while(el.scrollWidth>720&&fs>40){fs-=2;el.style.fontSize=fs+'px'}})();
+let t=0;
+window.render=function(time){t=time;
+  const pre=t<T.reveal, rv=seg(t,T.reveal,.9);
+  // photo: bloom in, slow push, parallax (bg drifts slower than hero)
+  const push=1+0.07*clamp((t-T.reveal)/(T.end-T.reveal),0,1);
+  const room=seg(t,T.build-.3,.9);            // build + ask phases: photo lifts out of the way
+  const lift=lerp(0,-300,room), shrink=lerp(1,.78,room);
+  $('hero').style.transform=`translateY(${lift}px) scale(${lerp(1.16,1,rv)*push*shrink})`;
+  $('hero').style.filter=`brightness(${lerp(1.6,1,rv)}) blur(${lerp(10,0,rv)}px)`;
+  $('hero').style.borderRadius = `${lerp(0,56,room)}px`;
+  $('bg').style.transform=`translateY(${lift*0.3}px) scale(${1+0.02*clamp((t-T.reveal)/10,0,1)})`;
+  $('hero').style.opacity=$('bg').style.opacity=$('vig').style.opacity=pre?0:Math.min(rv*2,1);
+  $('hint').style.opacity=pre?seg(t,0,.8):1-seg(t,T.reveal,.5);
+  rise($('wm'),T.reveal+.5,.8);
+  // ask phase
+  rise($('ask'),.1,.7,{hold:T.reveal-.7-.1});
+  const b=seg(t,.25,.8); $('bar').style.opacity=pre?b*(1-seg(t,T.reveal-.5,.5,E.in)):0; $('bar').style.transform=`translateY(${lerp(30,0,b)}px) scale(${lerp(.97,1,b)})`;
+  const typing=t>=T.type0&&t<T.type0+T.typeDur;
+  const glow=typing?.35+.25*Math.sin(t*9):(pre?.18:0);
+  $('barglow').style.boxShadow=`0 0 ${lerp(0,70,glow)}px ${lerp(0,14,glow)}px rgba(245,196,81,${glow*.6})`; $('barglow').style.opacity=$('bar').style.opacity;
+  const n=Math.round(seg(t,T.type0,T.typeDur,E.io)*D.prompt.length), blink=Math.floor(t*2.4)%2===0;
+  $('typed').innerHTML=n===0?'<span class="ph">Ask Marlow anything</span><span id="cur"></span>':D.prompt.slice(0,n)+(blink||typing?'<span id="cur"></span>':'');
+  rise($('think'),T.think,.7,{hold:T.reveal-T.think-.6,dOut:.4}); $('dots').textContent='.'.repeat(1+Math.floor((t*3)%3));
+  rise($('sal'),T.think+.15,.9,{y:80,hold:T.reveal-T.think-.75,dOut:.4});
+  // photo phase
+  rise($('name'),T.name,.9,{hold:T.build-T.name-.9,dOut:.55});
+  rise($('build'),T.build,.9,{hold:T.next-T.build-.9,dOut:.55});
+  rows.forEach((r,i)=>{const u=seg(t,T.build+.35+i*.32,.7);r.style.opacity=u;r.style.transform=`translateX(${lerp(-26,0,u)}px)`;r.style.filter=`blur(${lerp(8,0,u)}px)`});
+  rise($('next'),T.next,.9,{hold:T.end-T.next-.9,dOut:.5});
+  // marlow: skeptical while it's named, cheers on the ask
+  $('m').style.opacity=0;
+  const mar=(k,t0,hold)=>{$('m_img').src=D.marlow[k];const u=seg(t,t0,.8,E.back),o=seg(t,t0+hold,.45,E.in);
+    $('m').style.opacity=Math.min(u*2,1)*(1-o);$('m').style.transform=`translateY(${lerp(60,0,u)}px) scale(${lerp(.6,1,u)}) rotate(${lerp(-10,0,u)}deg)`};
+  if(t>=T.name+.6&&t<T.build) mar('skeptical',T.name+.6,T.build-T.name-1.2);
+  else if(t>=T.next+.4&&t<T.end) mar('cheers',T.next+.4,T.end-T.next-.9);
+  // end
+  const en=seg(t,T.end,.7); $('end').style.opacity=t>=T.end?en:0; $('end').style.transform=`scale(${lerp(1.03,1,en)})`;
+  rise($('salend'),T.end+.4,.9,{y:90});
+};
+window.showGuides=v=>{$('guides').style.display=v?'block':'none'}; window.render(0);
+</script></body></html>
