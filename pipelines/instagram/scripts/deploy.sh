@@ -21,7 +21,7 @@ KEEP=(
   'state/*.db*'       # the tracking database
   '.wrangler'
   '.tools'            # puppeteer-core for reel capture, npm-installed on the server
-  'service.log' 'service.err'
+  'service.log' 'service.err' 'watchdog.log'
   '__pycache__' '*.pyc'
 )
 
