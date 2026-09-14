@@ -90,8 +90,9 @@ CHANNEL_BLOCKLIST = {"6a7b98a8b2d9d577435cbebe": "finkavo"}
 CHANNEL_TIKTOK = "6a8825c2ccaf649a67eab6b0"
 ALLOWED_CHANNELS = {CHANNEL_ELIXIARY: "instagram", CHANNEL_TIKTOK: "tiktok"}
 
-# Off switch, so a TikTok outage can never hold up the Instagram post.
-TIKTOK_ENABLED = os.environ.get("ELIXIARY_TIKTOK", "1") not in ("0", "false", "")
+# TikTok mirroring is paused (user, 14 Sep 2026): Instagram only for now.
+# Flip back with ELIXIARY_TIKTOK=1.
+TIKTOK_ENABLED = os.environ.get("ELIXIARY_TIKTOK", "0") not in ("0", "false", "")
 
 
 def buffer_key():

@@ -91,12 +91,15 @@ def draft(conn, r, url, when):
         if res.get("message"): raise RuntimeError(f"Buffer refused ({channel}): {res['message']}")
         return res["post"]
     ig = create(publish.CHANNEL_ELIXIARY, {"instagram": {"type": "reel", "shouldShareToFeed": True, "isAiGenerated": True}})
-    tt = create(publish.CHANNEL_TIKTOK, {"tiktok": {"isAiGenerated": True}})
     pid = db.reserve(conn, "reel", r["id"], angle="asked", meta={"due_at": slot, "video": url, "slide_token": "reels"})
     db.update(conn, pid, status="drafted", buffer_post_id=ig["id"], channel_id=publish.CHANNEL_ELIXIARY,
               caption=text, slide_urls=[url])
-    db.add_crosspost(conn, pid, "tiktok", publish.CHANNEL_TIKTOK, tt["id"], [url], status="drafted")
-    return pid, ig["id"], tt["id"]
+    tt_id = None
+    if publish.TIKTOK_ENABLED:          # same switch as the carousels
+        tt = create(publish.CHANNEL_TIKTOK, {"tiktok": {"isAiGenerated": True}})
+        db.add_crosspost(conn, pid, "tiktok", publish.CHANNEL_TIKTOK, tt["id"], [url], status="drafted")
+        tt_id = tt["id"]
+    return pid, ig["id"], tt_id
 
 
 def main():
