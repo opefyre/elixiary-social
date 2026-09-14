@@ -212,6 +212,11 @@ def mirror_tiktok(conn, post_id, text, image_urls, due_at):
     """Second draft, same caption, same slot, 9:16 frames. Never raises: the
     Instagram post is already live in Buffer by this point, and losing the
     mirror must not mark it failed."""
+    if not TIKTOK_ENABLED:
+        # hard stop, not just a skipped call site: the channel is gone from
+        # Buffer, and nothing — including a hand-run tool — may reach for it
+        print("tiktok  paused — no mirror created")
+        return None
     title = (text or "").split("\n")[0].strip()
     try:
         if not due_at:
