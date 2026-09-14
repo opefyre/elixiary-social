@@ -39,10 +39,10 @@ def why(desc):
     return "why it works: " + s.rstrip(".,; ")
 
 
-DESIGN = {"asked": ("asked.html", 15.0), "asked2": ("asked2.html", 18.5)}
+DESIGN = {"asked": ("asked.html", 15.0), "asked2": ("asked2.html", 18.5), "asked3": ("asked3.html", 18.5)}
 
 
-def write_html(r, workdir, timing, design="asked2"):
+def write_html(r, workdir, timing, design="asked3"):
     tpl = open(os.path.join(HERE, DESIGN[design][0])).read()
     assets = os.path.join(workdir, "assets"); os.makedirs(assets, exist_ok=True)
     photo = os.path.join(assets, "photo.png")
@@ -71,7 +71,7 @@ def main():
     ap.add_argument("recipe"); ap.add_argument("--out", default="reel.mp4"); ap.add_argument("--work")
     ap.add_argument("--guides", action="store_true"); ap.add_argument("--preview", action="store_true")
     ap.add_argument("--music", default=None)
-    ap.add_argument("--design", default="asked2", choices=["asked", "asked2"],
+    ap.add_argument("--design", default="asked3", choices=["asked", "asked2", "asked3"],
                     help="asked2 = glass design (default); asked = the first cut")
     a = ap.parse_args()
     r = json.load(open(a.recipe)); work = a.work or tempfile.mkdtemp(prefix="asked-")
