@@ -291,15 +291,28 @@ def _method_slides(r):
     return out
 
 
+def _ingredients_slide(r):
+    items = _ing_items(r)
+    if not items:
+        return None
+    return {"kind": "list", "eyebrow": "What you'll need",
+            "title": "Ingredients", "items": items,
+            "note": fit(f"Glass: {r['glassware']}", 108)
+                    if r.get("glassware") else None}
+
+
+def _has_ingredients(slides):
+    return any(s.get("kind") == "list" and
+               s.get("title") in ("Ingredients", "What's in it")
+               for s in slides)
+
+
 def a_classic(r):
     """The full build — ingredients, method, serving, pairings, numbers."""
     out = []
-    items = _ing_items(r)
-    if items:
-        out.append({"kind": "list", "eyebrow": "What you'll need",
-                    "title": "Ingredients", "items": items,
-                    "note": fit(f"Glass: {r['glassware']}", 108)
-                            if r.get("glassware") else None})
+    ing = _ingredients_slide(r)
+    if ing:
+        out.append(ing)
     out += _method_slides(r)
     serving = sentences(r.get("serving_notes"), 3)
     if serving:
@@ -515,6 +528,15 @@ def recipe_spec(r, angle="classic"):
     })
 
     body = ANGLES_BY_ID.get(angle or "classic", ANGLES_BY_ID["classic"])["build"](r)
+    # Every recipe post shows the ingredients, whatever its angle. A pairing
+    # or FAQ post that never says what is in the glass reads as incomplete —
+    # the angle decides what comes *after* the ingredients, not whether they
+    # appear. Angles that already list them (classic, story, numbers) keep
+    # their own placement; the rest get the list as slide 2.
+    if not _has_ingredients(body):
+        ing = _ingredients_slide(r)
+        if ing:
+            body.insert(0, ing)
     slides.extend(body)
 
     # 7 — cta: performable actions only, no fake button

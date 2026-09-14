@@ -256,7 +256,7 @@ def prepare_recipe(conn, hook_override):
         kicker, caption_hook = hooks.recipe_hook(row, angle=angle)
         print(f"hook    {kicker}")
     spec["slides"][0]["kicker"] = kicker
-    text = caption_mod.recipe_caption(row, hook=caption_hook)
+    text = caption_mod.recipe_caption(row, hook=caption_hook, angle=angle)
     tags = caption_mod.hashtags(row)
     return post_id, spec, text, tags
 

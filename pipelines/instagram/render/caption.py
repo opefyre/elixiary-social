@@ -83,7 +83,27 @@ def article_url(a):
     return f"{SITE}/education/{cat}/{slug}" if cat else f"{SITE}/education/{slug}"
 
 
-def recipe_caption(row, hook=None):
+# What the swipe actually holds, per angle — every recipe carousel opens on
+# the ingredients, then goes where the angle takes it.
+SWIPE = {
+    "classic": "Swipe for the full build — ingredients, method, "
+               "serving notes and what to pair it with.",
+    "story":   "Swipe for where it comes from, what to expect in the glass, "
+               "and what goes into it.",
+    "swaps":   "Swipe for the ingredients, then the swaps and variations "
+               "that keep it yours.",
+    "faq":     "Swipe for the ingredients and the questions people actually "
+               "ask about this one.",
+    "pairing": "Swipe for the ingredients, what to eat alongside it and "
+               "when to pour one.",
+    "numbers": "Swipe for the alcohol, calories and dietary detail — and "
+               "what's in the glass.",
+    "kit":     "Swipe for the ingredients, the kit it needs and how to "
+               "make it.",
+}
+
+
+def recipe_caption(row, hook=None, angle=None):
     name = row.get("name") or "This one"
     bits = [x for x in (row.get("difficulty"), row.get("prep_time"),
                         row.get("glassware")) if x and x != "Error"]
@@ -104,8 +124,7 @@ def recipe_caption(row, hook=None):
     if bits:
         parts.append(" · ".join(bits))
         parts.append("")
-    parts.append("Swipe for the full build — ingredients, method, "
-                 "serving notes and what to pair it with.")
+    parts.append(SWIPE.get(angle or "classic", SWIPE["classic"]))
     parts.append("")
     parts.append("Save it for your next round, and send it to whoever "
                  "usually makes the drinks.")
