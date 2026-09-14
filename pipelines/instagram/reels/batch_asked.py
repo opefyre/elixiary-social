@@ -43,7 +43,10 @@ def candidates(conn):
 
 def evenings(start, n, conn):
     """19:00 local on consecutive days from `start`, skipping any day already holding a reel."""
-    tz = slots._tz(); taken_ig = slots.occupied(); taken_tt = slots.occupied(publish.CHANNEL_TIKTOK)
+    tz = slots._tz(); taken_ig = slots.occupied()
+    # only consult TikTok while mirroring is on: a disconnected channel makes
+    # Buffer refuse the query outright
+    taken_tt = slots.occupied(publish.CHANNEL_TIKTOK) if publish.TIKTOK_ENABLED else set()
     out, d = [], start
     while len(out) < n:
         local = datetime(d.year, d.month, d.day, 19, 0, tzinfo=tz)
