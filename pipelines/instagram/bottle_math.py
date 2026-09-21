@@ -259,7 +259,7 @@ def order_carousel(recipes, steps=10, kicker=None, bottles=None, pantry=None,
 
     slides = [{
         "kind": "hook",
-        "eyebrow": (f"You already own {_title(seed)}" if seed
+        "eyebrow": (_owned_eyebrow(_title(seed)) if seed
                     else "Build your home bar"),
         "kicker": kicker or ("Here's what to buy next." if seed
                              else "Buy them in this order."),
@@ -326,6 +326,15 @@ def order_carousel(recipes, steps=10, kicker=None, bottles=None, pantry=None,
 
 # ── carousel spec ──────────────────────────────────────────────────────────
 
+def _owned_eyebrow(name):
+    # Hook eyebrows cap at 30 chars; long bottle names drop the prefix, then
+    # the name, rather than failing the whole post.
+    for text in (f"You already own {name}", f"You own {name}"):
+        if len(text) <= 30:
+            return text
+    return "Start from what you own"
+
+
 def _title(s):
     s = str(s or "").strip()
     return s[:1].upper() + s[1:]
@@ -380,7 +389,8 @@ def carousel(recipes, bar, kicker=None):
         "note": "Each unlocks this many more drinks on its own.",
     }, {
         "kind": "list",
-        "eyebrow": f"Buy {_title(top_fam)}",
+        "eyebrow": (f"Buy {_title(top_fam)}" if len(_title(top_fam)) <= 26
+                    else "Your next bottle"),
         "title": f"What {_title(top_fam)} unlocks",
         "items": [{"label": fit(r["name"], 46), "value": ""}
                   for r in sorted(top_recipes, key=lambda x: x["name"])[:6]],
