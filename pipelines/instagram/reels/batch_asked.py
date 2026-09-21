@@ -84,12 +84,18 @@ def caption(r):
             f"#cocktails #aicocktails #mixology #cocktailrecipe #elixiary")
 
 
+def cover_ms(prompt):
+    """Where the name has settled — mirrors the long-prompt timing in asked3.html."""
+    n = len(prompt.split()); extra = max(0.0, min(n * .2, 4.0) - 2.0) if n > 10 else 0.0
+    return max(COVER_MS, int((5.1 + extra * .9 + 1.3) * 1000))
+
+
 def draft(conn, r, url, when):
     slot = slots.to_buffer(when); text = caption(r)
     def create(channel, meta):
         res = publish.gql(Q, {"input": {"text": text, "channelId": channel, "schedulingType": "automatic",
             "mode": "customScheduled", "dueAt": slot, "saveToDraft": True,
-            "assets": [{"video": {"url": url, "metadata": {"title": r["name"], "thumbnailOffset": COVER_MS}}}],
+            "assets": [{"video": {"url": url, "metadata": {"title": r["name"], "thumbnailOffset": cover_ms(r["prompt"])}}}],
             "metadata": meta}})["createPost"]
         if res.get("message"): raise RuntimeError(f"Buffer refused ({channel}): {res['message']}")
         return res["post"]

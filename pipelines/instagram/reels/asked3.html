@@ -101,13 +101,29 @@ let t=0;
 // arrives through the API, and a black typing screen makes a black cover. So
 // frame 0 renders the fully composed reveal for one frame — 33ms, seen as the
 // cover, not as content — and the story starts on frame 1.
-const COVER_AT = 6.2;
 // the prompt arrives one word at a time, big; that is the hook
 const WORDS = D.prompt.split(/\s+/);
-$('words').innerHTML = WORDS.map(w=>`<span style="display:inline-block;margin-right:.24em">${w}</span>`).join('');
+const esc = s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+$('words').innerHTML = WORDS.map(w=>`<span style="display:inline-block;white-space:nowrap;margin-right:.24em">${esc(w)}</span>`).join('');
 const wordEls = [...$('words').children];
+// long prompts shrink to fit above the thinking chip (top 1190) and never let
+// one word run past the right margin. offset* ignores the animation transforms,
+// and it is re-run once the brand font has loaded, since the fallback is narrower.
+let wordsFit=false;
+function fitWords(){const el=$('words');let fs=122;el.style.fontSize=fs+'px';
+  const ok=()=>el.offsetTop+el.offsetHeight<=1160&&wordEls.every(w=>w.offsetLeft+w.offsetWidth<=el.offsetWidth+4);
+  while(!ok()&&fs>60){fs-=2;el.style.fontSize=fs+'px'}
+  $('cur').style.height=Math.round(fs*.82)+'px'}
+fitWords();
+if(document.fonts)document.fonts.ready.then(()=>{fitWords();wordsFit=true});
+// a long prompt needs time to be read: type it at ~0.2s a word and push the
+// reveal back; short prompts keep the original timeline untouched
+if(WORDS.length>10){const extra=Math.min(WORDS.length*.2,4.0)-T.typeDur;
+  if(extra>0){T.typeDur+=extra;T.think+=extra;T.reveal+=extra*.9;T.name+=extra*.9;T.build+=extra*.5}}
+const COVER_AT = Math.max(6.2, T.name+1.1);
 window.render=function(time){ renderAt(time < 1/30 ? COVER_AT : time); };
 function renderAt(time){t=time;
+  if(!wordsFit&&document.fonts&&document.fonts.status==='loaded'){fitWords();wordsFit=true}
   const pre=t<T.reveal, rv=seg(t,T.reveal,.9);
   // photo: bloom in, slow push, parallax (bg drifts slower than hero)
   const push=1+0.07*clamp((t-T.reveal)/(T.end-T.reveal),0,1);
@@ -126,7 +142,7 @@ function renderAt(time){t=time;
   const per=T.typeDur/WORDS.length; let last=null;
   wordEls.forEach((el,i)=>{const u=seg(t,T.type0+i*per,.42,E.back);const o=seg(t,T.reveal-.35,.35,E.in);
     el.style.opacity=u*(1-o);el.style.filter=`blur(${lerp(16,0,u)}px)`;el.style.transform=`translateY(${lerp(40,0,u)}px) scale(${lerp(.9,1,u)})`;
-    if(u>0)last=el});
+    if(u>.35)last=el});
   const wr=$('words').getBoundingClientRect();
   if(last){const r=last.getBoundingClientRect();const blink=t<T.type0+T.typeDur||Math.floor(t*2.2)%2===0;
     $('cur').style.left=(r.right+14)+'px';$('cur').style.top=(r.top+r.height*0.12)+'px';$('cur').style.opacity=pre&&blink?1-seg(t,T.reveal-.35,.35,E.in):0}
