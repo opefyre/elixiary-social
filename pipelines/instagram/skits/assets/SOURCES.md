@@ -15,3 +15,17 @@ Cutouts made with `cutout.py` (`TOLHEAD=14 HEADROWS=.55`); props split from one 
 | cutouts/friend_present.webp | 9951a668-ae59-4997-978a-75e1c5bf04fa |
 
 `sfx/*.wav` are copied from the Finkavo sound library (ElevenLabs sound generation). `logo.png` is the Elixiary logo.
+
+## sk2-loud-bar
+
+Cut with `clean.py` (cutout.py plus removal of background trapped in curls and between arms; keeps eye whites), then the
+pale rim on the curls trimmed.
+
+| file | job id |
+|---|---|
+| cutouts/cust_shout.webp (base for the customer) | 00519201-25b7-4835-abfb-0f869992c4fd |
+| cutouts/cust_scream.webp | 09e3095e-0979-4ade-bfbf-5c7a5e824759 |
+| cutouts/cust_oops.webp | c4d101fd-ae03-437e-8d57-6b248f1cf119 |
+| cutouts/salb_ear.webp (counter cropped off) | 8b235bb7-1bd9-46ae-a13d-337dd9e4541e |
+| cutouts/salb_thumb.webp | 6cf76ef5-b0a7-462e-ad54-0ec362db1cdd |
+| cutouts/salb_negroni.webp | 71c37829-0c35-43a3-b249-67ff3d4b921b |
