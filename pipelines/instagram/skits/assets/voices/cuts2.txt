@@ -1,0 +1,10 @@
+sk7/narr_take|Here, in his natural habitat, the male prepares his very first cocktail.|sk7/n1.wav
+sk7/narr_take|He has watched... one video.|sk7/n2.wav
+sk7/narr_take|The ice... resists.|sk7/n3.wav
+sk7/narr_take|And now, the courtship display. Rarely successful.|sk7/n4.wav
+sk7/narr_take|Precision... is not his strength.|sk7/n5.wav
+sk7/narr_take|He presents his offering.|sk7/n6.wav
+sk7/narr_take|And as the sun sets on the savanna... the pack quietly orders pizza.|sk7/n7.wav
+sk8/ice_take|I brought ice!|sk8/ice.wav
+sk9/dare_take|Don't. You. Dare.|sk9/dare.wav
+sk9/dare_take|Yes! Got it!|sk9/gotit.wav

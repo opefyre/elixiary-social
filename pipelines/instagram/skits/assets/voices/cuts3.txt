@@ -1,0 +1,5 @@
+sk7/narr_take|Here, in his natural habitat... the male attempts a cocktail.|sk7/n1.wav
+sk7/narr_take|He has watched one video.|sk7/n2.wav
+sk7/narr_take|The ice... resists.|sk7/n3.wav
+sk7/narr_take|The courtship display. Rarely successful.|sk7/n4.wav
+sk7/narr_take|As the sun sets... the pack quietly orders pizza.|sk7/n7.wav

@@ -53,3 +53,11 @@ Voices (ElevenLabs eleven_v3, tts.py/cut.py from the Finkavo toolkit): sk5 him =
 (EXAVITQu4vr4xnSDxMaL); sk6 tourist = Charlie (IKne3meq5aSn9XLyUdCD), barista = Paulo PT (aLFUti4k8YKvtQGXv0UO, --lang pt).
 The rapid-fire questions are cut with voices/recut_fast.py (midpoints snapped to the quietest 10 ms).
 Effects `elx-*.wav`: ElevenLabs sound generation (sfx.py); doorbell/applause/etc. from the Finkavo library.
+
+## sk7-wild-bartender, sk8-bringing-what, sk9-dont-you-dare
+
+From here on images are generated with `background: "transparent"` (gpt_image_2_5) and only trimmed — no local cutout.
+hb_video b14618ad, hb_ice c5411374, hb_shake c2f192de, hb_present 848d73f8, guests e9174f41, guests_fake 5878ef8d,
+friends5_shock e6fe9946, tropic_ice cacb14b3, wine_table bf1d6dc8, cat_sit 214d2a78, cat_paw fb88efb9, cat_guy_proud cd455881,
+cat_guy_warn 3fb34441, cat_guy_dive f812eeed. av_*.webp are face crops of friends6 (e3fda19a) for the chat avatars.
+Voices: sk7 narrator Bradford (NNl6r8mD7vthiJatiJt1); sk8 Rico = Liam (TX3LPaxmHKxFdv7VOQHJ); sk9 = Alex (yl2ZDV1MzN4HbQJbMihG).
