@@ -4,10 +4,10 @@
     python3 skits/publish_skit.py <id> "<title>" [cover_ms]      # run from ~/.local/elixiary-social on the spare Mac
 
 Uploads out/<id>/reel.mp4 to R2 and checks it is reachable, creates an Instagram reel draft with the caption in
-captions/<id>.txt at the next unoccupied 13:00/19:00 slot, and records it in the tracking DB as a reel with angle "skit"
+captions/<id>.txt at the next free 13:00 slot on a day with no other skit (one skit a day), and records it in the tracking DB as a reel with angle "skit"
 (the posts table only allows the pipeline's own source types).
 """
-import os, sys
+import json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
 for p in (ROOT, os.path.join(ROOT, "scripts"), os.path.join(ROOT, "state"), os.path.join(ROOT, "render")):
     sys.path.insert(0, p)
@@ -21,7 +21,15 @@ assert publish.CHANNEL_ELIXIARY == "6a855825ccaf649a67d4db86"
 conn = db.connect()
 if conn.execute("SELECT 1 FROM posts WHERE source_type='reel' AND source_id=?", (sid,)).fetchone():
     raise SystemExit(f"{sid} is already tracked — not drafting it twice")
-[when] = slots.next_free(1)
+# one skit a day, always at 13:00: the next free 13:00 slot on a day that has no skit yet
+from datetime import datetime, timezone
+skit_days = {datetime.fromisoformat(json.loads(m or "{}").get("due_at", "").replace("Z", "+00:00")).astimezone(slots._tz()).date()
+             for (m,) in conn.execute("SELECT meta FROM posts WHERE source_type='reel' AND angle='skit'") if json.loads(m or "{}").get("due_at")}
+taken = slots.occupied()
+when = next((u for u in slots.candidates() if u not in taken and u.astimezone(slots._tz()).hour == 13
+             and u.astimezone(slots._tz()).date() not in skit_days), None)
+if when is None:
+    raise SystemExit("no free 13:00 slot on a skit-free day in the lookahead window")
 key = f"social/skits/{sid}.mp4"
 url = r2.put(mp4, key, "video/mp4")
 if not r2.exists(key):
