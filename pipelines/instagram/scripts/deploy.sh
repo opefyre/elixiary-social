@@ -23,6 +23,8 @@ KEEP=(
   '.tools'            # puppeteer-core for reel capture, npm-installed on the server
   'service.log' 'service.err' 'watchdog.log'
   '__pycache__' '*.pyc'
+  'skits/out'         # skit renders live on the server until they are pulled back
+  'skits/node_modules' # symlink to the Finkavo reel toolchain (playwright, ffmpeg-static)
 )
 
 args=(-az --delete --itemize-changes)

@@ -1,0 +1,223 @@
+"""audio.py — every sound is synthesised from formulas (numpy). Nothing is sampled, so nothing needs licensing.
+usage: audio.py meta.json outdir   ->  sfx.wav (effects only), music.wav, mix.wav (music ducked under effects)
+Each effect is placed at the sample index of its animation event, so it lands on the frame of its visual."""
+import sys, json, wave
+import numpy as np
+
+SR = 44100
+meta = json.load(open(sys.argv[1])); out = sys.argv[2].rstrip("/")
+D = float(meta["dur"]); N = int(round(D * SR)) + SR // 2  # a little tail, trimmed by ffmpeg
+rng = np.random.default_rng(11)
+T = lambda n: np.arange(n) / SR
+peak = lambda x: x / (np.max(np.abs(x)) + 1e-9)
+
+def lowpass(x, k):
+    return np.convolve(x, np.ones(k) / k, mode="same")
+
+def sweep(dur, f0, f1, k):
+    n = int(dur * SR); t = T(n)
+    f = f1 + (f0 - f1) * np.exp(-k * t)
+    return np.sin(2 * np.pi * np.cumsum(f) / SR)
+
+def band_noise(dur, fa, fb, q=2.2, shape=1.5, ramp=None):
+    """noise through a band-pass whose centre glides from fa to fb (short-time FFT, overlap-add)"""
+    n = int(dur * SR); noise = rng.standard_normal(n + 4096)
+    frame, hop = 2048, 512; win = np.hanning(frame); freqs = np.fft.rfftfreq(frame, 1 / SR)
+    acc = np.zeros(n + 2 * frame)
+    for i in range(0, n, hop):
+        u = i / max(1, n)
+        fc = np.exp(np.log(fa) + (np.log(fb) - np.log(fa)) * u)
+        g = np.exp(-0.5 * ((np.log(freqs + 1) - np.log(fc)) * q) ** 2)
+        acc[i:i + frame] += np.fft.irfft(np.fft.rfft(noise[i:i + frame] * win) * g) * win
+    y = acc[:n]
+    a = np.sin(np.pi * np.linspace(0, 1, n)) ** shape if ramp is None else np.linspace(0, 1, n) ** ramp
+    return y * a
+
+def env(n, atk, tau):
+    t = T(n); e = np.exp(-t / tau)
+    return e * (1 - np.exp(-t / atk)) if atk > 0 else e
+
+def s_whoosh():  return peak(band_noise(.55, 260, 4400, 2.0, 1.4)) * .9
+def s_swish():   return peak(band_noise(.24, 900, 3200, 2.4, 1.2)) * .55
+def s_pop():
+    n = int(.14 * SR); return peak(sweep(.14, 950, 250, 42) * env(n, .001, .04)) * .8
+def s_thud():
+    n = int(.6 * SR); t = T(n)
+    body = sweep(.6, 135, 44, 13) * env(n, .002, .17)
+    knock = lowpass(rng.standard_normal(n), 28) * np.exp(-t / .025)
+    return peak(body + .5 * peak(knock)) * 1.0
+def s_slam():
+    n = int(.6 * SR); t = T(n)
+    crack = (rng.standard_normal(n) - lowpass(rng.standard_normal(n), 10)) * np.exp(-t / .035)
+    return peak(s_thud()[:n] + .35 * peak(crack)) * 1.0
+def s_ding():
+    n = int(1.6 * SR); t = T(n); f0 = 1568.0
+    y = sum(a * np.sin(2 * np.pi * f0 * r * t) * np.exp(-t / tau) for r, a, tau in [(1, 1, 1.0), (2.76, .35, .55), (5.4, .14, .25)])
+    return peak(y * (1 - np.exp(-t / .002))) * .7
+def s_tick():
+    n = int(.05 * SR); t = T(n)
+    return peak(np.sin(2 * np.pi * 3100 * t) * np.exp(-t / .006) + .3 * rng.standard_normal(n) * np.exp(-t / .002)) * .5
+def s_sparkle():
+    y = np.zeros(int(.9 * SR))
+    for k, f in enumerate([1046.5, 1318.5, 1568.0, 2093.0]):
+        n = int(.5 * SR); t = T(n); s = np.sin(2 * np.pi * f * t) * np.exp(-t / .12)
+        i = int(k * .07 * SR); y[i:i + n] += s
+    return peak(y) * .55
+def s_nope():
+    n = int(.42 * SR); t = T(n); f = 300 - 90 * (t / .42)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    y = sum(np.sin(h * ph) / h for h in (1, 3, 5)) * np.exp(-t / .22)
+    return peak(y * (1 - np.exp(-t / .004))) * .6
+def s_riser():
+    return peak(band_noise(1.0, 180, 3800, 1.6, 1.0, ramp=1.6)) * .55
+
+def s_scratch():
+    # record scratch: a fast pitch dive and a quick swing back, over grainy noise
+    n1, n2 = int(.16 * SR), int(.11 * SR)
+    f = np.concatenate([np.linspace(1100, 140, n1), np.linspace(140, 620, n2)])
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    saw = sum(np.sin(h * ph) / h for h in (1, 2, 3, 4))
+    grain = lowpass(rng.standard_normal(len(f)), 3)
+    e = np.concatenate([np.linspace(.2, 1, n1) ** .5, np.linspace(1, 0, n2) ** 1.3])
+    return peak((saw * .7 + grain * .9) * e) * .8
+def s_poof():
+    n = int(.7 * SR); t = T(n)
+    puff = band_noise(.7, 3000, 260, 1.1, 1.0)[:n] * np.exp(-t / .22)
+    low = sweep(.7, 90, 40, 9) * env(n, .004, .12)
+    return peak(puff * .8 + low * .5) * .8
+def s_splat():
+    # wet food landing: a soft low thump plus a short, dull, lowpassed noise burst
+    n = int(.32 * SR); t = T(n)
+    thump = sweep(.32, 170, 60, 22) * env(n, .002, .07)
+    wet = lowpass(rng.standard_normal(n), 14) * np.exp(-t / .045) * (1 - np.exp(-t / .004))
+    return peak(thump * .8 + peak(wet) * .9) * .85
+def s_crack():
+    # wood snapping: a burst of sharp splinter clicks over a heavy thud
+    n = int(.7 * SR); t = T(n); y = np.zeros(n)
+    for k, dt in enumerate([0, .018, .03, .052, .07, .11]):
+        i = int(dt * SR); m = int(.03 * SR); tt = T(m)
+        y[i:i + m] += (rng.standard_normal(m) - lowpass(rng.standard_normal(m), 6)) * np.exp(-tt / .006) * (1 - k * .12)
+    th = s_thud(); y = y[:len(th)]
+    return peak(peak(y) * .9 + th[:len(y)] * .7) * 1.0
+def s_smack():
+    # a cartoon kiss: a tiny lip-pop click plus a bright squeak
+    n = int(.12 * SR); t = T(n)
+    click = (rng.standard_normal(n) - lowpass(rng.standard_normal(n), 4)) * np.exp(-t / .004)
+    squeak = sweep(.12, 1400, 2300, 30) * env(n, .002, .03)
+    return peak(click * .7 + squeak * .8) * .7
+def s_buzz():
+    # a phone vibrating: two short bursts of a rough 150 Hz buzz
+    n = int(.62 * SR); t = T(n)
+    ph = 2 * np.pi * 150 * t; y = np.sign(np.sin(ph)) * .6 + np.sin(3 * ph) * .3
+    gate = ((t % .31) < .22).astype(float) * (1 - np.exp(-t / .005))
+    return peak(lowpass(y, 6) * gate) * .6
+def s_cluck():
+    # a hen: two short clucks and a long "ba-GAWK" that glides down, with a rough, nasal edge
+    def note(dur, f0, f1, rough=.35):
+        n = int(dur * SR); t = T(n); f = np.linspace(f0, f1, n) * (1 + .04 * np.sin(2 * np.pi * 38 * t))
+        ph = 2 * np.pi * np.cumsum(f) / SR
+        y = sum(np.sin(h * ph) / h ** .8 for h in (1, 2, 3, 4, 5)) + rough * rng.standard_normal(n)
+        return lowpass(y, 3) * np.sin(np.pi * np.linspace(0, 1, n)) ** .6
+    y = np.zeros(int(.95 * SR))
+    for i, (dt, d, a, b) in enumerate([(0, .07, 700, 640), (.13, .07, 720, 650), (.3, .12, 760, 980), (.42, .38, 980, 560)]):
+        k = int(dt * SR); z = note(d, a, b); y[k:k + len(z)] += z
+    return peak(y) * .55
+def s_creak():
+    # old springs / a door hinge: a slow, jittery, rough low tone
+    n = int(.8 * SR); t = T(n); f = 170 + 60 * np.sin(2 * np.pi * 1.3 * t) + 25 * rng.standard_normal(n).cumsum() / np.sqrt(np.arange(1, n + 1))
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    y = np.sign(np.sin(ph)) * (0.5 + 0.5 * np.sin(2 * np.pi * 23 * t) ** 2)
+    return peak(lowpass(y, 8) * np.sin(np.pi * np.linspace(0, 1, n)) ** .5) * .5
+def s_blare():
+    # a TV at full volume: a dense, clipped band of crowd noise plus a brassy chord (1 s, meant to be chained)
+    n = int(1.02 * SR); t = T(n)
+    crowd = band_noise(1.02, 500, 1400, 1.2, .2)[:n]
+    chord = sum(np.sign(np.sin(2 * np.pi * f * t)) * .3 for f in (220, 277, 330, 440))
+    wob = 1 + .3 * np.sin(2 * np.pi * 5 * t)
+    y = np.tanh((peak(crowd) * 1.2 + chord * .6) * wob * 2.5)
+    e = np.minimum(1, np.minimum(t / .02, (1.02 - t) / .02))
+    return peak(lowpass(y, 2) * e) * .75
+SFX = dict(blare=s_blare, cluck=s_cluck, creak=s_creak, smack=s_smack, buzz=s_buzz, splat=s_splat, crack=s_crack, scratch=s_scratch, poof=s_poof, whoosh=s_whoosh, swish=s_swish, pop=s_pop, thud=s_thud, slam=s_slam, ding=s_ding, tick=s_tick, sparkle=s_sparkle, nope=s_nope, riser=s_riser)
+cache = {}
+sfx = np.zeros((N, 2)); loud = []
+for k, ev in enumerate(sorted(meta["sounds"], key=lambda e: e["t"])):
+    name = ev["name"]
+    if name not in SFX: raise SystemExit(f"unknown sound: {name}")
+    y = cache.setdefault(name, SFX[name]()) * ev.get("vol", 1.0)
+    i = int(round(ev["t"] * SR)); j = min(N, i + len(y))
+    pan = 0.5 + (0.12 if k % 2 else -0.12)                       # a touch of alternating width
+    sfx[i:j, 0] += y[:j - i] * np.cos(pan * np.pi / 2); sfx[i:j, 1] += y[:j - i] * np.sin(pan * np.pi / 2)
+    if name in ("crack", "whoosh", "thud", "slam", "ding", "sparkle", "nope", "riser", "scratch", "poof"): loud.append(ev["t"])
+
+# ---------- recorded clips (voices, a TV soundtrack): WAV files under the repo's branding/ folder ----------
+import os
+ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets"))
+def load_wav(path):
+    w = wave.open(path); ch = w.getnchannels(); sr = w.getframerate(); sw = w.getsampwidth()
+    x = np.frombuffer(w.readframes(w.getnframes()), {2: np.int16, 4: np.int32}[sw]).astype(float) / (32768 if sw == 2 else 2 ** 31)
+    if ch > 1: x = x.reshape(-1, ch).mean(axis=1)
+    if sr != SR: raise SystemExit(f"{path}: resample to {SR} Hz first")
+    return x
+for c in meta.get("clips", []):
+    y = load_wav(os.path.join(ROOT, c["file"]))
+    a = int(c.get("from", 0) * SR); b = int(c["to"] * SR) if c.get("to") else len(y); y = y[a:b] * c.get("vol", 1.0)
+    i = int(round(c["t"] * SR))
+    if c.get("gain"):
+        g = c["gain"]; tt = c["t"] + np.arange(len(y)) / SR
+        y = y * np.interp(tt, [p[0] for p in g], [p[1] for p in g])
+    j = min(N, i + len(y)); y = y[:j - i]
+    sfx[i:j, 0] += y; sfx[i:j, 1] += y
+    if c.get("duck", True): loud.extend(np.arange(c["t"], c["t"] + len(y) / SR, .5).tolist())
+
+# ---------- music bed ----------
+spec = meta.get("music") or {}
+bpm = spec.get("bpm", 84); root = spec.get("root", 57)
+prog = spec.get("prog", [[0, 3, 7], [5, 8, 12], [3, 7, 10], [7, 10, 14]])
+seed = spec.get("seed", 3); r2 = np.random.default_rng(seed)
+beat = 60.0 / bpm; bar = 4 * beat
+mf = lambda m: 440.0 * 2 ** ((m - 69) / 12)
+music = np.zeros(N)
+def add(y, t0, gain=1.0):
+    i = int(t0 * SR); j = min(N, i + len(y))
+    if 0 <= i < N: music[i:j] += y[:j - i] * gain
+nb = int(np.ceil(N / SR / bar)) + 1
+for b in range(nb):
+    ch = prog[b % len(prog)]; t0 = b * bar
+    n = int((bar + .8) * SR); t = T(n)
+    e = np.minimum(1, t / .45) * np.minimum(1, np.maximum(0, (bar + .8 - t) / .7))
+    pad = np.zeros(n)
+    for iv in ch:
+        f = mf(root + iv)
+        for det in (-.0015, .0015):
+            pad += np.sin(2 * np.pi * f * (1 + det) * t) + .25 * np.sin(2 * np.pi * 2 * f * (1 + det) * t)
+    bass = np.sin(2 * np.pi * mf(root + ch[0] - 24) * t)
+    add((pad * .06 + bass * .22) * e, t0)
+    # soft pluck arpeggio on eighths
+    for k in range(8):
+        if r2.random() < .22: continue
+        note = ch[[0, 1, 2, 1, 2, 1, 0, 2][k]] + 12
+        n2 = int(.5 * SR); t2 = T(n2); f = mf(root + note)
+        pl = (np.sin(2 * np.pi * f * t2) + .3 * np.sin(2 * np.pi * 2 * f * t2)) * np.exp(-t2 / .16) * (1 - np.exp(-t2 / .003))
+        add(pl, t0 + k * beat / 2, .16 * (.7 + .3 * r2.random()))
+    for k in (0, 2):  # soft pulse on 1 and 3
+        n3 = int(.3 * SR); add(sweep(.3, 100, 48, 22) * env(n3, .002, .09), t0 + k * beat, .25)
+music = peak(music) * (0 if spec.get("off") else .34)          # E.music({ off: true }): a recorded clip is the music (the fado reel)
+
+# duck the music under loud effects: quick dip, short hold, gentle return
+duck = np.ones(N)
+for t in loud:
+    i = int(t * SR); a, h, r = int(.02 * SR), int(.14 * SR), int(.38 * SR)
+    shape = np.concatenate([np.linspace(1, .42, a), np.full(h, .42), np.linspace(.42, 1, r)])
+    i0 = max(0, i - a); seg = shape[(i0 - (i - a)):]; j = min(N, i0 + len(seg))
+    duck[i0:j] = np.minimum(duck[i0:j], seg[:j - i0])
+mstereo = np.stack([music * duck, music * duck], axis=1)
+
+def write(path, y):
+    y = np.tanh(y * 1.05)
+    pcm = (np.clip(y, -1, 1) * 32767).astype("<i2")
+    with wave.open(path, "wb") as w:
+        w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes(pcm.tobytes())
+write(f"{out}/sfx.wav", sfx * .9)
+write(f"{out}/music.wav", np.stack([music, music], axis=1))
+write(f"{out}/mix.wav", mstereo + sfx * .9)
+print(f"audio: {len(meta['sounds'])} effects, music {bpm} bpm, {len(loud)} duck points")

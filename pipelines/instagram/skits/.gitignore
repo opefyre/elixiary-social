@@ -1,0 +1,4 @@
+out/
+node_modules
+# generated originals (Higgsfield jobs listed in assets/SOURCES.md); the cutouts are what the reels use
+assets/src/
