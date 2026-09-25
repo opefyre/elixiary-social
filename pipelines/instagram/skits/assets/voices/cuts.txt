@@ -1,0 +1,16 @@
+sk5/guy_take|A Negroni. Stirred.|sk5/order.wav
+sk5/guy_take|Why does it taste like a pharmacy?|sk5/pharmacy.wav
+sk5/guy_take|Just smile. Sophisticated people smile.|sk5/smile.wav
+sk5/guy_take|Ninety-six percent left. I'm going to die at this table.|sk5/die.wav
+sk5/guy_take|I think I'm in love.|sk5/love.wav
+sk5/her_take|Mm. Classic.|sk5/classic.wav
+sk6/tourist_take|One coffee, please!|sk6/one.wav
+sk6/tourist_take|Uh... just... coffee?|sk6/just.wav
+sk6/barista_take|Bica?|sk6/q1.wav
+sk6/barista_take|Cheia ou curta?|sk6/q2.wav
+sk6/barista_take|Pingada?|sk6/q3.wav
+sk6/barista_take|Escaldada?|sk6/q4.wav
+sk6/barista_take|Chávena fria?|sk6/q5.wav
+sk6/barista_take|Descafeinada?|sk6/q6.wav
+sk6/barista_take|Ou um galão?|sk6/q7.wav
+sk6/barista_take|Bom dia, senhor António.|sk6/antonio.wav

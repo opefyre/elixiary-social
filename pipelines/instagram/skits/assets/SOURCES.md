@@ -41,3 +41,15 @@ pale rim on the curls trimmed.
 | cutouts/salc_old.webp (TOLHEAD=9 HEADROWS=.85 to keep the white beard) | 619a666f-a8bb-4929-92f1-e4c1623942af |
 
 `menu-sk3.json` is a read-only export of 48 curated_recipes rows (name, first three ingredients); the reel inlines 31 of them.
+
+## sk4-on-time, sk5-sophisticated, sk6-one-coffee
+
+Images (gpt_image_2_5 medium): host_relax bd11b520, host_freeze e0e3e582, host_run 9380eb4f, host_grin d3b6db38, host_run2 fb3bd5fb,
+friends6 e3fda19a (TOLHEAD=6 to keep the white cake box), guy_order e04c3953, guy_sip 6dd37e0a, guy_smile 2e0e6a7c, guy_love 5154c145
+(no enclosed-region pass: it ate the shirt), date_pina 9a79bafe, date_neg 76b864eb, tour_ask b2d391b3, tour_sweat a9568a36,
+bar_talk 326562b5, bar_slide 6ccd34ad (white shirts: TOLHEAD=7 HEADROWS=1), oldman 899a96c1 (counter cropped off).
+
+Voices (ElevenLabs eleven_v3, tts.py/cut.py from the Finkavo toolkit): sk5 him = Alex (yl2ZDV1MzN4HbQJbMihG), her = Sarah
+(EXAVITQu4vr4xnSDxMaL); sk6 tourist = Charlie (IKne3meq5aSn9XLyUdCD), barista = Paulo PT (aLFUti4k8YKvtQGXv0UO, --lang pt).
+The rapid-fire questions are cut with voices/recut_fast.py (midpoints snapped to the quietest 10 ms).
+Effects `elx-*.wav`: ElevenLabs sound generation (sfx.py); doorbell/applause/etc. from the Finkavo library.

@@ -220,7 +220,7 @@ window.E = (() => {
       el.__skew = true;
       return el;
     };
-    mk(C.deep, .07); mk(C.mint, 0);
+    mk(E.wipeColors ? E.wipeColors[0] : C.deep, .07); mk(E.wipeColors ? E.wipeColors[1] : C.mint, 0);   // Elixiary: E.wipeColors = [ink, gold]
     E.S(tb - d - .02, "whoosh");
     E.wipes.push(tb);
   };
