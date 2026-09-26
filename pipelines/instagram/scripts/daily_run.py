@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-One day's batch: recipe, article, Marlow and home-bar carousels, as drafts.
+The week's carousels, as drafts: two curated recipes and one AI recipe (see WEEK_PLAN).
 
 Run once a day. Every item is independent — one failure does not stop the
 others, and the exit code reflects whether anything at all succeeded, so the
@@ -19,7 +19,7 @@ import os
 import subprocess
 import sys
 import time
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PIPE = os.path.abspath(os.path.join(HERE, ".."))
@@ -42,26 +42,19 @@ if os.path.abspath(db.__file__) != os.path.abspath(_expected):
 
 PUBLISH = os.path.join(HERE, "publish.py")
 
-# Two posts a day — 13:00 and 19:00 Europe/Lisbon — leaves 14 slots a week
-# for six formats, which is too few for per-day counts with recipes as filler.
-# The mix is a fixed weekly calendar instead. Mon=0 .. Sun=6.
+# Three carousels a week (from 2026-09-26), every one of them at 19:00 Europe/Lisbon:
+# 13:00 belongs to the hand-made character skits (skits/), one a day, and the
+# pipeline must never take it. Mon=0 .. Sun=6, {local hour: format}.
 #
-#   recipe 7  ·  shortlist 4  ·  article 2  ·  homebar 1
+#   Mon  curated recipe   · Wed  AI recipe from the owner's own profile (marlow)
+#   Fri  curated recipe
 #
-# Marlow-generated recipes are no longer carousels: they are the reel series
-# (reels/asked2.html), built from the same rows. Their three slots went to
-# recipes, which now open on the cocktail photo.
-#
-# Home bar stays rare on purpose: there are only ~52 variants, and one a week
-# stretches them over a year while still reading as a recurring anchor.
+# Shortlists, articles and home-bar carousels are retired; the formats still exist
+# for an ad-hoc `--only`, but nothing schedules them.
 WEEK_PLAN = {
-    0: ["recipe", "shortlist"],   # Mon
-    1: ["recipe", "homebar"],     # Tue
-    2: ["recipe", "article"],     # Wed
-    3: ["recipe", "shortlist"],   # Thu
-    4: ["recipe", "article"],     # Fri
-    5: ["recipe", "shortlist"],   # Sat
-    6: ["recipe", "shortlist"],   # Sun
+    0: {19: "recipe"},   # Mon
+    2: {19: "marlow"},   # Wed
+    4: {19: "recipe"},   # Fri
 }
 
 FORMATS = ("recipe", "article", "homebar", "marlow", "shortlist")
@@ -72,39 +65,34 @@ FORMATS = ("recipe", "article", "homebar", "marlow", "shortlist")
 # run made exactly two posts the queue never recovered — it just ran a day
 # shallower until it hit empty. Filling to a depth instead means the next run
 # after any outage catches up on its own.
-QUEUE_DAYS = int(os.environ.get("ELIXIARY_QUEUE_DAYS", "2"))    # today + tomorrow
+QUEUE_DAYS = int(os.environ.get("ELIXIARY_QUEUE_DAYS", "7"))    # a week ahead: drafts get time for review
 MAX_PER_RUN = int(os.environ.get("ELIXIARY_MAX_PER_RUN", "6"))  # runaway guard
 
 
 def plan_for(weekday):
-    return list(WEEK_PLAN.get(weekday, []))
+    return list(WEEK_PLAN.get(weekday, {}).values())
 
 
 def kinds_for_slots(days=QUEUE_DAYS, cap=MAX_PER_RUN):
-    """Formats for every free slot inside the horizon, keyed to the day each
-    slot lands on.
-
-    The queue deliberately runs ahead, so a Thursday run fills Friday's slots.
-    Reading the calendar with today's weekday put Thursday's formats on Friday
-    and shifted the whole week — and the size of the shift moved with how deep
-    the queue happened to be. Each slot picks its own format instead: the 13:00
-    Friday slot always gets Friday's 13:00 entry, whenever it was created.
-    """
+    """[(format, utc_datetime)] for every planned slot inside the horizon that is
+    still free in Buffer. Each carousel is pinned to its own slot (publish --at),
+    so it can never drift into the 13:00 skit slot or onto another day."""
     import slots
     tz = slots._tz()
-    horizon = (datetime.now(tz) + timedelta(days=days - 1)).replace(
-        hour=23, minute=59, second=59, microsecond=0)
+    now = datetime.now(tz)
+    earliest = now + timedelta(hours=slots.MIN_LEAD_HOURS)
+    taken = slots.occupied()
     out = []
-    for utc in slots.next_free(cap):
-        local = utc.astimezone(tz)
-        if local > horizon:
-            break
-        plan = plan_for(local.weekday())
-        if not plan:
-            continue
-        i = (slots.SLOT_HOURS.index(local.hour)
-             if local.hour in slots.SLOT_HOURS else 0)
-        out.append(plan[i] if i < len(plan) else plan[-1])
+    for d in range(days):
+        day = (now + timedelta(days=d)).date()
+        for hour, kind in sorted(WEEK_PLAN.get(day.weekday(), {}).items()):
+            local = datetime(day.year, day.month, day.day, hour, 0, tzinfo=tz)
+            utc = local.astimezone(timezone.utc).replace(second=0, microsecond=0)
+            if local < earliest or utc in taken:
+                continue
+            out.append((kind, utc))
+            if len(out) >= cap:
+                return out
     return out
 
 
@@ -172,19 +160,20 @@ def main():
     a = ap.parse_args()
 
     if a.only:
-        kinds = [k.strip() for k in a.only.split(",") if k.strip()]
-        bad = [k for k in kinds if k not in FORMATS]
+        wanted_kinds = [k.strip() for k in a.only.split(",") if k.strip()]
+        bad = [k for k in wanted_kinds if k not in FORMATS]
         if bad:
             raise SystemExit(f"unknown format(s): {bad}; expected {FORMATS}")
+        planned = [(k, None) for k in wanted_kinds]           # ad-hoc: next free slot, as before
     else:
         try:
-            kinds = kinds_for_slots()
+            planned = kinds_for_slots()
         except Exception as ex:
-            # Buffer unreachable: fall back to today's row rather than skipping
-            # the run entirely. Wrong day, but a post beats no post.
-            kinds = plan_for(date.today().weekday())
-            print(f"  [plan ] slot lookup failed ({str(ex)[:70]}) — "
-                  f"using today's row")
+            # Buffer unreachable: create nothing rather than guess a slot that may
+            # collide with a skit. The watchdog runs again later.
+            planned = []
+            print(f"  [plan ] slot lookup failed ({str(ex)[:70]}) — nothing planned")
+    kinds = [k for k, _ in planned]
 
     conn = db.connect()
     run_id = db.start_run(conn, "daily")
@@ -210,10 +199,13 @@ def main():
 
     results = []
     queue = list(series)
-    for kind in kinds:
-        extra = None
+    import slots
+    for kind, when in planned:
+        extra = []
         if kind == "shortlist" and queue:
-            extra = ["--series", queue.pop(0)]
+            extra += ["--series", queue.pop(0)]
+        if when is not None:
+            extra += ["--at", when.astimezone(slots._tz()).strftime("%Y-%m-%d %H:%M")]
         results.append(run_one(kind, a.dry_run, extra=extra))
 
     # Buffer fetches media at publish time, so a slide that vanishes between

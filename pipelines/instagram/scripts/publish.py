@@ -350,6 +350,9 @@ def prepare_marlow(conn, hook_override):
     ELIXIARY_MARLOW_USER_ID — these rows are somebody's private generations."""
     rows = marlow.fetch()
     used = {sid for sid, _ in db.used_keys(conn, "marlow")}
+    # a generation that already ran as a reel (published or still queued) is not repeated as a carousel
+    used |= {r[0] for r in conn.execute(
+        "SELECT source_id FROM posts WHERE source_type='reel' AND status NOT IN ('rejected','failed')")}
     candidates = [g for g in rows if g["id"] not in used]
     if not candidates:
         raise RuntimeError(f"no unposted Marlow recipes left ({len(rows)} total)")
