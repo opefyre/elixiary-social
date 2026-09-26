@@ -77,3 +77,10 @@ Transparent generations, trimmed with trim.py: boss_speech ca32b89d, crew_raised
 trav_wait 0fb458ba, trav_asleep 78e54d95, trav_eyes 088dcc61, trav_nooo 21d7bf6e, attendant 738d1b73 (no airline logos),
 parents_cheers 85cddde0, parents_phone d40bfbb2, parents_yawn 1a1b9705, parents_asleep 7adaf0cd.
 Voices: sk13 boss = Bill (pqHfZKP75CvOlQylNhV4); sk14 captain = Daniel (onwK4e9ZLuTAKqWW03F9, stability .8); sk15 = Marta (bBNhdwrIjl4fcVYiRbT2).
+
+## sk16-mojito, sk17-fancy-bar, sk18-last-lime
+
+Transparent generations: sal_twitch 8a883eae, sal_muddle f427437f, sal_apron d45fe7f7, sal_sea f393e239, cust_sweet dd8fd237, crowd_hands 7e0c2308,
+waiter d475d69e, fancy_props 42adcbbc (split into prop_boot / prop_slate), guy_stare c8122cc2, guy_pipette f4ef04dc, rico_dive a86b4958,
+maya_lunge 7e459310, hb_triumph c9d400c5, hb_dry 49637e2c.
+Voices: sk16 her = Jessica, crowd = Liam; sk17 guy = Alex, waiter = George (JBFqnCBsd6RMkjVDRZzb); sk18 trailer = Brian (nPczCjzI2devNBz1zQrb).

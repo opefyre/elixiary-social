@@ -1,0 +1,19 @@
+sk16/her_take|Can I get a mojito?|sk16/h1.wav
+sk16/her_take|Oh, amazing!|sk16/h2.wav
+sk16/her_take|...and one without mint?|sk16/h3.wav
+sk16/crowd_take|Ooh, make that two!|sk16/c1.wav
+sk16/crowd_take|Three!|sk16/c2.wav
+sk16/crowd_take|Four for us!|sk16/c3.wav
+sk16/crowd_take|Mojitos for everyone!|sk16/c4.wav
+sk17/guy_take|Just a gin and tonic, please.|sk17/g1.wav
+sk17/guy_take|...is that a boot?|sk17/g2.wav
+sk17/guy_take|Could I just get some water?|sk17/g3.wav
+sk17/waiter_take|An exquisite choice.|sk17/w1.wav
+sk17/waiter_take|The boot is the experience, sir.|sk17/w2.wav
+sk17/waiter_take|Alpine glacier water. Deconstructed.|sk17/w3.wav
+sk18/trailer_take|In a world... where the party... has just begun...|sk18/t1.wav
+sk18/trailer_take|there is only... one lime.|sk18/t2.wav
+sk18/trailer_take|Friendships... will be tested.|sk18/t3.wav
+sk18/trailer_take|Trust... no one.|sk18/t4.wav
+sk18/trailer_take|One hero... will rise.|sk18/t5.wav
+sk18/trailer_take|...it was dry.|sk18/t6.wav
