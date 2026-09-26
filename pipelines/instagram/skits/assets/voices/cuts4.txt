@@ -1,0 +1,17 @@
+sk10/him_take|Tastes great though.|sk10/great.wav
+sk11/mum_take|Is there alcohol in this?|sk11/m1.wav
+sk11/mum_take|Ooh. Strong.|sk11/m2.wav
+sk11/mum_take|Little bit of water.|sk11/m3.wav
+sk11/mum_take|Bit of orange juice.|sk11/m4.wav
+sk11/mum_take|Spoon of sugar...|sk11/m5.wav
+sk11/mum_take|Perfect! Now it's lovely!|sk11/m6.wav
+sk11/kid_take|I made you a cocktail!|sk11/k1.wav
+sk11/kid_take|Mum. That's orange juice.|sk11/k2.wav
+sk12/him_take|Hey Nova, how do I make a margarita?|sk12/h1.wav
+sk12/him_take|No! The recipe! Margarita recipe!|sk12/h2.wav
+sk12/him_take|What? No! Cancel! Cancel!|sk12/h3.wav
+sk12/him_take|...yes.|sk12/h4.wav
+sk12/nova_take|Now playing: Margarita Time. Extended remix.|sk12/n1.wav
+sk12/nova_take|Adding forty limes to your basket.|sk12/n2.wav
+sk12/nova_take|Order placed. Arriving... now.|sk12/n3.wav
+sk12/nova_take|Would you like the recipe?|sk12/n4.wav

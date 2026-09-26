@@ -1,0 +1,6 @@
+Hello. I am your home assistant, and I am always happy to help you with anything you need.
+[calm, flat, robotic] Now playing: Margarita Time. Extended remix.
+[calm, flat, robotic] Adding forty limes to your basket.
+[calm, flat, robotic] Order placed. Arriving... now.
+[calm, flat, robotic] Would you like the recipe?
+Thank you, that is all for today.

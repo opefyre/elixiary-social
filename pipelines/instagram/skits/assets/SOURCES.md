@@ -61,3 +61,12 @@ hb_video b14618ad, hb_ice c5411374, hb_shake c2f192de, hb_present 848d73f8, gues
 friends5_shock e6fe9946, tropic_ice cacb14b3, wine_table bf1d6dc8, cat_sit 214d2a78, cat_paw fb88efb9, cat_guy_proud cd455881,
 cat_guy_warn 3fb34441, cat_guy_dive f812eeed. av_*.webp are face crops of friends6 (e3fda19a) for the chat avatars.
 Voices: sk7 narrator Bradford (NNl6r8mD7vthiJatiJt1); sk8 Rico = Liam (TX3LPaxmHKxFdv7VOQHJ); sk9 = Alex (yl2ZDV1MzN4HbQJbMihG).
+
+## sk10-recipe-vs-reality, sk11-mum-fixes-it, sk12-hey-nova
+
+Transparent generations, trimmed only: hb_salt 8afc7245, hb_foam 520671d1, hb_burnt 91f24146, hb_sip 3ffaa621, stylist 73ce12b7,
+cust_serve f66a716a, cust_nooo ca03a9f8, cust_flat 35e201ea, mum_sniff 7f3e8c5b, mum_pour ad32b8b6, mum_happy d18d9b02,
+nova_guy 0cebd055, nova_argue d9b26703, nova_panic 4e5a1899, nova_buried b03e7994.
+Voices: sk10 Will (bIHbv24MWmeRgasZH58o); sk11 Mum = Matilda (XrExE9yKIg1WjnnlVkGX), daughter = Jessica (r1KmysJdVYZjJCm4mL3b);
+sk12 him = Alex, Nova = Alice (Xb7hH8MSUJpSbSDYk0k2, stability 1.0). Clipped line endings re-cut with voices/recut_end.py.
+"Nova" and "Margarita Time" are invented — no real assistant or song.
