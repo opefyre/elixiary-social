@@ -70,35 +70,49 @@ def fetch_many(post_ids):
     """
     out = {}
     ids = list(dict.fromkeys(i for i in post_ids if i))
-    for n in range(0, len(ids), BATCH):
-        chunk = ids[n:n + BATCH]
+
+    def ask(chunk):
         q = "query {" + " ".join(
             f'p{k}: post(input:{{id:{json.dumps(pid)}}}) {{ id status dueAt }}'
             for k, pid in enumerate(chunk)) + " }"
-        try:
-            res = gql(q, {})
-        except Exception as ex:                       # network / 429: the whole chunk is unknown
-            for pid in chunk:
-                out[pid] = ex
-            continue
-        data = res.get("data") or {}
-        errs = {}
-        for e in res.get("errors") or []:
-            path = (e.get("path") or [None])[0]
-            if isinstance(path, str) and path.startswith("p"):
-                errs[path] = e
-        for k, pid in enumerate(chunk):
-            node = data.get(f"p{k}")
-            if node:
-                out[pid] = node
-                continue
-            e = errs.get(f"p{k}")
-            if e is None and not res.get("errors"):
-                out[pid] = None                      # null with no error: gone
-            elif e is not None and any(w in json.dumps(e).lower() for w in NOT_FOUND):
+        return gql(q, {})
+
+    for n in range(0, len(ids), BATCH):
+        chunk = ids[n:n + BATCH]
+        # A missing post is an error at its alias, and Buffer may then null the whole response. Take the
+        # not-found ids out and ask again (at most once per missing post), so one deleted post cannot blind
+        # the rest of the batch.
+        for _ in range(len(chunk) + 1):
+            try:
+                res = ask(chunk)
+            except Exception as ex:                   # network / 429: the whole chunk is unknown
+                for pid in chunk:
+                    out[pid] = ex
+                chunk = []
+                break
+            data = res.get("data") or {}
+            gone = []
+            for e in res.get("errors") or []:
+                path = (e.get("path") or [None])[0]
+                if isinstance(path, str) and path.startswith("p") and path[1:].isdigit() \
+                        and any(w in json.dumps(e).lower() for w in NOT_FOUND):
+                    gone.append(chunk[int(path[1:])])
+            for pid in gone:
                 out[pid] = None
-            else:
-                out[pid] = RuntimeError(json.dumps(e or res.get("errors"))[:220])
+            answered = [pid for k, pid in enumerate(chunk) if data.get(f"p{k}")]
+            for k, pid in enumerate(chunk):
+                if data.get(f"p{k}"):
+                    out[pid] = data[f"p{k}"]
+            rest = [pid for pid in chunk if pid not in gone and pid not in answered]
+            if not rest:
+                chunk = []
+                break
+            if not gone:                              # unexplained gaps: report, do not guess
+                for pid in rest:
+                    out[pid] = RuntimeError(json.dumps(res.get("errors") or "no data")[:220])
+                chunk = []
+                break
+            chunk = rest                              # ask again without the deleted ones
     return out
 
 
