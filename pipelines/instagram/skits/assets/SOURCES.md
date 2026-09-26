@@ -70,3 +70,10 @@ nova_guy 0cebd055, nova_argue d9b26703, nova_panic 4e5a1899, nova_buried b03e799
 Voices: sk10 Will (bIHbv24MWmeRgasZH58o); sk11 Mum = Matilda (XrExE9yKIg1WjnnlVkGX), daughter = Jessica (r1KmysJdVYZjJCm4mL3b);
 sk12 him = Alex, Nova = Alice (Xb7hH8MSUJpSbSDYk0k2, stability 1.0). Clipped line endings re-cut with voices/recut_end.py.
 "Nova" and "Margarita Time" are invented — no real assistant or song.
+
+## sk13-the-toast, sk14-the-trolley, sk15-night-out
+
+Transparent generations, trimmed with trim.py: boss_speech ca32b89d, crew_raised c27cfcae, crew_strain 21e0509d, crew_empty dba6eeea,
+trav_wait 0fb458ba, trav_asleep 78e54d95, trav_eyes 088dcc61, trav_nooo 21d7bf6e, attendant 738d1b73 (no airline logos),
+parents_cheers 85cddde0, parents_phone d40bfbb2, parents_yawn 1a1b9705, parents_asleep 7adaf0cd.
+Voices: sk13 boss = Bill (pqHfZKP75CvOlQylNhV4); sk14 captain = Daniel (onwK4e9ZLuTAKqWW03F9, stability .8); sk15 = Marta (bBNhdwrIjl4fcVYiRbT2).

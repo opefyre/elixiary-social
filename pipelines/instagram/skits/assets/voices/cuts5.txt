@@ -1,0 +1,9 @@
+sk13/boss_take|Before we toast... just a few words.|sk13/b1.wav
+sk13/boss_take|Now, Q1. What a journey.|sk13/b2.wav
+sk13/boss_take|Which brings me to our core values.|sk13/b3.wav
+sk13/boss_take|And... one more thing.|sk13/b4.wav
+sk13/boss_take|Cheers!|sk13/b5.wav
+sk14/pilot_take|Cabin crew, the trolley will come through once more.|sk14/p1.wav
+sk14/pilot_take|We're expecting some turbulence. Cabin crew, please take your seats.|sk14/p2.wav
+sk15/couple_take|To us!|sk15/c1.wav
+sk15/couple_take|Just checking.|sk15/c2.wav
