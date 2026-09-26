@@ -57,17 +57,57 @@ def gql(query, variables):
     return out
 
 
+NOT_FOUND = ("not found", "does not exist", "no post")
+BATCH = 25   # posts per request; the daily API budget is 250 requests for the whole account
+
+
+def fetch_many(post_ids):
+    """Look up many posts in as few requests as possible (GraphQL aliases).
+
+    Returns {post_id: node | None | Exception}: node for a live post, None when
+    Buffer says it no longer exists, an Exception when the lookup itself failed
+    (that post is skipped this run, never marked rejected on a guess).
+    """
+    out = {}
+    ids = list(dict.fromkeys(i for i in post_ids if i))
+    for n in range(0, len(ids), BATCH):
+        chunk = ids[n:n + BATCH]
+        q = "query {" + " ".join(
+            f'p{k}: post(input:{{id:{json.dumps(pid)}}}) {{ id status dueAt }}'
+            for k, pid in enumerate(chunk)) + " }"
+        try:
+            res = gql(q, {})
+        except Exception as ex:                       # network / 429: the whole chunk is unknown
+            for pid in chunk:
+                out[pid] = ex
+            continue
+        data = res.get("data") or {}
+        errs = {}
+        for e in res.get("errors") or []:
+            path = (e.get("path") or [None])[0]
+            if isinstance(path, str) and path.startswith("p"):
+                errs[path] = e
+        for k, pid in enumerate(chunk):
+            node = data.get(f"p{k}")
+            if node:
+                out[pid] = node
+                continue
+            e = errs.get(f"p{k}")
+            if e is None and not res.get("errors"):
+                out[pid] = None                      # null with no error: gone
+            elif e is not None and any(w in json.dumps(e).lower() for w in NOT_FOUND):
+                out[pid] = None
+            else:
+                out[pid] = RuntimeError(json.dumps(e or res.get("errors"))[:220])
+    return out
+
+
 def fetch(post_id):
-    """Returns the Buffer status, or None if the post no longer exists."""
-    q = "query P($i: PostInput!){ post(input:$i){ id status dueAt } }"
-    out = gql(q, {"i": {"id": post_id}})
-    if out.get("errors"):
-        msg = json.dumps(out["errors"]).lower()
-        if "not found" in msg or "does not exist" in msg or "no post" in msg:
-            return None
-        raise RuntimeError(json.dumps(out["errors"])[:220])
-    node = (out.get("data") or {}).get("post")
-    return node or None
+    """Single lookup (kept for callers that need one post)."""
+    r = fetch_many([post_id])[post_id]
+    if isinstance(r, Exception):
+        raise r
+    return r
 
 
 def sync(conn=None, dry=False, quiet=False):
@@ -83,13 +123,15 @@ def sync(conn=None, dry=False, quiet=False):
             print("nothing to reconcile")
         return 0, 0
 
+    mirrors = db.open_crossposts(conn)
+    found = fetch_many([r["buffer_post_id"] for r in rows] + [m["buffer_post_id"] for m in mirrors])
+
     changed = 0
     for r in rows:
-        try:
-            node = fetch(r["buffer_post_id"])
-        except Exception as ex:
+        node = found.get(r["buffer_post_id"])
+        if isinstance(node, Exception):
             if not quiet:
-                print(f"  {r['id']:>3} lookup failed: {str(ex)[:90]}")
+                print(f"  {r['id']:>3} lookup failed: {str(node)[:90]}")
             continue
 
         if node is None:
@@ -115,14 +157,12 @@ def sync(conn=None, dry=False, quiet=False):
 
     # Mirrors are separate Buffer posts with their own approval, so a TikTok
     # draft can be scheduled or deleted independently of its Instagram twin.
-    mirrors = db.open_crossposts(conn)
     for m in mirrors:
-        try:
-            node = fetch(m["buffer_post_id"])
-        except Exception as ex:
+        node = found.get(m["buffer_post_id"])
+        if isinstance(node, Exception):
             if not quiet:
                 print(f"  {m['post_id']:>3} {m['service']} lookup failed: "
-                      f"{str(ex)[:80]}")
+                      f"{str(node)[:80]}")
             continue
         new = "rejected" if node is None else MAP.get(node["status"], "drafted")
         if new == m["status"]:
