@@ -84,3 +84,10 @@ Transparent generations: sal_twitch 8a883eae, sal_muddle f427437f, sal_apron d45
 waiter d475d69e, fancy_props 42adcbbc (split into prop_boot / prop_slate), guy_stare c8122cc2, guy_pipette f4ef04dc, rico_dive a86b4958,
 maya_lunge 7e459310, hb_triumph c9d400c5, hb_dry 49637e2c.
 Voices: sk16 her = Jessica, crowd = Liam; sk17 guy = Alex, waiter = George (JBFqnCBsd6RMkjVDRZzb); sk18 trailer = Brian (nPczCjzI2devNBz1zQrb).
+
+## sk19-minibar, sk20-split-evenly, sk21-photo-first
+
+Transparent generations: mb_look a90f0493, mb_shock dd63bbca, mb_phone dce1ac78, mb_tiptoe 1874d152, split_cheer c36d9492, nina_water 6f867689,
+nina_order 930ed5e3, waiter_tower 4e576745, inf_wait 06c6c641, inf_chair 941615cc, inf_crouch b1163db9, inf_selfie 29790341,
+pals_reach 31e7d3cd, pals_bored 97a7b61b.
+Voices: sk19 guest = Callum (N2lVS1w4EtoT3dr4eOWO), desk = Lily (pFZP5JQG7iQjIQuC4Bku); sk20 Rico = Liam, Nina = Sarah; sk21 her = Laura (FGY2WhTYpPnrIDTdsKH5), friend = Brian.

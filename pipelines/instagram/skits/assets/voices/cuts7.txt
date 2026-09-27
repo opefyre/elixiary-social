@@ -1,0 +1,14 @@
+sk19/guy_take|I'm just looking!|sk19/g1.wav
+sk19/guy_take|I put it back!|sk19/g2.wav
+sk19/guy_take|I didn't even open it!|sk19/g3.wav
+sk19/desk_take|Good evening, sir. We noticed you looked at the minibar.|sk19/d1.wav
+sk19/desk_take|That's nine euros.|sk19/d2.wav
+sk20/rico_take|Let's just split it evenly, it's easier!|sk20/r1.wav
+sk20/rico_take|...wait, what?|sk20/r2.wav
+sk20/nina_take|Sure. Evenly.|sk20/n1.wav
+sk20/nina_take|Could I get the entire dessert menu? To go.|sk20/n2.wav
+sk21/influ_take|WAIT! Nobody touch anything!|sk21/i1.wav
+sk21/influ_take|The light's wrong.|sk21/i2.wav
+sk21/influ_take|One more.|sk21/i3.wav
+sk21/influ_take|Okay! You can drink now.|sk21/i4.wav
+sk21/friend_take|The ice melted in March.|sk21/f1.wav
