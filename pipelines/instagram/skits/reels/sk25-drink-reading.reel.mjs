@@ -52,7 +52,8 @@ export default function (E) {
   const custEls = CUST.map(([n, w, h, H, t0, t1, order], i) => {
     const W = w * H / h, el = E.el(R, "abs", `left:${800 - W / 2}px;top:${TOP + (n === "rico" ? 280 : 60) - H}px;width:${W}px;height:${H}px;opacity:0`);
     E.img(el, n, `width:${W}px;height:${H}px`);
-    E.K(el, "o", [[t0, 0], [t0 + .15, 1], [t1 - .15, 1], [t1, 0]]); E.K(el, "x", [[t0, 400], [t0 + .4, 0, "out"], [t1 - .3, 0], [t1, 400, "in"]]);
+    if (n !== "nina") E.K(el, "o", [[t0, 0], [t0 + .15, 1], [t1 - .15, 1], [t1, 0]]);   // Nina's fade is set below (she swaps pose at the flip)
+    E.K(el, "x", [[t0, 400], [t0 + .4, 0, "out"], [t1 - .3, 0], [t1, 400, "in"]]);
     E.S(t0, "swish", .5);
     return el;
   });
