@@ -1,0 +1,16 @@
+sk28/rico_take|Okay. Just check it. How bad can it be.|sk28/r1.wav
+sk28/rico_take|Twelve fifty. One drink. Told you.|sk28/r2.wav
+sk28/rico_take|A hundred and eighty-six?!|sk28/r3.wav
+sk28/rico_take|...three kebabs?|sk28/r4.wav
+sk28/rico_take|What did I buy at four A.M.?|sk28/r5.wav
+sk28/rico_take|...his name is Gerald.|sk28/r6.wav
+sk29/laura_take|Wait! Eye contact! Or it's seven years of bad luck!|sk29/l1.wav
+sk29/nina_take|Sorry I'm late! Did I miss the cheers?|sk29/n1.wav
+sk29/old_take|...Seven years it is.|sk29/o1.wav
+sk30/guest_take|Right! I'm heading off!|sk30/g1.wav
+sk30/guest_take|No, really. I'm going.|sk30/g2.wav
+sk30/guest_take|Okay. One for the road.|sk30/g3.wav
+sk30/guest_take|Byeee! Bye! Bye!|sk30/g4.wav
+sk30/guest_take|...where's my phone?|sk30/g5.wav
+sk30/host_take|Oh, you HAVE to try this first!|sk30/h1.wav
+sk30/host_take|Take some leftovers!|sk30/h2.wav

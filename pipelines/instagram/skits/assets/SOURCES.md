@@ -102,3 +102,7 @@ Voices: sk22 noir narrator = Callum; sk23 her = Laura, Sal = Chris (iP95p4xoKVk5
 sal_psychic 4a2d514d, hb_manual 6bed8783, hb_hexkey 16654e36, snob_swirl e8491986, snob_frozen aa7dfeb2.
 Voices: sk25 Sal = Chris, Nina = Sarah; sk26 none (wordless); sk27 snob = George, host = Matilda (XrExE9yKIg1WjnnlVkGX).
 SFX (ElevenLabs): elx-mystic, elx-paper-unfold, elx-ratchet, elx-parts-collapse, elx-swirl, elx-dinner-party, elx-kids-party.
+
+## sk28-bank-app, sk29-eye-contact, sk30-leaving (3.5 credits: 7 new images)
+rico_squint c1c17d55, rico_shock 5dab27c1, rico_swan fb7c9c68, cheers_up fefeac73, cheers_done abfa1b26, leave_wave 5d5aa1be, leave_boxes 92a98f13.
+Voices: sk28 Rico = Liam; sk29 Laura, Nina = Sarah, Grandpa = Bill (pqHfZKP75CvOlQylNhV4); sk30 guest = Will (bIHbv24MWmeRgasZH58o), host = Matilda.
