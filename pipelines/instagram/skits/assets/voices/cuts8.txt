@@ -1,0 +1,13 @@
+sk22/noir_take|It was a Tuesday. The ice tray... was empty.|sk22/n1.wav
+sk22/noir_take|Somebody put it back. Empty.|sk22/n2.wav
+sk22/noir_take|Everyone had a motive.|sk22/n3.wav
+sk22/noir_take|So I checked the tape.|sk22/n4.wav
+sk22/noir_take|...it was me.|sk22/n5.wav
+sk23/her_take|I am NOT doing karaoke.|sk23/h1.wav
+sk23/her_take|...okay. One song.|sk23/h2.wav
+sk23/her_take|ONE MORE!|sk23/h3.wav
+sk23/sal_take|We closed an hour ago.|sk23/s1.wav
+sk24/nina_take|I'm not drinking tonight.|sk24/n1.wav
+sk24/nina_take|Can I just try a sip?|sk24/n2.wav
+sk24/nina_take|Oh, nothing for me. I'm not drinking.|sk24/n3.wav
+sk24/waiter_take|And for you, madam?|sk24/w1.wav

@@ -91,3 +91,8 @@ Transparent generations: mb_look a90f0493, mb_shock dd63bbca, mb_phone dce1ac78,
 nina_order 930ed5e3, waiter_tower 4e576745, inf_wait 06c6c641, inf_chair 941615cc, inf_crouch b1163db9, inf_selfie 29790341,
 pals_reach 31e7d3cd, pals_bored 97a7b61b.
 Voices: sk19 guest = Callum (N2lVS1w4EtoT3dr4eOWO), desk = Lily (pFZP5JQG7iQjIQuC4Bku); sk20 Rico = Liam, Nina = Sarah; sk21 her = Laura (FGY2WhTYpPnrIDTdsKH5), friend = Brian.
+
+## sk22-empty-tray, sk23-karaoke, sk24-just-a-sip (3.5 credits: 7 new images, the rest reused)
+
+det_look 32ae0f26, det_shock dca290de, kar_sing d79418ef, kar_cling 44b79942, sal_mop 0c389787, nina_sip 3e85088f, nina_empties 32a9e1ed.
+Voices: sk22 noir narrator = Callum; sk23 her = Laura, Sal = Chris (iP95p4xoKVk53GoZ742B); sk24 Nina = Sarah, waiter = George (+ sk20 callbacks).
