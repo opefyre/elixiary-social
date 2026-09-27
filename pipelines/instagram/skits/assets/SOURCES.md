@@ -96,3 +96,9 @@ Voices: sk19 guest = Callum (N2lVS1w4EtoT3dr4eOWO), desk = Lily (pFZP5JQG7iQjIQu
 
 det_look 32ae0f26, det_shock dca290de, kar_sing d79418ef, kar_cling 44b79942, sal_mop 0c389787, nina_sip 3e85088f, nina_empties 32a9e1ed.
 Voices: sk22 noir narrator = Callum; sk23 her = Laura, Sal = Chris (iP95p4xoKVk53GoZ742B); sk24 Nina = Sarah, waiter = George (+ sk20 callbacks).
+
+## sk25-drink-reading, sk26-flat-pack, sk27-wine-snob (2.5 credits: 5 new images, the rest reused)
+
+sal_psychic 4a2d514d, hb_manual 6bed8783, hb_hexkey 16654e36, snob_swirl e8491986, snob_frozen aa7dfeb2.
+Voices: sk25 Sal = Chris, Nina = Sarah; sk26 none (wordless); sk27 snob = George, host = Matilda (XrExE9yKIg1WjnnlVkGX).
+SFX (ElevenLabs): elx-mystic, elx-paper-unfold, elx-ratchet, elx-parts-collapse, elx-swirl, elx-dinner-party, elx-kids-party.

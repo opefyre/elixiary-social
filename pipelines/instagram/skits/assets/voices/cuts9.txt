@@ -1,0 +1,12 @@
+sk25/sal_take|Don't tell me. I already know your drink. And I know you.|sk25/s0.wav
+sk25/sal_take|Aperol spritz. Four photos already. You've never been to Italy.|sk25/s1.wav
+sk25/sal_take|Old fashioned. You ordered it because of a TV show. You won't finish it.|sk25/s2.wav
+sk25/sal_take|Espresso martini. You said "just one" three hours ago.|sk25/s3.wav
+sk25/sal_take|Tap water. You'll drink everyone else's.|sk25/s4.wav
+sk25/sal_take|...how?|sk25/s5.wav
+sk25/nina_take|Bartender. Hates mojitos. Owns one apron. That one.|sk25/n1.wav
+sk27/snob_take|Mmm. Notes of blackcurrant... wet oak...|sk27/w1.wav
+sk27/snob_take|A Parisian summer. Nineteen eighty-seven, I'd say.|sk27/w2.wav
+sk27/snob_take|...and a hint of my grandfather's regret.|sk27/w3.wav
+sk27/snob_take|...exquisite juice.|sk27/w4.wav
+sk27/host_take|It's grape juice. From the kids' party.|sk27/h1.wav
