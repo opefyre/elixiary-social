@@ -114,3 +114,7 @@ Voices: sk31 her = Laura, Theo = Daniel (onwK4e9ZLuTAKqWW03F9); sk32 Sal = Chris
 ## sk34-take-a-photo, sk35-polite-sip, sk36-self-checkout (3.5 credits images + 1.8 credits TTS)
 couple_fake 6173352b, couple_pour 7e9dea3e (ref guests e9174f41), gramps_joy 3049cf91, gramps_flat 6f1a57c0 (ref oldman 899a96c1), clerk 28d2c0f5, tourist_shoot e3e729cb, tourist_selfie 1893bd80.
 Voices (Higgsfield text2speech_v2, elevenlabs presets): sk34 friend = Maya, tourist = Bob; sk35 host = Mabel, guest = Emily; sk36 machine = Tamsin, clerk = Evan, him = Alistair.
+
+## sk37-i-know-a-place, sk38-long-story-short, sk39-airport-beer (1 credit images + 1.65 credits TTS)
+tourist_shock 502fa55a, tourist_resign 3345c592 (ref tourist_shoot e3e729cb). Everything else reused (friend_*, guy_*, pals_*, couple_fake, bar_talk/bar_slide, sal_mop).
+Voices (Higgsfield text2speech_v2, elevenlabs presets): sk37 Rico = Miles, bartender = Brooks; sk38 him = Reid, her = Isla; sk39 tourist = Bob, bartender = Barrett, announcement = Imogen (band-passed).
