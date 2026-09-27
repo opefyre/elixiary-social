@@ -118,3 +118,7 @@ Voices (Higgsfield text2speech_v2, elevenlabs presets): sk34 friend = Maya, tour
 ## sk37-i-know-a-place, sk38-long-story-short, sk39-airport-beer (1 credit images + 1.65 credits TTS)
 tourist_shock 502fa55a, tourist_resign 3345c592 (ref tourist_shoot e3e729cb). Everything else reused (friend_*, guy_*, pals_*, couple_fake, bar_talk/bar_slide, sal_mop).
 Voices (Higgsfield text2speech_v2, elevenlabs presets): sk37 Rico = Miles, bartender = Brooks; sk38 him = Reid, her = Isla; sk39 tourist = Bob, bartender = Barrett, announcement = Imogen (band-passed).
+
+## Seasonal: sk40-espresso-martini (Coffee Day, 1 Oct), sk41-oktoberfest (2 Oct), sk42-halloween (31 Oct) — 4 credits images + 1.5 TTS
+em_awake c4eec204, em_wired 23ded9fb, em_asleep 37817a48 (ref cust_ask ce4b86fd), okt_strain e704800b, okt_foam 83ef5a02 (ref tourist e3e729cb), okt_server 54019e50, hw_skeleton d829ef43, hw_vampire 0c4f8436.
+Voices (Higgsfield text2speech_v2, elevenlabs presets): sk40 her = Kayla; sk41 Gary = Bob; sk42 Sal = Marcus, ghost = Gideon (pitched down + echo), vampire = Vlad, skeleton = Knox. skits/move_skit.py moved sk6 → 5 Nov, sk5 → 6 Nov, sk35 → 7 Nov.

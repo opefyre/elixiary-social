@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Draft a rendered skit in Buffer at the next free slot (never publishes on its own).
 
-    python3 skits/publish_skit.py <id> "<title>" [cover_ms]      # run from ~/.local/elixiary-social on the spare Mac
+    python3 skits/publish_skit.py <id> "<title>" [cover_ms] [YYYY-MM-DD]      # run from ~/.local/elixiary-social on the spare Mac
 
 Uploads out/<id>/reel.mp4 to R2 and checks it is reachable, creates an Instagram reel draft with the caption in
 captions/<id>.txt at the next free 13:00 slot on a day with no other skit (one skit a day), and records it in the tracking DB as a reel with angle "skit"
@@ -28,6 +28,11 @@ skit_days = {datetime.fromisoformat(json.loads(m or "{}").get("due_at", "").repl
 taken = slots.occupied()
 when = next((u for u in slots.candidates(days=90) if u not in taken and u.astimezone(slots._tz()).hour == 13
              and u.astimezone(slots._tz()).date() not in skit_days), None)
+if len(sys.argv) > 4:                     # a fixed day (seasonal skits): 13:00 that day, which must be free
+    y, mo, d = map(int, sys.argv[4].split("-"))
+    when = datetime(y, mo, d, 13, 0, tzinfo=slots._tz()).astimezone(timezone.utc).replace(second=0, microsecond=0)
+    if when.astimezone(slots._tz()).date() in skit_days or when in taken:
+        raise SystemExit(f"{sys.argv[4]} 13:00 is not free — move the skit there first (skits/move_skit.py)")
 if when is None:
     raise SystemExit("no free 13:00 slot on a skit-free day in the lookahead window")
 key = f"social/skits/{sid}.mp4"
