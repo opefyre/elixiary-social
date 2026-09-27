@@ -1,0 +1,7 @@
+sk31/inf_take|Watch my drink! I need a selfie with the DJ!|sk31/i1.wav
+sk31/inf_take|...where's my drink?|sk31/i2.wav
+sk31/theo_take|With my life.|sk31/t1.wav
+sk31/theo_take|Asset is secure.|sk31/t2.wav
+sk31/theo_take|It was... compromised.|sk31/t3.wav
+sk32/sal_take|Hi! What can I get you?|sk32/s1.wav
+sk32/sal_take|...you've never been here.|sk32/s2.wav

@@ -106,3 +106,7 @@ SFX (ElevenLabs): elx-mystic, elx-paper-unfold, elx-ratchet, elx-parts-collapse,
 ## sk28-bank-app, sk29-eye-contact, sk30-leaving (3.5 credits: 7 new images)
 rico_squint c1c17d55, rico_shock 5dab27c1, rico_swan fb7c9c68, cheers_up fefeac73, cheers_done abfa1b26, leave_wave 5d5aa1be, leave_boxes 92a98f13.
 Voices: sk28 Rico = Liam; sk29 Laura, Nina = Sarah, Grandpa = Bill (pqHfZKP75CvOlQylNhV4); sk30 guest = Will (bIHbv24MWmeRgasZH58o), host = Matilda.
+
+## sk31-watch-my-drink, sk32-brain-blank, sk33-no-corkscrew (2.5 credits images + 1.65 credits TTS)
+theo_guard 9cda2546, theo_dive a92c34a2, theo_guilty 37e28c92, hb_shoe 32389624, hb_wine c1736886.
+Voices: sk31 her = Laura, Theo = Daniel (onwK4e9ZLuTAKqWW03F9); sk32 Sal = Chris. ElevenLabs quota ran out mid-round, so the rest are Higgsfield text2speech_v2 (elevenlabs engine, presets): sk32 her = Kayla, brain crew = Pixie (pitched up x1.22); sk33 video host = Callum preset, flatmate = Marcus.
