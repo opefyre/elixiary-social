@@ -44,7 +44,8 @@ MAX_SLIDES = 10
 
 # tag/flag vocabularies use snake_case with a category prefix
 PREFIXES = ("flavor_", "style_", "strength_", "season_", "occ_", "base_spirit_",
-            "energy_", "temp_", "method_")
+            "energy_", "temp_", "method_", "intent_", "mood_", "occasion_", "time_",
+            "diet_", "cat_")
 
 FLAG_LABELS = {
     "contains_alcohol": "Contains alcohol",
@@ -114,7 +115,8 @@ def clean_category(c):
                         .replace("-", " ").split())
         if key == norm or key.rstrip("s") == norm.rstrip("s"):
             return canon
-    return str(c).strip().title()
+    out = str(c).strip().title()
+    return out.split(" & ")[0].strip() if len(out) > 30 else out
 
 
 def fit(text, limit, ellipsis="…"):
@@ -236,10 +238,10 @@ def validate_spec(spec):
 def _ing_items(r, limit=9):
     out = []
     for i in (r.get("ingredients") or [])[:limit]:
-        label = (i.get("name") or i.get("ingredient") or "").strip()
+        label = re.sub(r"\s*\([^)]*\)?", "", (i.get("name") or i.get("ingredient") or "")).strip()
+        value = re.sub(r"\s*\([^)]*\)?", "", (i.get("measure") or "")).strip()
         if label:
-            out.append({"label": fit(label, 46),
-                        "value": fit((i.get("measure") or "").strip(), 20)})
+            out.append({"label": fit(label, 46), "value": fit(value, 20)})
     return out
 
 
@@ -527,17 +529,33 @@ def recipe_spec(r, angle="classic"):
         "meta": meta,
     })
 
-    body = ANGLES_BY_ID.get(angle or "classic", ANGLES_BY_ID["classic"])["build"](r)
-    # Every recipe post shows the ingredients, whatever its angle. A pairing
-    # or FAQ post that never says what is in the glass reads as incomplete —
-    # the angle decides what comes *after* the ingredients, not whether they
-    # appear. Angles that already list them (classic, story, numbers) keep
-    # their own placement; the rest get the list as slide 2.
-    if not _has_ingredients(body):
-        ing = _ingredients_slide(r)
-        if ing:
+    # Every curated recipe teaches the drink: ingredients, then the method,
+    # then ONE slide from the angle (origin, pairing, swaps, FAQ, numbers or
+    # kit) so posts about the same drink still differ, then how to finish and
+    # serve it. Recipes without instructions fall back to the angle's own build.
+    ing = _ingredients_slide(r)
+    method = _method_slides(r)
+    angle_slides = ANGLES_BY_ID.get(angle or "classic", ANGLES_BY_ID["classic"])["build"](r)
+    extra = next((x for x in angle_slides
+                  if x.get("kind") != "steps" and x.get("title") not in ("Ingredients", "What's in it")), None)
+    if method:
+        body = ([ing] if ing else []) + method[:2]
+        if extra:
+            body.append(extra)
+        finish = []
+        if r.get("garnish"):
+            finish.append({"label": "Garnish", "value": fit(re.sub(r"\s*\([^)]*\)?", "", r["garnish"]), 20)})
+        if r.get("glassware"):
+            finish.append({"label": "Glass", "value": fit(r["glassware"], 20)})
+        if r.get("serving_temperature"):
+            finish.append({"label": "Serve", "value": fit(r["serving_temperature"], 20)})
+        if len(finish) >= 2 and not (extra and extra.get("title") == "How it's served"):
+            body.append({"kind": "list", "eyebrow": "Finish it", "title": "Garnish & serve", "items": finish})
+    else:
+        body = angle_slides
+        if not _has_ingredients(body) and ing:
             body.insert(0, ing)
-    slides.extend(body)
+    slides.extend(body[:MAX_SLIDES - 2])
 
     # 7 — cta: performable actions only, no fake button
     slides.append({
