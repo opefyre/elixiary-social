@@ -110,3 +110,7 @@ Voices: sk28 Rico = Liam; sk29 Laura, Nina = Sarah, Grandpa = Bill (pqHfZKP75CvO
 ## sk31-watch-my-drink, sk32-brain-blank, sk33-no-corkscrew (2.5 credits images + 1.65 credits TTS)
 theo_guard 9cda2546, theo_dive a92c34a2, theo_guilty 37e28c92, hb_shoe 32389624, hb_wine c1736886.
 Voices: sk31 her = Laura, Theo = Daniel (onwK4e9ZLuTAKqWW03F9); sk32 Sal = Chris. ElevenLabs quota ran out mid-round, so the rest are Higgsfield text2speech_v2 (elevenlabs engine, presets): sk32 her = Kayla, brain crew = Pixie (pitched up x1.22); sk33 video host = Callum preset, flatmate = Marcus.
+
+## sk34-take-a-photo, sk35-polite-sip, sk36-self-checkout (3.5 credits images + 1.8 credits TTS)
+couple_fake 6173352b, couple_pour 7e9dea3e (ref guests e9174f41), gramps_joy 3049cf91, gramps_flat 6f1a57c0 (ref oldman 899a96c1), clerk 28d2c0f5, tourist_shoot e3e729cb, tourist_selfie 1893bd80.
+Voices (Higgsfield text2speech_v2, elevenlabs presets): sk34 friend = Maya, tourist = Bob; sk35 host = Mabel, guest = Emily; sk36 machine = Tamsin, clerk = Evan, him = Alistair.

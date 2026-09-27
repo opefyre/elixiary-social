@@ -26,7 +26,7 @@ from datetime import datetime, timezone
 skit_days = {datetime.fromisoformat(json.loads(m or "{}").get("due_at", "").replace("Z", "+00:00")).astimezone(slots._tz()).date()
              for (m,) in conn.execute("SELECT meta FROM posts WHERE source_type='reel' AND angle='skit'") if json.loads(m or "{}").get("due_at")}
 taken = slots.occupied()
-when = next((u for u in slots.candidates() if u not in taken and u.astimezone(slots._tz()).hour == 13
+when = next((u for u in slots.candidates(days=90) if u not in taken and u.astimezone(slots._tz()).hour == 13
              and u.astimezone(slots._tz()).date() not in skit_days), None)
 if when is None:
     raise SystemExit("no free 13:00 slot on a skit-free day in the lookahead window")
