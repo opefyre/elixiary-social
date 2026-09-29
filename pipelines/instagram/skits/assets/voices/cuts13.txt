@@ -1,0 +1,15 @@
+sk48/jess_take|Can I get a mojito, please?|sk48/j1.wav
+sk48/jess_take|Can we get the bill? ...Separately.|sk48/j2.wav
+sk48/jess_take|Sorry! Traffic!|sk49/c_jess.wav
+sk48/alex_take|Oh! Me too!|sk48/a1.wav
+sk48/alex_take|Sorry! Traffic!|sk49/c_alex.wav
+sk48/rico_take|Actually, make that two!|sk48/r1.wav
+sk48/rico_take|Sorry, traffic!|sk49/c_rico.wav
+sk48/rico_take|Never. Again.|sk50/r1.wav
+sk48/laura_take|Wait, is it sugar-free?|sk48/l1.wav
+sk48/laura_take|Sorry! Traffic!|sk49/c_laura.wav
+sk48/nina_take|Ooh, can I get what they're having?|sk48/n1.wav
+sk48/nina_take|Sorry! Traffic!|sk49/c_nina.wav
+sk48/sal_take|...Of course.|sk48/s1.wav
+sk48/sal_take|...Kitchen's closed.|sk49/s1.wav
+sk48/gramps_take|Right! Where's the after-party?|sk50/g1.wav

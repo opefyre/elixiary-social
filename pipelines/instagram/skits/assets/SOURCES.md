@@ -130,3 +130,6 @@ Voices (Higgsfield text2speech_v2, elevenlabs presets): sk43 Rico = Miles, Nina 
 ## sk45-new-pricing, sk46-beer-2026, sk47-wine-tasting (8 credits: gpt_image_2 ×3 + image_background_remover ×5, 2 of them duplicates from timeouts)
 gpt_image_2_5 was retired; gpt_image_2 has no transparent background and reference images failed, so w_spit e8629084, w_cheese dd388fa0, w_nina fde54415 were text-only, then background-removed (2d916233, e70d9d98, c54daa37).
 Voices: ElevenLabs direct again (Sal = Chris, Jessica, Alex, Rico = Liam, Nina = Sarah, sommelier = George).
+
+## sk48-one-at-a-time, sk49-five-min-away, sk50-ages (0 Higgsfield credits: all poses reused)
+Voices: ElevenLabs (Jessica, Alex, Rico = Liam, Laura, Nina = Sarah, Sal = Chris, Grandpa = Bill). Formats: bartender pet peeve (one-at-a-time orders), fake-text "where are you", age brackets.
