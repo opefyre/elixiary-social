@@ -133,3 +133,6 @@ Voices: ElevenLabs direct again (Sal = Chris, Jessica, Alex, Rico = Liam, Nina =
 
 ## sk48-one-at-a-time, sk49-five-min-away, sk50-ages (0 Higgsfield credits: all poses reused)
 Voices: ElevenLabs (Jessica, Alex, Rico = Liam, Laura, Nina = Sarah, Sal = Chris, Grandpa = Bill). Formats: bartender pet peeve (one-at-a-time orders), fake-text "where are you", age brackets.
+
+## sk51-cat-saw-everything, sk52-last-orders, sk53-designated-driver (2 credits: 1 gpt_image_2 + 1 background removal)
+cat_guy_cheese 7e8a5e44 → 8c4adc62 (text-only). Voices: ElevenLabs (cat = Daniel, him = Will; Jessica, Rico = Liam, Laura, Alex, Sal = Chris, Nina = Sarah, Gary = Bill).

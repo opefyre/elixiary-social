@@ -1,0 +1,19 @@
+sk51/cat_take|Three a.m. He said he'd have one drink.|sk51/c1.wav
+sk51/cat_take|He is shushing me. I haven't said a word.|sk51/c2.wav
+sk51/cat_take|Cheese. In the dark. Like a raccoon.|sk51/c3.wav
+sk51/cat_take|A nightcap. Of course.|sk51/c4.wav
+sk51/cat_take|He'll forget this. I won't.|sk51/c5.wav
+sk51/cat_take|Hydration... is a privilege.|sk51/c6.wav
+sk51/guy_take|Shhh! Shhhh!|sk51/g1.wav
+sk51/guy_take|You're my best friend. You know that?|sk51/g2.wav
+sk52/jess_take|FOUR PINTS!|sk52/j1.wav
+sk52/jess_take|Can we get nuggets?|sk53/j1.wav
+sk52/rico_take|SIX SHOTS!|sk52/r1.wav
+sk52/rico_take|I love you, man!|sk53/r1.wav
+sk52/laura_take|Everything! Just... everything!|sk52/l1.wav
+sk52/alex_take|Two of whatever she's having!|sk52/a1.wav
+sk52/alex_take|This is my soooong!|sk53/a1.wav
+sk52/sal_take|...Hello? Mum?|sk52/s1.wav
+sk52/nina_take|Don't worry, I'll drive!|sk53/n1.wav
+sk52/nina_take|...Who are you?|sk53/n2.wav
+sk52/gary_take|Gary.|sk53/g1.wav
