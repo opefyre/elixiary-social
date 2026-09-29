@@ -141,3 +141,8 @@ cat_guy_cheese 7e8a5e44 → 8c4adc62 (text-only). Voices: ElevenLabs (cat = Dani
 First skits with generated 9:16 background plates in assets/bg/ (752x1344 → 1080x1920): beach 16869b52, kitchen 72f56e58, wedding e2f5a6a6, speakeasy ccb2c082.
 Cutouts (text-only, then background-removed): rico_hoodie 1595c6b8 → a48a1db0, fob_receipt 185e43ab → 2b64b035, mix_tweezers 4eb64162 → 3bdf55b4, mix_shock 491bb98f → cf823df0, wed_dancers e72f24b8 → d519c891.
 Voices: ElevenLabs (Rico = Liam; DJ = Brian, auntie = Matilda, Grandpa = Bill, bride's dad = Callum; customer = Alex, mixologist = Charlie).
+
+## sk57-club-bathroom, sk58-drunk-mode, sk59-cancelled-plans (~24 credits: gpt_image_2 ×14 incl. 1 re-roll after a content flag, image_background_remover ×10)
+Backgrounds (752x1344 → 1080x1920): ladies fa8988b4, mens 0cf158fb, night 1e8086d5.
+Cutouts (text-only, then background-removed): glam_point 91a30398 → 9de9e548, nina_aww e8101a44 → 80b2eb6d (re-roll of acd4dfb6), rico_nod 2e30b1d0 → ccaa084d, sal_bouncer d3159998 → 5904cf41, rico_drunk 9c516641 → 4394de84, rico_relief 3bc9603b → 917ca54b, pizza_guy 064560bc → 862a9e0d, jess_pj 8d1b9fdc → 2edcb33e, nina_popcorn 99ee9b1e → 5562bee6, rico_robe 69cfd6ec → 48eaa93d.
+Voices: ElevenLabs (stranger = Laura, Nina = Sarah, Rico = Liam, Alex, Sal = Chris, delivery = Will, Jess = Jessica).

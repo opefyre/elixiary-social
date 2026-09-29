@@ -1,0 +1,20 @@
+sk60/rico_take|I am never. Drinking. Again.|sk60/r1.wav
+sk60/rico_take|New me.|sk60/r2.wav
+sk60/rico_take|I'm... thriving.|sk60/r3.wav
+sk60/rico_take|Mmm. Kombucha.|sk60/r4.wav
+sk60/rico_take|...Maybe one.|sk60/r5.wav
+sk60/rico_take|WHO WANTS SHOTS?!|sk60/r6.wav
+sk60/sal_take|See you Sunday.|sk60/s1.wav
+sk61/nina_take|Drinks on Friday?|sk60/n1.wav
+sk61/nina_take|Two hundred and forty-seven photos?|sk61/n1.wav
+sk61/nina_take|...Whose dog is this?|sk61/n2.wav
+sk61/nina_take|I just... I love you guys so much...|sk61/n3.wav
+sk61/nina_take|...Who's Kevin?|sk61/n4.wav
+sk62/doc2_take|So... how many drinks do you have a week?|sk62/d1.wav
+sk62/doc_take|And how big is 'a glass'?|sk62/d2.wav
+sk62/doc_take|And your week starts on...?|sk62/d3.wav
+sk62/doc_take|Honestly? Less than me.|sk62/d4.wav
+sk62/alex_take|Oh, not much. Two... three, maybe?|sk62/a1.wav
+sk62/alex_take|Normal size.|sk62/a2.wav
+sk62/alex_take|Friday. ...Ish. Wednesday.|sk62/a3.wav
+sk62/alex_take|Is that bad?|sk62/a4.wav

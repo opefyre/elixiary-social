@@ -14,7 +14,7 @@ How we make, check and schedule the Elixiary Instagram character skits. This is 
 | Audience | Universal. No country-specific jokes, no foreign-language dialogue. |
 | Detail | Rich, accurate code-drawn sets and props. More images or more code is fine if it buys detail. |
 | Sound | Real voices (ElevenLabs) and sound effects when the joke needs them. |
-| Higgsfield budget | **Max 5–6 credits per run of 3 skits.** Reuse existing poses first (see §4). |
+| Higgsfield budget | Spend what the story needs (the owner asked for more, richer images; recent rounds used 15–25 credits). Still reuse existing poses and `assets/bg/` plates when they fit (see §4). |
 | Posting | One skit per day, **13:00 Lisbon**, always a Buffer **draft** — the owner approves. Schedule only when the owner says so. |
 | Review | Build 3, send the mp4s for review, schedule only after "schedule". |
 
@@ -73,6 +73,11 @@ The old 0.5-credit transparent model (`gpt_image_2_5`) is retired. Current recip
    `cutout.py`/`clean.py` — the owner finds them inaccurate.
 3. **Download + trim**: `curl -o assets/src/<name>.png <result_url>` then
    `STRIP=/tmp/strip.png python3 trim.py <name>` (writes `assets/cutouts/<name>.webp` and a magenta contact strip to check).
+
+**Background plates** (`assets/bg/`): `gpt_image_2`, `aspect_ratio: "9:16"`, prompt "Polished Pixar-like 3D animated film
+background plate, <room> seen straight on … No people, no text, no logos." Resize the 752x1344 result to a 1080x1920 jpg and
+load it via `meta.images` (`bg: "bg/<name>.jpg"`), drawn full-frame with a slow scale for motion. Content-filter flags hit
+party outfits ("sequin dress", "going wild"): re-word as "long-sleeved party top", "family-friendly, wholesome".
 
 ⚠️ **Timeouts:** Higgsfield sometimes says "server isn't responding" but the job ran and charged. Before retrying, check
 `transactions` / `show_generations`. Budget ≈ 2 credits per new pose.

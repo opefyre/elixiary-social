@@ -1,0 +1,28 @@
+sk57/stranger_take|Oh my god. I LOVE your dress!|sk57/s1.wav
+sk57/stranger_take|Wait. Is he texting you back?|sk57/s2.wav
+sk57/stranger_take|Leave him. You're a queen.|sk57/s3.wav
+sk57/stranger_take|Come to Ibiza with me!|sk57/s4.wav
+sk57/nina_take|Stop it! I love YOUR hair!|sk57/n1.wav
+sk57/nina2_take|No... he's not.|sk57/n2.wav
+sk57/nina_take|You're literally my best friend.|sk57/n3.wav
+sk57/nina_take|YES!|sk57/n4.wav
+sk57/rico_take|...Alright?|sk57/r1.wav
+sk57/rico_take|...Great chat.|sk57/r2.wav
+sk57/alex_take|...Alright.|sk57/a1.wav
+sk57/rico_take|She misses me. I know it.|sk58/r1.wav
+sk57/rico_take|Fine. I'll just call her.|sk58/r2.wav
+sk57/rico_take|Just one... little like.|sk58/r3.wav
+sk57/rico_take|...Oh, thank god.|sk58/r4.wav
+sk57/rico_take|...Six?|sk58/r5.wav
+sk58/sal_take|Not tonight, mate.|sk58/b1.wav
+sk58/sal_take|Line's closed.|sk58/b2.wav
+sk58/sal_take|Absolutely not!|sk58/b3.wav
+sk58/pizza_take|Six large pizzas for Rico?|sk58/p1.wav
+sk57/rico_take|Next time, babe!|sk59/r1.wav
+sk57/rico_take|PYJAMAS!|sk59/r2.wav
+sk57/alex_take|...Guys?|sk59/a1.wav
+sk58/sal_take|Table for four, was it?|sk59/s1.wav
+sk59/jess_take|Guys... I'm so sorry. I can't make it tonight.|sk59/j1.wav
+sk59/jess_take|Yesss.|sk59/j2.wav
+sk59/nina_take|Nooo! Totally fine!|sk59/n1.wav
+sk59/nina_take|Freedom!|sk59/n2.wav
