@@ -146,3 +146,15 @@ Voices: ElevenLabs (Rico = Liam; DJ = Brian, auntie = Matilda, Grandpa = Bill, b
 Backgrounds (752x1344 → 1080x1920): ladies fa8988b4, mens 0cf158fb, night 1e8086d5.
 Cutouts (text-only, then background-removed): glam_point 91a30398 → 9de9e548, nina_aww e8101a44 → 80b2eb6d (re-roll of acd4dfb6), rico_nod 2e30b1d0 → ccaa084d, sal_bouncer d3159998 → 5904cf41, rico_drunk 9c516641 → 4394de84, rico_relief 3bc9603b → 917ca54b, pizza_guy 064560bc → 862a9e0d, jess_pj 8d1b9fdc → 2edcb33e, nina_popcorn 99ee9b1e → 5562bee6, rico_robe 69cfd6ec → 48eaa93d.
 Voices: ElevenLabs (stranger = Laura, Nina = Sarah, Rico = Liam, Alex, Sal = Chris, delivery = Will, Jess = Jessica).
+
+## sk60-never-again, sk61-camera-roll, sk62-doctor (25 credits: gpt_image_2 ×15, image_background_remover ×10)
+Backgrounds: bedroom 1e48b288, gym 12c003f8, clinic 279b3218. Photos (no bg removal, assets/photos/): dog_selfie b2a1c933, cone_hug 9f83b4a6.
+Cutouts: rico_oath dba8d6db → 2fcc5d16, rico_smoothie 4a9a2c89 → 943fc66a, rico_gym 673d1691 → 9184a980, rico_kombucha 2582136a → 7e0f3001, rico_party a48202c9 → 7dc28f69,
+nina_morning f2d9cd71 → ed59f28a, kevin 705cee05 → d289934d, doc_skeptic ee279a77 → 8305128b, doc_sip 12725321 → f6ef5153, alex_pinch 93b97e80 → 89b22c9a.
+Voices: ElevenLabs (Rico = Liam, Sal = Chris, Nina = Sarah, doctor = Matilda, Alex).
+
+## sk63-how-i-dance, sk64-2am-philosophy, sk65-new-year-champagne (~29 credits: gpt_image_2 ×17 incl. 4 content-flagged, image_background_remover ×10)
+Backgrounds: club b1d16a5e, kebab cfda0d7e, nye 6f9bcbf2. Flagged (not used): split fail b830e43b/3361ca40, group hug 1de04e18/8785c6f1.
+Cutouts: dance_point 8012fda4 → 505d97b7, dance_split 8ca6ce5e → e0d8cb60, dance_flail 2e08eac6 → d72199f4, dance_worm a622d2b1 → 291258f5, dj_stare d3add434 → 284582b2,
+alex_fry 27d64ed5 → a65f104f, rico_tear 6537dc98 → 8b1a4652, cook_tear 87ced63e → 051627bf, alex_cork 4ac00d6c → dd041911, alex_spray 58fe5e21 → 8daebad6.
+Voices: ElevenLabs (Rico = Liam, DJ = Brian, Nina = Sarah, Jess = Jessica, Alex, cook/Grandpa = Bill).

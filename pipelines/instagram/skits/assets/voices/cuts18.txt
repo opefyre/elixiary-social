@@ -1,0 +1,19 @@
+sk63/rico_take|Alright. Watch this.|sk63/r1.wav
+sk63/rico_take|I've still got it.|sk63/r2.wav
+sk63/rico_take|...Ow.|sk63/r3.wav
+sk63/nina_take|...Should we call someone?|sk63/n1.wav
+sk63/jess_take|Let him have this.|sk63/j1.wav
+sk63/dj2_take|Mate... what was that?|sk63/d1.wav
+sk64/alex_take|Do you ever think... we're all just... ice cubes?|sk64/a1.wav
+sk64/alex_take|We start solid. And then life... melts us.|sk64/a2.wav
+sk64/alex_take|And the drink... is the universe.|sk64/a3.wav
+sk63/rico_take|...What?|sk64/r1.wav
+sk63/rico_take|...Bro.|sk64/r2.wav
+sk64/cook_take|He's right.|sk64/c1.wav
+sk63/nina_take|...It's a kebab shop.|sk64/n1.wav
+sk63/jess_take|Ten! Nine! Eight! Seven!|sk65/j1.wav
+sk63/nina_take|HAPPY NEW YEAR!|sk65/n1.wav
+sk64/alex_take|I got it, I got it!|sk65/a1.wav
+sk64/alex_take|Come on... come on!|sk65/a2.wav
+sk64/alex_take|...Happy New Year?|sk65/a3.wav
+sk64/cook_take|...Happy New Year.|sk65/g1.wav
