@@ -148,7 +148,15 @@ def run_one(kind, dry, extra=None):
     }
 
 
+PAUSE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "state", "PAUSED")
+
+
 def main():
+    # Paused by the owner (29 Sep 2026): the pipeline posts nothing while state/PAUSED exists, however it is triggered
+    # (n8n, the watchdog, the service or by hand). Delete the file to resume. Hand-built skits are unaffected.
+    if os.path.exists(PAUSE_FILE):
+        print("pipeline paused (state/PAUSED exists) — nothing drafted")
+        return
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", default=None,
                     help="comma-separated formats to run instead of today's "

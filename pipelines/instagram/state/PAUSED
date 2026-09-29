@@ -1,0 +1,5 @@
+Paused by the owner on 2026-09-29: the pipeline (daily_run.py) drafts nothing while this file exists.
+Hand-built skits (skits/publish_skit.py) are not affected.
+To resume: delete this file, deploy (scripts/deploy.sh), then on the spare Mac:
+  launchctl enable gui/$(id -u)/com.elixiary.social.service && launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.elixiary.social.service.plist
+  launchctl enable gui/$(id -u)/com.elixiary.social.watchdog && launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.elixiary.social.watchdog.plist
