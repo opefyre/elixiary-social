@@ -1,0 +1,13 @@
+sk54/rico_take|Oh my god. This is the best drink I've ever had in my life.|sk54/r1.wav
+sk54/rico_take|I'm buying a bottle!|sk54/r2.wav
+sk54/rico_take|...Tastes like cough syrup.|sk54/r3.wav
+sk54/rico_take|...Book the flight.|sk54/r4.wav
+sk54/dj_take|Ladies and gentlemen... the bar is OPEN!|sk55/d1.wav
+sk54/dj_take|The open bar... is now closed.|sk55/d2.wav
+sk54/aunt_take|Oh, I don't really drink... Make it a double!|sk55/a1.wav
+sk54/uncle_take|Tequila! For everyone!|sk55/u1.wav
+sk54/dad_take|...How much?!|sk55/f1.wav
+sk54/cust_take|Hi! Can I get an old fashioned?|sk56/c1.wav
+sk54/cust_take|...Another one, please.|sk56/c2.wav
+sk54/mix_take|Of course. Give me... eleven minutes.|sk56/m1.wav
+sk54/mix_take|...Excuse me?|sk56/m2.wav

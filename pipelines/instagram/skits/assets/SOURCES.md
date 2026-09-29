@@ -136,3 +136,8 @@ Voices: ElevenLabs (Jessica, Alex, Rico = Liam, Laura, Nina = Sarah, Sal = Chris
 
 ## sk51-cat-saw-everything, sk52-last-orders, sk53-designated-driver (2 credits: 1 gpt_image_2 + 1 background removal)
 cat_guy_cheese 7e8a5e44 → 8c4adc62 (text-only). Voices: ElevenLabs (cat = Daniel, him = Will; Jessica, Rico = Liam, Laura, Alex, Sal = Chris, Nina = Sarah, Gary = Bill).
+
+## sk54-holiday-drink, sk55-open-bar, sk56-craft-cocktail (~15 credits: gpt_image_2 ×10 incl. 1 re-roll after a content flag, image_background_remover ×5)
+First skits with generated 9:16 background plates in assets/bg/ (752x1344 → 1080x1920): beach 16869b52, kitchen 72f56e58, wedding e2f5a6a6, speakeasy ccb2c082.
+Cutouts (text-only, then background-removed): rico_hoodie 1595c6b8 → a48a1db0, fob_receipt 185e43ab → 2b64b035, mix_tweezers 4eb64162 → 3bdf55b4, mix_shock 491bb98f → cf823df0, wed_dancers e72f24b8 → d519c891.
+Voices: ElevenLabs (Rico = Liam; DJ = Brian, auntie = Matilda, Grandpa = Bill, bride's dad = Callum; customer = Alex, mixologist = Charlie).
