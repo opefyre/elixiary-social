@@ -1,0 +1,15 @@
+sk45/sal_take|New pricing. Drinks are cheap. Behaviour... costs extra.|sk45/s1.wav
+sk45/sal_take|...Plus twenty.|sk45/s2.wav
+sk45/sal_take|On the house.|sk45/s3.wav
+sk45/sal_take|Scan the QR code.|sk46/s1.wav
+sk45/jess_take|Surprise me!|sk45/j1.wav
+sk45/alex_take|Make it strong.|sk45/a1.wav
+sk45/alex_take|Hi! Can I get a beer?|sk46/g1.wav
+sk45/alex_take|...Can I just... get a beer?|sk46/g2.wav
+sk45/rico_take|Relax. I know the owner.|sk45/r1.wav
+sk45/rico_take|WHAT?!|sk45/r2.wav
+sk45/rico_take|...Why is it warm?|sk47/r1.wav
+sk45/rico_take|Do you have this in a can?|sk47/r2.wav
+sk45/nina_take|Hi! Whenever you're ready. No rush. Thank you!|sk45/n1.wav
+sk45/somm_take|Notes of dark cherry... with a long, elegant finish.|sk47/w1.wav
+sk45/somm_take|Sir... that's the spit bucket.|sk47/w2.wav

@@ -126,3 +126,7 @@ Voices (Higgsfield text2speech_v2, elevenlabs presets): sk40 her = Kayla; sk41 G
 ## Seasonal: sk43-black-friday (27 Nov), sk44-christmas (25 Dec) — 1.5 credits images + 1.05 TTS
 rico_cart d6d2d555 (ref friend_point 3a4f9857), xm_dad e465208b (ref guy_smile 2e0e6a7c), xm_kid 7f8a2ce7.
 Voices (Higgsfield text2speech_v2, elevenlabs presets): sk43 Rico = Miles, Nina = Isla; sk44 kid = Pixie, dad = Julian.
+
+## sk45-new-pricing, sk46-beer-2026, sk47-wine-tasting (8 credits: gpt_image_2 ×3 + image_background_remover ×5, 2 of them duplicates from timeouts)
+gpt_image_2_5 was retired; gpt_image_2 has no transparent background and reference images failed, so w_spit e8629084, w_cheese dd388fa0, w_nina fde54415 were text-only, then background-removed (2d916233, e70d9d98, c54daa37).
+Voices: ElevenLabs direct again (Sal = Chris, Jessica, Alex, Rico = Liam, Nina = Sarah, sommelier = George).
