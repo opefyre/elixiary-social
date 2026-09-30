@@ -1,0 +1,28 @@
+sk75/nina_take|Okay. Where should we go tonight?|sk75/n1.wav
+sk75/rico_take|I'm easy! Anywhere is fine!|sk75/r1.wav
+sk75/jess_take|How about tapas?|sk75/j1.wav
+sk75/rico_take|Hmm... too loud.|sk75/r2.wav
+sk75/alex_take|How about sushi?|sk75/a1.wav
+sk75/rico_take|Not in the mood for fish.|sk75/r3.wav
+sk75/nina_take|Burgers, then?|sk75/n2.wav
+sk75/rico_take|Had that yesterday.|sk75/r4.wav
+sk75/nina_take|It's ten p.m. I'm ordering pizza.|sk75/n3.wav
+sk75/rico_take|See? I'm easy.|sk75/r5.wav
+sk76/nina_take|Come in! Make yourself at home!|sk76/n1.wav
+sk76/rico_take|Thanks! Nice place!|sk76/r1.wav
+sk76/nina_take|Oh, not that chair, sweetie.|sk76/n2.wav
+sk76/nina_take|Coaster! Coaster!|sk76/n3.wav
+sk76/rico_take|Sorry! Sorry!|sk76/r2.wav
+sk76/nina_take|Shoes off, please.|sk76/n4.wav
+sk76/nina_take|Oh, that's for Sunday.|sk76/n5.wav
+sk76/rico_take|So... where can I sit?|sk76/r3.wav
+sk76/nina_take|Anywhere! Make yourself at home!|sk76/n6.wav
+sk77/barry_take|Excuse me! Hello?!|sk77/b1.wav
+sk77/barry_take|I've got cash! Right here!|sk77/b2.wav
+sk77/sal_take|Be right with you!|sk77/s1.wav
+sk77/sal_take|Did you just... snap at me?|sk77/s2.wav
+sk77/quiet_take|Hi. No rush at all.|sk77/q1.wav
+sk77/sal_take|Hi there! What can I get you?|sk77/s3.wav
+sk77/barry_take|What?! I was here first!|sk77/b3.wav
+sk77/sal_take|Wait your turn.|sk77/s4.wav
+sk77/sal2_take|Hi there... what can I get you, my friend?|sk77/s3.wav

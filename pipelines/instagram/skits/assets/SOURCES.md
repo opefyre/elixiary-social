@@ -175,3 +175,8 @@ Voices: ElevenLabs (Mum = Laura, Rico = Liam, Mia = Sarah, Dan = Callum, Sal = C
 Pose sheet marcus_sheet 67aae5b1 → marcus_shake / marcus_panic / marcus_guns (split.py). Background: freezer 8c8e2350.
 Reused: night, beach, rico_nod/squint/greet/party/shock/cart/relief, friends6, av_* avatars.
 SFX reused from ElevenLabs sound generation; voices: ElevenLabs (Nina = Sarah, Rico = Liam, Marcus = Daniel, Jess = Jessica, Leo = Alex, Frank = Bill, Maya = Laura).
+
+## sk75-im-easy, sk76-make-yourself-at-home, sk77-bartender-attention (~5 credits: gpt_image_2_5 transparent ×3, gpt_image_2 ×2 backgrounds)
+Transparent generations: sofa_trio 3bcb8a17; pose sheets rico_home_sheet c3c16547 → rico_chair / rico_glass / rico_socks, barry_sheet 1c62009d → barry_cash / barry_snap / barry_whistle (split.py).
+Backgrounds: livingroom 21eba61c, cocktailbar 68784115. Reused: night, nina_order, rico_nod/squint, glam_point, sal_muddle/twitch/flat/host, guy_smile, av_jess, av_leo.
+SFX (ElevenLabs sound generation): elx-snap, elx-whistle. Voices: ElevenLabs (Nina/host = Sarah, Rico = Liam, Jess = Jessica, Alex, Barry = Charlie, Sal = Chris, quiet guy = George).
