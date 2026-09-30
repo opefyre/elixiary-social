@@ -9,7 +9,15 @@ for line in open(sys.argv[1]):
     k = i + len(phrase) - 1
     while k > i and not phrase[k - i].isalnum(): k -= 1
     t1 = a["character_end_times_seconds"][k]
-    subprocess.run(["python3", "recut_end.py", take, out, f"{t0 - .05:.3f}", f"{t1:.3f}"], check=True, capture_output=True)
+    pk = i - 1
+    while pk >= 0:
+        if s[pk] == "]":                      # skip an [emotion tag]
+            while pk >= 0 and s[pk] != "[": pk -= 1
+            pk -= 1
+        elif not s[pk].isalnum(): pk -= 1
+        else: break
+    floor = a["character_end_times_seconds"][pk] + .03 if pk >= 0 else 0
+    r = subprocess.run(["python3", "recut_end.py", take, out, f"{t0 - .05:.3f}", f"{t1:.3f}", f"{floor:.3f}"], check=True, capture_output=True, text=True).stdout.strip(); print("   ", r)
     m = float(re.search(r"mean_volume: (-?[\d.]+)", subprocess.run(["ffmpeg", "-hide_banner", "-i", out, "-af", "volumedetect", "-f", "null", "-"], capture_output=True, text=True).stderr).group(1))
     g = max(-6, min(10, -16.5 - m)); tmp = out + ".tmp.wav"
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", out, "-af", f"volume={g:.2f}dB,alimiter=limit=0.9", tmp], check=True)
