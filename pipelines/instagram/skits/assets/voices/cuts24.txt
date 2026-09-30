@@ -1,0 +1,20 @@
+sk81/rico_take|Five more minutes.|sk81/r1.wav
+sk81/rico_take|If I get up at seven-thirty, I can still do everything.|sk81/r2.wav
+sk81/rico_take|Skip breakfast? Seven forty-five. Totally fine.|sk81/r3.wav
+sk81/rico_take|Skip the shower? Eight o'clock. Also fine.|sk81/r4.wav
+sk81/rico_take|Yesterday's clothes... eight ten.|sk81/r5.wav
+sk81/rico_take|Pyjamas. Eight twenty-five.|sk81/r6.wav
+sk81/rico_take|WHAT TIME IS IT?!|sk81/r7.wav
+sk82/nina_take|Rico?! Oh my gosh, it's been forever!|sk82/n1.wav
+sk82/nina_take|We should totally grab a coffee sometime!|sk82/n2.wav
+sk82/nina_take|I'll text you!|sk82/n3.wav
+sk82/rico_take|Nina! Wow, you look great!|sk82/r1.wav
+sk82/rico_take|Yes! Definitely! Let's do it!|sk82/r2.wav
+sk82/rico_take|Please do!|sk82/r3.wav
+sk83/rico_take|Excuse me?|sk83/r1.wav
+sk83/rico_take|Mm-hm!|sk83/r2.wav
+sk83/rico_take|It's cold.|sk83/r3.wav
+sk83/rico_take|Mm-hm! Great!|sk83/r4.wav
+sk83/waiter_take|Is everything okay with your meal?|sk83/w1.wav
+sk83/waiter_take|Wonderful!|sk83/w2.wav
+sk83/waiter_take|Be right with you!|sk83/w3.wav

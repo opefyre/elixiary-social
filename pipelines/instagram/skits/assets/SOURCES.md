@@ -186,3 +186,10 @@ SFX (ElevenLabs sound generation): elx-snap, elx-whistle. Voices: ElevenLabs (Ni
 - Backgrounds reused: restaurant, clinic, cocktailbar. Existing cutouts reused: waiter, doc_skeptic, sal_host/sal_flat, rico_greet, rico_shock, barry_snap, av_nina.
 - Voices (ElevenLabs v3, tts.py + recut_n.py with "#n" for repeated phrases): sk78 Rico=Liam, Nina=Sarah, waiter=George; sk79 Rico, Sal=Chris, Nina, Barry=Charlie; sk80 Rico, waiter, doctor=Laura, Sal.
 - New SFX (sfx.py → branding/sfx, copied here): elx-crunch, elx-munch, elx-lowbatt, elx-powerdown, elx-plug-in.
+
+## Round sk81–83 (30 Sep 2026)
+- Pose sheets (gpt_image_2_5, transparent, 3:2, split.py; sheet_r83 split at a column valley): rico_bed_sleep/rico_bed_calc 6c10a688, rico_bed_up/rico_rush 4f398efb, rico_wave/rico_fake 8db7abab, nina_wave/nina_fake 0a95412d, rico_stuffed/rico_hand/rico_slump d4d52bd8.
+- Background (gpt_image_2, 9:16): street.jpg (café sidewalk) 1bacec77. Reused: bedroom, restaurant, waiter.
+- Voices (ElevenLabs v3; recut_n.py): sk81 Rico=Liam; sk82 Nina=Sarah, Rico; sk83 Rico, waiter=George.
+- New SFX (sfx.py): elx-alarm, elx-cutlery. (A page-flip SFX came out near-silent; the calendar uses the built-in swish instead.)
+- Lesson from the owner (sk80): characters must be BIG for the scene — about 850–1050 px tall for standing figures, waist-up figures cut by the frame edge/table. Check this in the stills before rendering.
