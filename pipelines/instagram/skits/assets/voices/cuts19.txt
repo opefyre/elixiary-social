@@ -1,0 +1,17 @@
+sk66/nina_take|Shall we get a bottle?|sk66/n1.wav
+sk66/alex_take|Sure! Let me just... have a look.|sk66/a1.wav
+sk66/alex_take|We'll have the Merlot, please.|sk66/a2.wav
+sk66/waiter_take|Excellent choice, sir.|sk66/w1.wav
+sk66/waiter_take|Another second-cheapest!|sk66/w2.wav
+sk67/sal_take|What can I get you?|sk67/s1.wav
+sk67/jess_take|Hmm. Something fruity... but not sweet.|sk67/j1.wav
+sk67/jess_take|Strong... but I don't want to taste the alcohol.|sk67/j2.wav
+sk67/jess_take|And pink. But not, like... pink pink.|sk67/j3.wav
+sk67/jess_take|Oh! And no ice.|sk67/j4.wav
+sk67/sal_take|...Water. With a strawberry.|sk67/s2.wav
+sk67/jess_take|Oh my god. Ten out of ten! Can I get another?|sk67/j5.wav
+sk68/nina_take|Quick drink at mine before we go out?|sk68/n1.wav
+sk68/rico_take|Right! Let's GO OUT!|sk68/r1.wav
+sk67/sal_take|Forty minutes.|sk68/b1.wav
+sk68/dj_take|Last song, everybody!|sk68/d1.wav
+sk66/nina_take|...We should've stayed at yours.|sk68/n2.wav

@@ -6,6 +6,7 @@ from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__)); A = os.path.join(HERE, "assets"); ims = []
 for n in sys.argv[1:]:
     im = Image.open(f"{A}/src/{n}.png").convert("RGBA"); im = im.crop(im.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox())
+    r, g, b, al = im.split(); im = Image.merge("RGBA", (r, g, b, al.point(lambda v: 255 if v >= 250 else v)))  # gpt_image_2_5 bodies come back at alpha ~253
     im.save(f"{A}/cutouts/{n}.webp", lossless=True, method=6); print(n, im.size)
     h = 440; t = im.resize((int(im.width * h / im.height), h)); bg = Image.new("RGBA", t.size, (255, 0, 255, 255)); bg.alpha_composite(t); ims.append(bg.convert("RGB"))
 if os.environ.get("STRIP"):

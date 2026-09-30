@@ -14,7 +14,7 @@ How we make, check and schedule the Elixiary Instagram character skits. This is 
 | Audience | Universal. No country-specific jokes, no foreign-language dialogue. |
 | Detail | Rich, accurate code-drawn sets and props. More images or more code is fine if it buys detail. |
 | Sound | Real voices (ElevenLabs) and sound effects when the joke needs them. |
-| Higgsfield budget | Spend what the story needs (the owner asked for more, richer images; recent rounds used 15–25 credits). Still reuse existing poses and `assets/bg/` plates when they fit (see §4). |
+| Higgsfield budget | Spend what the story needs, but don't overdo it (~6–12 credits a round is plenty). Still reuse existing poses and `assets/bg/` plates when they fit (see §4). |
 | Posting | One skit per day, **13:00 Lisbon**, always a Buffer **draft** — the owner approves. Schedule only when the owner says so. |
 | Review | Build 3, send the mp4s for review, schedule only after "schedule". |
 
@@ -63,16 +63,14 @@ Other ElevenLabs voices used: Laura `FGY2WhTYpPnrIDTdsKH5`, Matilda `XrExE9yKIg1
 
 ## 5. New images (Higgsfield)
 
-The old 0.5-credit transparent model (`gpt_image_2_5`) is retired. Current recipe:
-
-1. **Generate** with `generate_image_batch`, model `gpt_image_2`, `quality: "medium"` (1 credit), `aspect_ratio: "2:3"`.
-   Prompt: describe the character in full (text-only — reference images currently fail with "Something went wrong"),
-   say *"Polished Pixar-like 3D cartoon character … Plain flat solid white background, no shadow, nothing else in frame.
-   Exactly two arms and two hands. No text."*
-2. **Remove the background** with `remove_background` on the finished job id (1 credit). Never use the local
-   `cutout.py`/`clean.py` — the owner finds them inaccurate.
-3. **Download + trim**: `curl -o assets/src/<name>.png <result_url>` then
-   `STRIP=/tmp/strip.png python3 trim.py <name>` (writes `assets/cutouts/<name>.webp` and a magenta contact strip to check).
+**Cutouts: generate them transparent — do not remove backgrounds** (the owner finds removal inaccurate: residue remains).
+1. `generate_image_batch`, model `gpt_image_2_5`, `quality: "medium"`, `background: "transparent"`, `aspect_ratio: "2:3"`
+   (or `3:2` for groups). Prompt: describe the character in full (text-only), "Polished Pixar-like 3D cartoon character …
+   Transparent background, isolated character only, no floor, no shadow. Exactly two arms and two hands. No text."
+2. Download + trim: `curl -o assets/src/<name>.png <result_url>` then `STRIP=/tmp/strip.png python3 trim.py <name>`.
+3. (`trim.py` snaps alpha ≥250 → 255: the model returns bodies at ≈253.)
+4. Check the edges on a dark and a light background before using.
+Only if transparency ever fails: `gpt_image_2` on a white background + `remove_background` (1 credit) as a fallback.
 
 **Background plates** (`assets/bg/`): `gpt_image_2`, `aspect_ratio: "9:16"`, prompt "Polished Pixar-like 3D animated film
 background plate, <room> seen straight on … No people, no text, no logos." Resize the 752x1344 result to a 1080x1920 jpg and

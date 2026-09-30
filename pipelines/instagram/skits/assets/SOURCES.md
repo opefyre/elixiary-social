@@ -158,3 +158,8 @@ Backgrounds: club b1d16a5e, kebab cfda0d7e, nye 6f9bcbf2. Flagged (not used): sp
 Cutouts: dance_point 8012fda4 → 505d97b7, dance_split 8ca6ce5e → e0d8cb60, dance_flail 2e08eac6 → d72199f4, dance_worm a622d2b1 → 291258f5, dj_stare d3add434 → 284582b2,
 alex_fry 27d64ed5 → a65f104f, rico_tear 6537dc98 → 8b1a4652, cook_tear 87ced63e → 051627bf, alex_cork 4ac00d6c → dd041911, alex_spray 58fe5e21 → 8daebad6.
 Voices: ElevenLabs (Rico = Liam, DJ = Brian, Nina = Sarah, Jess = Jessica, Alex, cook/Grandpa = Bill).
+
+## sk66-second-cheapest, sk67-fruity-not-sweet, sk68-pre-drinks (~9 credits: gpt_image_2_5 transparent ×4, gpt_image_2 ×2 backgrounds, no background removal)
+First cutouts generated with a native transparent background (gpt_image_2_5, background: "transparent"): alex_menu 4c462f35, waiter_wink 129287ca, queue4 d101562c, walkhome4 3b267c5e.
+Backgrounds: restaurant c6770841, queue 5e02fd9a. Reused: speakeasy, night, club, split_cheer, kar_sing, cheers_up, friend_point, sal_bouncer, cust_*, salc_wait, sal_twitch, w_nina.
+Voices: ElevenLabs (Nina = Sarah, Alex, waiter = George, Jess = Jessica, Sal = Chris, Rico = Liam, DJ = Brian).
