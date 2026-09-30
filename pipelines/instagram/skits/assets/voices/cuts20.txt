@@ -1,0 +1,21 @@
+sk69/mum_take|Oh, you're back! Good night, love?|sk69/m1.wav
+sk69/mum_take|Did you eat something?|sk69/m2.wav
+sk69/mum_take|Night, love. Water's on your bedside table.|sk69/m3.wav
+sk69/rico_take|Good evening... Mother. It was a... most reasonable evening.|sk69/r1.wav
+sk69/rico_take|I had... a salad.|sk69/r2.wav
+sk69/rico_take|Ow... sorry, door.|sk69/r3.wav
+sk70/nina_take|Dan... it's your round.|sk70/n1.wav
+sk70/nina_take|Dan? Your round.|sk70/n2.wav
+sk70/rico_take|Dan. It's your round, mate.|sk70/r1.wav
+sk70/dan_take|Oh! Just nipping to the loo!|sk70/d1.wav
+sk70/dan_take|Sorry, gotta take this... Hello? Yeah?|sk70/d2.wav
+sk70/dan_take|Hang on... shoelace.|sk70/d3.wav
+sk70/dan_take|Right! Next round's on me!|sk70/d4.wav
+sk70/sal_take|Bar's closed! Everybody out!|sk70/s1.wav
+sk71/rico_take|Leave it with me. I know the bartender.|sk71/r1.wav
+sk71/rico_take|Sal! My man!|sk71/r2.wav
+sk71/rico_take|It's me! Rico! Twenty nineteen? You served me a beer?|sk71/r3.wav
+sk71/rico_take|He says hi.|sk71/r4.wav
+sk71/sal_take|...That's forty-two euros.|sk71/s1.wav
+sk71/nina_take|Free drinks!|sk71/n1.wav
+sk71/nina_take|Well?!|sk71/n2.wav

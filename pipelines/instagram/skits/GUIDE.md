@@ -70,6 +70,10 @@ Other ElevenLabs voices used: Laura `FGY2WhTYpPnrIDTdsKH5`, Matilda `XrExE9yKIg1
 2. Download + trim: `curl -o assets/src/<name>.png <result_url>` then `STRIP=/tmp/strip.png python3 trim.py <name>`.
 3. (`trim.py` snaps alpha ≥250 → 255: the model returns bodies at ≈253.)
 4. Check the edges on a dark and a light background before using.
+5. **Pose sheets:** for one character in 2–3 poses, ask for "the SAME man shown in N different full-body poses side by side,
+   evenly spaced, not overlapping" (3:2). One generation → consistent face/outfit, cheaper per pose. Split it on the
+   transparent column gaps with `python3 split.py <sheet> <name1> <name2> …`, then `trim.py` the names.
+   Poses come out ~650 px tall: show them at ≤ ~900 px.
 Only if transparency ever fails: `gpt_image_2` on a white background + `remove_background` (1 credit) as a fallback.
 
 **Background plates** (`assets/bg/`): `gpt_image_2`, `aspect_ratio: "9:16"`, prompt "Polished Pixar-like 3D animated film

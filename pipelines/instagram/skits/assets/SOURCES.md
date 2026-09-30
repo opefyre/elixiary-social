@@ -163,3 +163,10 @@ Voices: ElevenLabs (Rico = Liam, DJ = Brian, Nina = Sarah, Jess = Jessica, Alex,
 First cutouts generated with a native transparent background (gpt_image_2_5, background: "transparent"): alex_menu 4c462f35, waiter_wink 129287ca, queue4 d101562c, walkhome4 3b267c5e.
 Backgrounds: restaurant c6770841, queue 5e02fd9a. Reused: speakeasy, night, club, split_cheer, kar_sing, cheers_up, friend_point, sal_bouncer, cust_*, salc_wait, sal_twitch, w_nina.
 Voices: ElevenLabs (Nina = Sarah, Alex, waiter = George, Jess = Jessica, Sal = Chris, Rico = Liam, DJ = Brian).
+
+## sk69-acting-sober, sk70-his-round, sk71-know-the-bartender (~9 credits: gpt_image_2_5 transparent ×4 incl. 3 multi-pose sheets, gpt_image_2 ×2 backgrounds)
+Pose sheets (one generation, several poses of the same character, split on the transparent gaps): dan_loo/dan_phone/dan_shoe cadc2fa6,
+rico_greet/rico_tray b3d4468e, rico_robot/rico_bonk cc081730. Single: mum_tea b3155e13.
+Backgrounds: kitchen_night 34fc8b50, pub 4dd97068. Reused: speakeasy, pals_bored, pals_reach, rico_nod, sal_flat, sal_host.
+SFX (ElevenLabs sound generation): elx-keys-fumble, elx-light-switch, elx-door-bonk, elx-pub-bell, elx-pub-chatter.
+Voices: ElevenLabs (Mum = Laura, Rico = Liam, Mia = Sarah, Dan = Callum, Sal = Chris).
