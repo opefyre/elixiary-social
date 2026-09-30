@@ -43,7 +43,7 @@ Don't pitch from memory. Before each round:
 | `assets/SOURCES.md` | Log of job ids and voices per skit — append every round. |
 | `engine.js`, `render.mjs`, `audio.py` | The renderer (don't edit per skit). |
 | `trim.py` | Crop a transparent PNG to its content → `assets/cutouts/<name>.webp`. |
-| `publish_skit.py`, `move_skit.py` | Buffer scheduling (§9). |
+| `publish_skit.py`, `move_skit.py`, `replace_skit.py` | Buffer scheduling (§9); `replace_skit.py <id>` swaps the video of an already drafted skit (new R2 key, same day/caption/draft status). |
 
 ## 4. Characters & reusable poses
 
@@ -98,9 +98,12 @@ project's secrets — never print it).
    ```
    (Warm-up first, filler last — v3 clips very short texts and the last line of a take.)
 2. `python3 $V/tts.py <voice_id> sk45/sal.txt sk45/sal_take` (max 3 in parallel).
-3. Cut: a `cutsNN.txt` with `take|exact phrase|out.wav` lines → `python3 $V/cut.py cutsNN.txt`.
-4. **Re-cut every line to true silence** (cut.py clips endings):
-   `python3 recut_end.py <take> <out.wav> <start> <aligned_end>` (in `assets/voices/`).
+3. Cut: a `cutsNN.txt` (in `assets/voices/`) with `take|exact phrase|out.wav` lines (append `#n` to the phrase to take its n-th repeat,
+   e.g. `You too!#2`) → `python3 recut_n.py cutsNN.txt`. It cuts every line to true silence and normalizes it (step 5) in one go.
+4. **Starts are cut from the audio, not the timestamps.** Eleven v3 timestamps drift after an `[emotion]` tag, which clipped the first syllable
+   of some lines ("Rico?!" → "…co?!"). `recut_end.py` therefore walks back from the aligned start to the real word onset (≥120 ms of silence
+   before it, never earlier than the end of the previous spoken word, skipping `[tags]`). After a new cut, check the durations: a line that got
+   shorter than its text suggests is clipped.
 5. **Normalize** each line to about −16.5 dB mean (`ffmpeg volumedetect`, then `volume=…dB,alimiter=limit=0.9`).
 
 Fallback only if `tts.py` says `quota_exceeded`: Higgsfield `generate_audio_batch`, model `text2speech_v2`,

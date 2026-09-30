@@ -93,3 +93,7 @@ pipelines/instagram/render/.imgcache/
 # derived on each machine: tempo catalogue and per-reel track rotation log
 pipelines/instagram/reels/music/.catalogue.json
 pipelines/instagram/reels/.music-used.json
+
+# local review copies of rendered videos (finals live in R2/Buffer)
+output/
+.DS_Store
