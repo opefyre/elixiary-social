@@ -42,13 +42,13 @@ export default function (E) {
   const said = [RA, RB, RC, RE];                    // wrong answers
   const cringing = t => said.some(s => t >= s + .8 && t < s + 3.2) || (t >= RE + .8);
   const greeting = t => !cringing(t);
-  const [g, gi] = fig("greet", 700, 598, 677, 290, 1945, 6, t => greeting(t));
-  const [c, ci] = fig("cringe", 800, 259, 669, 300, 1945, 6, t => cringing(t));
+  const [g, gi] = fig("greet", 830, 598, 677, 335, 1945, 6, t => greeting(t));
+  const [c, ci] = fig("cringe", 950, 259, 669, 320, 1945, 6, t => cringing(t));
   E.F(t => { gi.style.transform = `translateY(${Math.sin(t * 1.8) * 4}px)`; const s = said.find(s => t >= s + .8 && t < s + 3.2); ci.style.transform = `translateX(${s !== undefined && t < s + 1.4 ? Math.sin(t * 40) * 4 : 0}px)`; });
   // the other person in each scene
-  const [wf, wfi] = fig("waiter", 900, 526, 1010, 810, 1945, 5, t => at(t, 0) || at(t, 3));
-  const [df, dfi] = fig("doc", 900, 594, 995, 790, 1940, 5, t => at(t, 1));
-  const SH = 720, SVIS = .8;
+  const [wf, wfi] = fig("waiter", 1050, 526, 1010, 800, 1945, 5, t => at(t, 0) || at(t, 3));
+  const [df, dfi] = fig("doc", 1050, 594, 995, 800, 1940, 5, t => at(t, 1));
+  const SH = 800, SVIS = .8;
   const salBox = E.el(R, "abs", `left:0;top:${1125 - SH * SVIS}px;width:1080px;height:${SH * SVIS}px;overflow:hidden;z-index:2`);
   const SW = SH * 827 / 1104; const sal = E.img(salBox, "sal", `position:absolute;left:${800 - SW / 2}px;top:0;width:${SW}px;height:${SH}px;opacity:0`);
   E.F(t => { wfi.style.transform = `translateY(${Math.sin(t * 1.6) * 3}px)`; dfi.style.transform = `translateY(${Math.sin(t * 1.5) * 3}px)`; sal.style.opacity = at(t, 2) ? 1 : 0; salBox.style.transform = `translateY(${Math.sin(t * 1.5) * 2}px)`; });
@@ -72,17 +72,17 @@ export default function (E) {
     E.el(box, "abs", `left:${tail - 22}px;bottom:-20px;width:44px;height:44px;background:${dark ? "#1b2330" : "#fff"};transform:rotate(45deg);border-radius:6px`);
     E.pop(b, t0, { from: .3, dur: .3 }); E.K(b, "o", [[t0, 0], [t0 + .08, 1], [t1 - .12, 1], [t1, 0]]); E.S(t0 + .02, "pop", .4);
   };
-  const RT = 880, OT = 830;
+  const RT = 770, OT = 740;
   const R_ = (t0, t1, txt, size = 62) => bubble(txt, { left: 60, top: RT, w: 460, tail: 230, t0, t1, size });
   bubble("Enjoy your meal!", { left: 560, top: OT, w: 470, tail: 250, t0: A0, t1: RA - .1, dark: true, size: 44 });
   R_(RA, DA - .1, "You too!"); 
   bubble("😐", { left: 660, top: OT, w: 170, tail: 100, t0: DA, t1: W2 - .3, dark: true, size: 60 });
   bubble("Get well soon!", { left: 560, top: OT, w: 470, tail: 250, t0: D1, t1: RB - .1, dark: true, size: 46 });
   R_(RB, D2 - .1, "You too!");
-  bubble("I’m… not the<br><b>sick one.</b>", { left: 560, top: OT - 30, w: 470, tail: 250, t0: D2, t1: W3 - .3, dark: true, size: 44 });
-  bubble("Have a safe<br>trip home!", { left: 590, top: 400, w: 450, tail: 260, t0: S1, t1: RC - .1, dark: true, size: 44 });
+  bubble("I’m… not the<br><b>sick one.</b>", { left: 560, top: OT - 50, w: 470, tail: 250, t0: D2, t1: W3 - .3, dark: true, size: 44 });
+  bubble("Have a safe<br>trip home!", { left: 40, top: 470, w: 470, tail: 430, t0: S1, t1: RC - .1, dark: true, size: 44 });
   R_(RC, S2 - .1, "You too!");
-  bubble("I <b>live</b> upstairs.", { left: 570, top: 400, w: 470, tail: 280, t0: S2, t1: W4 - .3, dark: true, size: 44 });
+  bubble("I <b>live</b> upstairs.", { left: 40, top: 470, w: 470, tail: 430, t0: S2, t1: W4 - .3, dark: true, size: 44 });
   bubble("Enjoy your meal!", { left: 560, top: OT, w: 470, tail: 250, t0: WD, t1: RD - .1, dark: true, size: 44 });
   bubble("Thank you!", { left: 60, top: RT, w: 420, tail: 220, t0: RD, t1: WE - .1, size: 58 });
   bubble("Sorry for the wait.", { left: 560, top: OT, w: 470, tail: 250, t0: WE, t1: RE - .1, dark: true, size: 44 });
