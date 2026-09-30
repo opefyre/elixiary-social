@@ -1,0 +1,12 @@
+sk80/rico_take|You too!#0|sk80/r1.wav
+sk80/rico_take|You too!#1|sk80/r2.wav
+sk80/rico_take|You too!#2|sk80/r3.wav
+sk80/rico_take|Thank you!|sk80/r4.wav
+sk80/rico_take|You too!#3|sk80/r5.wav
+sk80/waiter_take|Enjoy your meal!|sk80/w1.wav
+sk80/waiter_take|Sorry for the wait.|sk80/w2.wav
+sk80/waiter_take|Thank you.|sk80/w3.wav
+sk80/doc_take|Get well soon!|sk80/d1.wav
+sk80/doc_take|I'm... not the sick one.|sk80/d2.wav
+sk80/sal_take|Have a safe trip home!|sk80/s1.wav
+sk80/sal_take|I live upstairs.|sk80/s2.wav

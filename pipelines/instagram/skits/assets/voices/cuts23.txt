@@ -1,0 +1,32 @@
+sk78/rico_take|Fries for the table?|sk78/r1.wav
+sk78/rico_take|Nina... where are my fries?|sk78/r2.wav
+sk78/nina_take|Oh, not for me. I'm not hungry.|sk78/n1.wav
+sk78/nina_take|I'll just pick.|sk78/n2.wav
+sk78/nina_take|So then my boss said, no way! And I was like, no way!|sk78/n3.wav
+sk78/nina_take|What? I'm not even hungry.|sk78/n4.wav
+sk78/nina_take|Should we order more? I'm starving!|sk78/n5.wav
+sk78/waiter_take|One fries, for the table.|sk78/w1.wav
+sk79/rico_take|Twelve percent. That's plenty.|sk79/r1.wav
+sk79/rico_take|What?! It was twelve a minute ago!|sk79/r2.wav
+sk79/rico_take|Sal! Do you have a charger?|sk79/r3.wav
+sk79/rico_take|Five minutes... I'm on four percent.|sk79/r4.wav
+sk79/rico_take|Four percent!|sk79/r5.wav
+sk79/sal_take|Sure! It's the other kind of plug.|sk79/s1.wav
+sk79/nina_take|Text me when you're home!|sk79/n1.wav
+sk79/nina_take|I've got one!|sk79/n2.wav
+sk79/nina_take|Oh. Mine's the other kind too.|sk79/n3.wav
+sk79/nina_take|It's been an hour.|sk79/n4.wav
+sk79/barry_take|Power bank!|sk79/b1.wav
+sk79/barry_take|It's also dead.|sk79/b2.wav
+sk80/rico_take|You too!#0|sk80/r1.wav
+sk80/rico_take|You too!#1|sk80/r2.wav
+sk80/rico_take|You too!#2|sk80/r3.wav
+sk80/rico_take|Thank you!|sk80/r4.wav
+sk80/rico_take|You too!#3|sk80/r5.wav
+sk80/waiter_take|Enjoy your meal!|sk80/w1.wav
+sk80/waiter_take|Sorry for the wait.|sk80/w2.wav
+sk80/waiter_take|Thank you.|sk80/w3.wav
+sk80/doc_take|Get well soon!|sk80/d1.wav
+sk80/doc_take|I'm... not the sick one.|sk80/d2.wav
+sk80/sal_take|Have a safe trip home!|sk80/s1.wav
+sk80/sal_take|I live upstairs.|sk80/s2.wav

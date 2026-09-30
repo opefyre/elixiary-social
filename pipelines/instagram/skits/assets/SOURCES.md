@@ -180,3 +180,9 @@ SFX reused from ElevenLabs sound generation; voices: ElevenLabs (Nina = Sarah, R
 Transparent generations: sofa_trio 3bcb8a17; pose sheets rico_home_sheet c3c16547 → rico_chair / rico_glass / rico_socks, barry_sheet 1c62009d → barry_cash / barry_snap / barry_whistle (split.py).
 Backgrounds: livingroom 21eba61c, cocktailbar 68784115. Reused: night, nina_order, rico_nod/squint, glam_point, sal_muddle/twitch/flat/host, guy_smile, av_jess, av_leo.
 SFX (ElevenLabs sound generation): elx-snap, elx-whistle. Voices: ElevenLabs (Nina/host = Sarah, Rico = Liam, Jess = Jessica, Alex, Barry = Charlie, Sal = Chris, quiet guy = George).
+
+## Round sk78–80 (30 Sep 2026)
+- Pose sheets (gpt_image_2_5, transparent, 3:2, split with split.py; sheet_rico78 split at column valleys because shoulders touched): nina_refuse/nina_chew/nina_sneak 9d9d580b, rico_reach/rico_deadpan/rico_stunned 3db79674, rico_floor/rico_smug/rico_cringe e461fceb.
+- Backgrounds reused: restaurant, clinic, cocktailbar. Existing cutouts reused: waiter, doc_skeptic, sal_host/sal_flat, rico_greet, rico_shock, barry_snap, av_nina.
+- Voices (ElevenLabs v3, tts.py + recut_n.py with "#n" for repeated phrases): sk78 Rico=Liam, Nina=Sarah, waiter=George; sk79 Rico, Sal=Chris, Nina, Barry=Charlie; sk80 Rico, waiter, doctor=Laura, Sal.
+- New SFX (sfx.py → branding/sfx, copied here): elx-crunch, elx-munch, elx-lowbatt, elx-powerdown, elx-plug-in.
