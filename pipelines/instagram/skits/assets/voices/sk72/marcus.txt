@@ -1,0 +1,5 @@
+Hey there, good evening, it is so nice to finally be out tonight with everyone here.
+[friendly] You too, man!
+[friendly, easy] Through work! How about you, boss?
+[warm] Definitely! Here you go.
+Right, that is all for this evening, thank you very much.

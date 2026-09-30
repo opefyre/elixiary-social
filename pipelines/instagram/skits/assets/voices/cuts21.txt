@@ -1,0 +1,20 @@
+sk72/nina_take|Rico, this is Marcus! Marcus, this is Rico!|sk72/n1.wav
+sk72/rico_take|Marcus! Great to meet you!|sk72/r1.wav
+sk72/marcus_take|You too, man!|sk72/m1.wav
+sk72/rico_take|So, how do you know... everyone, buddy?|sk72/r2.wav
+sk72/marcus_take|Through work! How about you, boss?|sk72/m2.wav
+sk72/rico_take|We should totally hang out! Give me your number!|sk72/r3.wav
+sk72/marcus_take|Definitely! Here you go.|sk72/m3.wav
+sk73/nina_take|Okay, everyone squeeze in! Three, two, one!|sk73/n1.wav
+sk73/jess_take|Wait wait wait. Let me see... my eyes are closed!|sk73/j1.wav
+sk73/rico_take|Delete that. I have no neck.|sk73/r1.wav
+sk73/alex_take|One more! I wasn't ready!|sk73/a1.wav
+sk73/frank_take|I blinked. Again.|sk73/f1.wav
+sk73/maya_take|Okay, this one's perfect! Wait... my chin.|sk73/m1.wav
+sk73/nina_take|Fine. Let's just use the first one.|sk73/n2.wav
+sk74/rico_take|One bag of ice. For twelve people. Easy.|sk74/r1.wav
+sk74/jess_take|Any ice for my drink?|sk74/j1.wav
+sk74/rico_take|It's... a lifestyle choice. Warm is authentic.|sk74/r2.wav
+sk74/rico_take|Sold out?! It's a Saturday!|sk74/r3.wav
+sk74/rico_take|I got... peas.|sk74/r4.wav
+sk74/jess_take|Peas in a Negroni. Honestly? Not bad.|sk74/j2.wav

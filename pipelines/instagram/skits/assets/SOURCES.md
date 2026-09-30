@@ -170,3 +170,8 @@ rico_greet/rico_tray b3d4468e, rico_robot/rico_bonk cc081730. Single: mum_tea b3
 Backgrounds: kitchen_night 34fc8b50, pub 4dd97068. Reused: speakeasy, pals_bored, pals_reach, rico_nod, sal_flat, sal_host.
 SFX (ElevenLabs sound generation): elx-keys-fumble, elx-light-switch, elx-door-bonk, elx-pub-bell, elx-pub-chatter.
 Voices: ElevenLabs (Mum = Laura, Rico = Liam, Mia = Sarah, Dan = Callum, Sal = Chris).
+
+## sk72-forgot-name, sk73-group-photo, sk74-ice-math (~3 credits: gpt_image_2_5 transparent ×1 pose sheet, gpt_image_2 ×1 background)
+Pose sheet marcus_sheet 67aae5b1 → marcus_shake / marcus_panic / marcus_guns (split.py). Background: freezer 8c8e2350.
+Reused: night, beach, rico_nod/squint/greet/party/shock/cart/relief, friends6, av_* avatars.
+SFX reused from ElevenLabs sound generation; voices: ElevenLabs (Nina = Sarah, Rico = Liam, Marcus = Daniel, Jess = Jessica, Leo = Alex, Frank = Bill, Maya = Laura).
