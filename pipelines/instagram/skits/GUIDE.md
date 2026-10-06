@@ -43,7 +43,9 @@ Don't pitch from memory. Before each round:
 | `assets/SOURCES.md` | Log of job ids and voices per skit — append every round. |
 | `engine.js`, `render.mjs`, `audio.py` | The renderer (don't edit per skit). |
 | `trim.py` | Crop a transparent PNG to its content → `assets/cutouts/<name>.webp`. |
-| `publish_skit.py`, `move_skit.py`, `replace_skit.py` | Buffer scheduling (§9); `replace_skit.py <id>` swaps the video of an already drafted skit (new R2 key, same day/caption/draft status). |
+| `publish_skit.py`, `move_skit.py`, `replace_skit.py`, `rehost_posts.py` | Buffer scheduling (§9); `replace_skit.py <id>` swaps the video of an already drafted skit (new R2 key, same day/caption/draft status); `rehost_posts.py [--apply]` swaps the media host in every unsent post's video URL. |
+
+**Media host:** videos are uploaded to the `elixiary-images` bucket under `social/` and Buffer fetches them from `https://elixiary-social-media.opefyre.workers.dev/social/...` (`r2.PUBLIC_BASE`). The bucket's r2.dev URL is switched off for good and `images.elixiary.com` blocks Buffer (Cloudflare bot protection) — never use either in a Buffer post.
 
 ## 4. Characters & reusable poses
 

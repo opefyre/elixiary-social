@@ -20,9 +20,12 @@ import credentials  # noqa: E402
 ACCOUNT = os.environ.get("CLOUDFLARE_ACCOUNT_ID",
                          "b53df72f41f5135daf312100e73ff6a1")
 BUCKET = os.environ.get("ELIXIARY_R2_BUCKET", "elixiary-images")
+# Public address of the bucket's media Worker (it serves the social/ prefix of elixiary-images). The managed r2.dev URL is switched off for
+# good (dev-team decision, Oct 2026) and images.elixiary.com is behind Cloudflare bot protection, which blocks Buffer — so Buffer media
+# URLs must use the Worker.
 PUBLIC_BASE = os.environ.get(
     "ELIXIARY_R2_PUBLIC",
-    "https://pub-dfe281321d524908ae12d89d86e1a8f6.r2.dev")
+    "https://elixiary-social-media.opefyre.workers.dev")
 
 # Everything else in this bucket is live site content.
 WRITABLE_PREFIXES = ("social/", "curated-recipes/")
